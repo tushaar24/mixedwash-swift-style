@@ -222,15 +222,15 @@ const ServiceDetail = () => {
         </div>
       </main>
       
-      {/* Sticky Schedule Pickup CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-10">
-        <div className="max-w-5xl mx-auto px-4 flex justify-between items-center">
-          <div>
+      {/* Sticky Schedule Pickup CTA - Updated to be centered and bigger */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-6 shadow-lg z-10">
+        <div className="max-w-5xl mx-auto px-4 flex flex-col items-center justify-center">
+          <div className="text-center mb-2">
             <div className="text-sm text-gray-500">From</div>
-            <div className="font-bold">{service.prices[0].amount}</div>
+            <div className="font-bold text-xl">{service.prices[0].amount}</div>
           </div>
           <Button 
-            className="bg-black hover:bg-gray-800 px-10"
+            className="bg-black hover:bg-gray-800 px-12 py-7 text-lg font-semibold w-full max-w-md"
             size="lg"
             onClick={() => navigate("/schedule")}
           >
