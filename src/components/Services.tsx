@@ -111,9 +111,9 @@ export const Services = () => {
                   <span>Free pickup & delivery included</span>
                 </div>
                 
-                {/* Arrow indicator that shows on hover */}
+                {/* Arrow indicator - now always visible */}
                 <div className="mt-4 flex justify-end">
-                  <ArrowRight className="h-5 w-5 text-black opacity-0 transform translate-x-[-10px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                  <ArrowRight className="h-5 w-5 text-black group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </CardContent>
             </Card>
