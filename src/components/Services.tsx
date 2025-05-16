@@ -113,12 +113,13 @@ export const Services = () => {
         </div>
         
         <div className="mt-12 text-center">
-          <Button className="bg-black hover:bg-gray-800 text-white group">
+          <Button className="bg-black hover:bg-gray-800 text-white group px-8 py-6 h-auto text-lg">
             Explore Services
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
       </div>
     </section>
   );
 };
+
