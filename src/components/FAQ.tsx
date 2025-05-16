@@ -16,10 +16,6 @@ export const FAQ = () => {
       answer: "Our reliable service ensures zero lost items and total peace of mind. We have extensive tracking systems in place."
     },
     {
-      question: "What areas do you service in Bangalore?",
-      answer: "We currently serve HSR Layout, Koramangala, and BTM Layout in Bangalore with plans to expand soon."
-    },
-    {
       question: "How do I schedule a pickup?",
       answer: "Simply use our website or app to schedule a convenient pickup time. We'll be there at your doorstep!"
     }
