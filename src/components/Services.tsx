@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,23 +45,14 @@ export const Services = () => {
     {
       title: "Dry Cleaning",
       description: "Delicate care, speedy turnaround.",
-      icon: <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-saree">
-        <path d="M18.7 3.8a2.45 2.45 0 0 0-3.4 0L6.8 12.3a3 3 0 0 0 0 4.3l.9.9" />
-        <path d="M15.3 7.2 6.8 15.7a3 3 0 0 0 0 4.3l.9.9" />
-        <path d="M15.3 7.2a2.45 2.45 0 0 0 3.4 0l.9-.9c2.6-2.6-1.4-6.6-4-4l-2.2 2.2" />
-        <path d="M11.5 12a4.5 4.5 0 0 0 6.4 6.4" />
-        <path d="M12.8 17.8c-1.1-1.4-3-2.8-4.8-4.5" />
-        <path d="m3 14 .5-.5a2.45 2.45 0 0 1 3.4 0 2.45 2.45 0 0 1 0 3.4l-1.8 1.8a1 1 0 0 1-1.4 0L3 18a1 1 0 0 1 0-1.4z" />
-        <path d="m7.5 12.2-.7-.7" />
-        <line x1="5.5" y1="10.5" x2="4.5" y2="9.5" />
-      </svg>,
+      icon: <img src="/lovable-uploads/c458f6b0-88cf-4b84-8d9a-10526e393e2d.png" alt="Blazer" className="h-10 w-10" />,
       newPrice: "starts at ₹100",
       oldPrice: "",
       discount: 0,
       route: "dry-cleaning",
       minimumOrder: null,
       deliveryTime: "24-48h",
-      serviceCharge: "A service charge of ₹50 will be applied to orders below ₹250"
+      serviceCharge: "₹50 service fee on orders under ₹250"
     }
   ];
 

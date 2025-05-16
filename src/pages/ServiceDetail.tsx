@@ -101,7 +101,7 @@ const servicesData = {
     discount: 0,
     minimumOrder: null,
     deliveryTime: "24-48h",
-    serviceCharge: "A service charge of ₹50 will be applied to orders below ₹250",
+    serviceCharge: "₹50 service fee on orders under ₹250",
     // Updated with detailed price items for dry cleaning
     prices: [
       {
