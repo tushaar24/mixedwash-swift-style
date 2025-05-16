@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,7 +87,7 @@ export const Services = () => {
                       <HoverCard>
                         <HoverCardTrigger>
                           <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
-                            Save {service.discount}%
+                            Save 20% on first order
                           </span>
                         </HoverCardTrigger>
                         <HoverCardContent className="p-2 text-xs w-48">
