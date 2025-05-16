@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,12 +6,20 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { Order, Address, TimeSlot } from "@/types/models";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin, Plus, Home, Check } from "lucide-react";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog";
 
 const Profile = () => {
   const [name, setName] = useState("");
@@ -23,6 +32,18 @@ const Profile = () => {
   const { user, isFirstLogin, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // New address form state
+  const [newAddress, setNewAddress] = useState({
+    address_line1: "",
+    address_line2: "",
+    city: "",
+    state: "",
+    postal_code: "",
+    is_default: false
+  });
+  const [savingAddress, setSavingAddress] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -72,7 +93,8 @@ const Profile = () => {
         const { data: addressesData, error: addressesError } = await supabase
           .from("addresses")
           .select("*")
-          .eq("user_id", user.id);
+          .eq("user_id", user.id)
+          .order("is_default", { ascending: false });
 
         if (addressesError) {
           console.error("Error fetching addresses:", addressesError);
@@ -133,6 +155,132 @@ const Profile = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle address form input changes
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setNewAddress(prev => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value
+    }));
+  };
+
+  // Save new address
+  const handleSaveAddress = async () => {
+    // Basic validation
+    if (!newAddress.address_line1 || !newAddress.city || !newAddress.state || !newAddress.postal_code) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSavingAddress(true);
+    
+    try {
+      if (!user) {
+        throw new Error("You must be logged in to add an address");
+      }
+
+      // Check if this is the first address, make it default if so
+      if (addresses.length === 0) {
+        newAddress.is_default = true;
+      }
+      
+      const { data, error } = await supabase
+        .from("addresses")
+        .insert([{
+          ...newAddress,
+          user_id: user.id
+        }])
+        .select();
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (data && data.length > 0) {
+        // If setting this as default, update other addresses
+        if (newAddress.is_default) {
+          await supabase
+            .from("addresses")
+            .update({ is_default: false })
+            .neq("id", data[0].id);
+        }
+        
+        toast({
+          title: "Address saved",
+          description: "Your address has been saved successfully",
+        });
+        
+        // Add the new address to the list
+        setAddresses(prevAddresses => [data[0], ...prevAddresses]);
+        
+        // Close the dialog
+        setDialogOpen(false);
+        
+        // Reset form
+        setNewAddress({
+          address_line1: "",
+          address_line2: "",
+          city: "",
+          state: "",
+          postal_code: "",
+          is_default: false
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error saving address",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSavingAddress(false);
+    }
+  };
+
+  // Set address as default
+  const setAddressAsDefault = async (addressId: string) => {
+    try {
+      // First update the selected address to be default
+      const { error: updateError } = await supabase
+        .from("addresses")
+        .update({ is_default: true })
+        .eq("id", addressId);
+        
+      if (updateError) throw updateError;
+      
+      // Then set all other addresses to not be default
+      const { error: bulkUpdateError } = await supabase
+        .from("addresses")
+        .update({ is_default: false })
+        .neq("id", addressId);
+        
+      if (bulkUpdateError) throw bulkUpdateError;
+      
+      // Update local state
+      setAddresses(prevAddresses => 
+        prevAddresses.map(addr => ({
+          ...addr,
+          is_default: addr.id === addressId
+        }))
+      );
+      
+      toast({
+        title: "Default address updated",
+        description: "Your default address has been updated successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error updating address",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -344,9 +492,123 @@ const Profile = () => {
                     Manage your saved addresses
                   </CardDescription>
                 </div>
-                <Button onClick={() => navigate('/schedule')}>
-                  Add Address
-                </Button>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" /> Add Address
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Add a New Address</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <label htmlFor="address_line1" className="text-sm font-medium">
+                          Address Line 1 *
+                        </label>
+                        <Input 
+                          id="address_line1"
+                          name="address_line1"
+                          value={newAddress.address_line1}
+                          onChange={handleAddressChange}
+                          placeholder="House/Flat No., Building Name, Street"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label htmlFor="address_line2" className="text-sm font-medium">
+                          Address Line 2 (Optional)
+                        </label>
+                        <Input 
+                          id="address_line2"
+                          name="address_line2"
+                          value={newAddress.address_line2}
+                          onChange={handleAddressChange}
+                          placeholder="Landmark, Area"
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label htmlFor="city" className="text-sm font-medium">
+                            City *
+                          </label>
+                          <Input 
+                            id="city"
+                            name="city"
+                            value={newAddress.city}
+                            onChange={handleAddressChange}
+                            placeholder="City"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="state" className="text-sm font-medium">
+                            State *
+                          </label>
+                          <Input 
+                            id="state"
+                            name="state"
+                            value={newAddress.state}
+                            onChange={handleAddressChange}
+                            placeholder="State"
+                            required
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label htmlFor="postal_code" className="text-sm font-medium">
+                          Postal Code *
+                        </label>
+                        <Input 
+                          id="postal_code"
+                          name="postal_code"
+                          value={newAddress.postal_code}
+                          onChange={handleAddressChange}
+                          placeholder="Postal Code"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 pt-2">
+                        <input
+                          type="checkbox"
+                          id="is_default"
+                          name="is_default"
+                          checked={newAddress.is_default}
+                          onChange={handleAddressChange}
+                          className="rounded border-gray-300"
+                        />
+                        <label htmlFor="is_default" className="text-sm">
+                          Set as default address
+                        </label>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setDialogOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={handleSaveAddress} 
+                        disabled={savingAddress}
+                      >
+                        {savingAddress ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                          </>
+                        ) : "Save Address"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </CardHeader>
               <CardContent>
                 {addresses.length === 0 ? (
@@ -355,9 +617,9 @@ const Profile = () => {
                     <Button 
                       variant="outline" 
                       className="mt-4"
-                      onClick={() => navigate('/schedule')}
+                      onClick={() => setDialogOpen(true)}
                     >
-                      Add Address
+                      <Plus className="h-4 w-4 mr-2" /> Add Address
                     </Button>
                   </div>
                 ) : (
@@ -365,20 +627,39 @@ const Profile = () => {
                     {addresses.map((address) => (
                       <Card key={address.id} className="p-4">
                         <div className="flex items-start justify-between">
-                          <div>
-                            <p className="font-medium">
-                              {address.address_line1}
-                              {address.address_line2 && `, ${address.address_line2}`}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {address.city}, {address.state} {address.postal_code}
-                            </p>
-                            {address.is_default && (
-                              <span className="mt-2 inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                                Default
-                              </span>
-                            )}
+                          <div className="flex items-start space-x-4">
+                            <div className="bg-gray-100 p-2 rounded-lg">
+                              <Home className="h-5 w-5 text-gray-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                {address.address_line1}
+                                {address.address_line2 && `, ${address.address_line2}`}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {address.city}, {address.state} {address.postal_code}
+                              </p>
+                              {address.is_default && (
+                                <span className="mt-2 inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                                  Default
+                                </span>
+                              )}
+                            </div>
                           </div>
+                          {!address.is_default && (
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setAddressAsDefault(address.id)}
+                            >
+                              Set as Default
+                            </Button>
+                          )}
+                          {address.is_default && (
+                            <div className="h-6 w-6 bg-green-600 rounded-full flex items-center justify-center">
+                              <Check className="h-4 w-4 text-white" />
+                            </div>
+                          )}
                         </div>
                       </Card>
                     ))}
