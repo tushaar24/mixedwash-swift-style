@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { Order, Address, TimeSlot } from "@/types/models";
-import { Loader2, MapPin, Plus, Home, Check } from "lucide-react";
+import { Loader2, MapPin, Plus, Home, Check, Phone, User, Edit } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -29,10 +28,12 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user, isFirstLogin, refreshProfile } = useAuth();
+  const { user, isFirstLogin, refreshProfile, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editProfileDialogOpen, setEditProfileDialogOpen] = useState(false);
+  const [profileUpdateLoading, setProfileUpdateLoading] = useState(false);
   
   // New address form state
   const [newAddress, setNewAddress] = useState({
@@ -44,6 +45,14 @@ const Profile = () => {
     is_default: false
   });
   const [savingAddress, setSavingAddress] = useState(false);
+
+  // Set initial name and phone values from the profile
+  useEffect(() => {
+    if (profile) {
+      setName(profile.username || "");
+      setPhone(profile.mobile_number || "");
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (!user) {
@@ -167,6 +176,43 @@ const Profile = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle profile update
+  const handleProfileUpdate = async () => {
+    if (!user) return;
+    
+    setProfileUpdateLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          username: name,
+          mobile_number: phone,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", user.id);
+        
+      if (error) throw error;
+      
+      await refreshProfile();
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been updated successfully."
+      });
+      
+      setEditProfileDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error updating profile",
+        description: error.message || "Failed to update profile",
+        variant: "destructive"
+      });
+    } finally {
+      setProfileUpdateLoading(false);
     }
   };
 
@@ -691,21 +737,106 @@ const Profile = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Email</label>
-                    <Input value={user.email} disabled />
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    {/* User info section */}
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                          <User className="h-5 w-5 text-gray-500" />
+                          <div>
+                            <p className="text-sm text-gray-500">Name</p>
+                            <p className="font-medium">{profile?.username || "Not set"}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Phone className="h-5 w-5 text-gray-500" />
+                          <div>
+                            <p className="text-sm text-gray-500">Phone</p>
+                            <p className="font-medium">{profile?.mobile_number || "Not set"}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="h-5 w-5 text-gray-500" />
+                          <div>
+                            <p className="text-sm text-gray-500">Email</p>
+                            <p className="font-medium">{user.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <Dialog open={editProfileDialogOpen} onOpenChange={setEditProfileDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4 mr-2" /> Edit Profile
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Edit Profile</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <label htmlFor="edit-name" className="text-sm font-medium">
+                                Name
+                              </label>
+                              <Input 
+                                id="edit-name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Your name"
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <label htmlFor="edit-phone" className="text-sm font-medium">
+                                Phone Number
+                              </label>
+                              <Input 
+                                id="edit-phone"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                placeholder="Your phone number"
+                                type="tel"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={() => setEditProfileDialogOpen(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={handleProfileUpdate} 
+                              disabled={profileUpdateLoading}
+                            >
+                              {profileUpdateLoading ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Saving...
+                                </>
+                              ) : "Save Changes"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
 
-                  <Button 
-                    variant="destructive"
-                    onClick={async () => {
-                      await supabase.auth.signOut();
-                      navigate("/");
-                    }}
-                  >
-                    Sign Out
-                  </Button>
+                  <div className="pt-4 border-t border-gray-200">
+                    <Button 
+                      variant="destructive"
+                      onClick={async () => {
+                        await supabase.auth.signOut();
+                        navigate("/");
+                      }}
+                    >
+                      Sign Out
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
