@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -117,7 +116,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       if (selectedSlot) {
         updateOrderData({
           deliveryDate: deliveryDate,
-          deliverySlotId: selectedSlotId,
+          deliverySlotId: selectedTimeSlotId, // Fixed: Changed from selectedSlotId to selectedTimeSlotId
           deliverySlotLabel: selectedSlot.label
         });
       }
