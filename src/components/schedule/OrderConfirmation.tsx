@@ -27,6 +27,15 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
       !orderData.deliveryDate ||
       !orderData.deliverySlotId
     ) {
+      console.log("Missing data:", {
+        services: orderData.services,
+        addressId: orderData.addressId,
+        pickupDate: orderData.pickupDate,
+        pickupSlotId: orderData.pickupSlotId,
+        deliveryDate: orderData.deliveryDate,
+        deliverySlotId: orderData.deliverySlotId
+      });
+      
       toast({
         title: "Missing information",
         description: "Please complete all the previous steps before confirming your order",
@@ -196,7 +205,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
             <span className="text-gray-600">Cash on delivery</span>
           </div>
           
-          {orderData.totalAmount && orderData.estimatedWeight && (
+          {orderData.totalAmount !== null && orderData.estimatedWeight && (
             <div className="flex items-center justify-between font-bold text-lg">
               <span>Total</span>
               <span>₹{orderData.totalAmount.toFixed(2)}</span>
