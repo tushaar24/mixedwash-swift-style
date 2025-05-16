@@ -19,13 +19,11 @@ const servicesData = {
       {
         title: "Normal Wash",
         amount: "₹72/kg",
-        totalAmount: "₹1080 (per 15kg)",
         details: "Light and dark clothes washed together at 90°F. You can request 110°F instead."
       },
       {
         title: "Segregated Wash",
         amount: "₹72/kg",
-        totalAmount: "₹1800 (per 25kg)",
         details: "We'll separate the items for you and wash at 90°F. Starts with two loads. You can request 110°F instead."
       }
     ]
@@ -40,13 +38,11 @@ const servicesData = {
       {
         title: "Normal Wash with ironing",
         amount: "₹120/kg",
-        totalAmount: "₹1800 (per 15kg)",
         details: "Light and dark clothes washed together at 90°F and professionally ironed."
       },
       {
         title: "Segregated Wash with premium ironing",
         amount: "₹120/kg",
-        totalAmount: "₹3000 (per 25kg)",
         details: "Each item is individually ironed to perfection, with special care for formal and delicate garments."
       }
     ]
@@ -61,13 +57,11 @@ const servicesData = {
       {
         title: "Normal Heavy Wash",
         amount: "₹112/kg",
-        totalAmount: "₹1680 (per 15kg)",
         details: "Perfect for blankets, comforters, heavy jackets, and other bulky items."
       },
       {
         title: "Segregated Heavy Wash",
         amount: "₹112/kg",
-        totalAmount: "₹2800 (per 25kg)",
         details: "Special treatment for heavily soiled items, includes pre-treatment and extra wash cycles."
       }
     ]
@@ -82,13 +76,11 @@ const servicesData = {
       {
         title: "Standard dry cleaning",
         amount: "₹200/item",
-        totalAmount: "Starting at ₹200/item",
         details: "Professional dry cleaning for suits, dresses, and delicate fabrics."
       },
       {
         title: "Premium dry cleaning",
         amount: "₹300/item",
-        totalAmount: "Starting at ₹300/item",
         details: "Enhanced treatment for special garments, includes stain removal and pressing."
       }
     ]
@@ -154,8 +146,7 @@ const ServiceDetail = () => {
                     <p className="text-gray-500 mt-2">{price.details}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold">{price.totalAmount}</div>
-                    <div className="text-gray-500">{price.amount}</div>
+                    <div className="text-2xl font-bold">{price.amount}</div>
                   </div>
                 </div>
               </div>
@@ -222,13 +213,9 @@ const ServiceDetail = () => {
         </div>
       </main>
       
-      {/* Sticky Schedule Pickup CTA - Updated to be centered and bigger */}
+      {/* Sticky Schedule Pickup CTA - Updated to be centered and bigger with no pricing */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-6 shadow-lg z-10">
         <div className="max-w-5xl mx-auto px-4 flex flex-col items-center justify-center">
-          <div className="text-center mb-2">
-            <div className="text-sm text-gray-500">From</div>
-            <div className="font-bold text-xl">{service.prices[0].amount}</div>
-          </div>
           <Button 
             className="bg-black hover:bg-gray-800 px-12 py-7 text-lg font-semibold w-full max-w-md"
             size="lg"
