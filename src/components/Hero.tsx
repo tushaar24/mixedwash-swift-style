@@ -32,13 +32,38 @@ export const Hero = () => {
             </div>
           </div>
           
-          <div className="hidden md:block">
-            <div className="bg-gray-100 rounded-xl aspect-square flex items-center justify-center">
-              <img 
-                src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" 
-                alt="Clean, folded laundry" 
-                className="w-full h-full object-cover rounded-xl"
-              />
+          <div className="hidden md:flex justify-center items-center">
+            <div className="relative">
+              {/* Phone frame */}
+              <div className="w-[280px] h-[570px] bg-gray-900 rounded-[40px] border-[14px] border-gray-900 shadow-xl relative overflow-hidden">
+                {/* Phone notch */}
+                <div className="absolute top-0 w-full flex justify-center z-10">
+                  <div className="w-[120px] h-[25px] bg-gray-900 rounded-b-[20px]"></div>
+                </div>
+                {/* Phone content/screen */}
+                <div className="h-full w-full bg-white overflow-hidden relative">
+                  {/* Phone app content */}
+                  <img 
+                    src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" 
+                    alt="MixedWash App" 
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  {/* App interface overlay */}
+                  <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-30 p-4 flex flex-col">
+                    <div className="flex justify-between items-center mb-4 text-white">
+                      <div className="text-sm font-medium">9:41</div>
+                      <div className="text-sm font-medium">MixedWash</div>
+                    </div>
+                    <div className="mt-auto bg-white bg-opacity-90 p-4 rounded-lg shadow-lg">
+                      <div className="text-sm font-medium mb-1">Next Delivery</div>
+                      <div className="text-lg font-bold mb-2">Tomorrow, 2-4 PM</div>
+                      <div className="bg-black text-white text-xs py-2 rounded-md text-center font-medium">
+                        Track My Order
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
