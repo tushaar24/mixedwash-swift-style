@@ -41,6 +41,7 @@ const servicesData = {
     description: "For everyday laundry, bedsheets and towels.",
     discount: 20,
     minimumOrder: null,
+    deliveryTime: "24h",
     prices: [
       {
         title: "Regular Wash",
@@ -60,6 +61,7 @@ const servicesData = {
     description: "Your outfits, wrinkle-free and crisp.",
     discount: 20,
     minimumOrder: null,
+    deliveryTime: "24h",
     prices: [
       {
         title: "Regular Wash",
@@ -79,6 +81,7 @@ const servicesData = {
     description: "Big laundry loads handled with ease.",
     discount: 20,
     minimumOrder: null,
+    deliveryTime: "24-48h",
     prices: [
       {
         title: "Price per kg",
@@ -97,6 +100,8 @@ const servicesData = {
     description: "Delicate care, speedy turnaround.",
     discount: 0,
     minimumOrder: null,
+    deliveryTime: "24-48h",
+    serviceCharge: "A service charge of ₹50 will be applied to orders below ₹250",
     // Updated with detailed price items for dry cleaning
     prices: [
       {
@@ -206,7 +211,7 @@ const ServiceDetail = () => {
               <span className="text-sm">Back to Home</span>
             </Button>
             
-            {/* Other Services Section - Now with Carousel for mobile */}
+            {/* Other Services Section - with Carousel for mobile */}
             <div className="mb-6 sm:mb-8">
               <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Other Services You Might Like</h2>
               
@@ -273,6 +278,12 @@ const ServiceDetail = () => {
                 <Truck className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="font-semibold">Free pickup & delivery on all orders!</span>
               </div>
+              
+              {/* Add delivery time badge */}
+              <div className="inline-flex items-center gap-1 sm:gap-2 bg-gray-100 px-3 py-1 sm:px-4 sm:py-2 rounded-full text-gray-800 border border-gray-300 text-xs sm:text-sm w-full sm:w-auto mt-2 sm:mt-0">
+                <Info className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="font-semibold">{service.deliveryTime} delivery</span>
+              </div>
             </div>
           </div>
         </div>
@@ -280,6 +291,15 @@ const ServiceDetail = () => {
         {/* Pricing Section */}
         <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">
           <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Pricing</h2>
+          
+          {/* Add service charge note for dry cleaning */}
+          {service.serviceCharge && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm flex items-start gap-2">
+              <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <p>{service.serviceCharge}</p>
+            </div>
+          )}
+          
           <div className="space-y-6 sm:space-y-8">
             {serviceId === 'dry-cleaning' ? (
               // Dry Cleaning specific price display with tables and tabs
@@ -456,7 +476,7 @@ const ServiceDetail = () => {
                   <CardTitle className="text-lg sm:text-xl">Turnaround Time</CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base">
-                  <p>Standard turnaround time is 24 hours. Express service is available at an additional charge.</p>
+                  <p>Standard turnaround time is {service.deliveryTime}. Express service is available at an additional charge.</p>
                 </CardContent>
               </Card>
             </div>
