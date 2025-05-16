@@ -34,7 +34,7 @@ export const Services = () => {
       title: "Dry Cleaning",
       description: "Delicate care, speedy turnaround.",
       icon: "✨",
-      newPrice: "Special rates",
+      newPrice: "starts at ₹100",
       oldPrice: "",
       discount: 0
     }
