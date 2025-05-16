@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -17,7 +18,7 @@ const servicesData = {
     color: "bg-blue-50",
     description: "For everyday laundry, bedsheets and towels.",
     discount: 20,
-    minimumOrder: 4,
+    minimumOrder: null,
     prices: [
       {
         title: "Regular Wash",
@@ -42,17 +43,17 @@ const servicesData = {
     color: "bg-pink-50",
     description: "Your outfits, wrinkle-free and crisp.",
     discount: 20,
-    minimumOrder: 3,
+    minimumOrder: null,
     prices: [
       {
-        title: "Regular Wash with ironing",
+        title: "Regular Wash",
         amount: "₹120/kg",
         oldPrice: "₹150/kg",
         details: "Light and dark clothes washed together at 90°F and professionally ironed.",
         minimumOrder: 3
       },
       {
-        title: "Segregated Wash with premium ironing",
+        title: "Segregated Wash",
         amount: "₹120/kg",
         oldPrice: "₹150/kg",
         details: "Each item is individually ironed to perfection, with special care for formal and delicate garments.",
@@ -70,7 +71,7 @@ const servicesData = {
     minimumOrder: null,
     prices: [
       {
-        title: "Normal Heavy Wash",
+        title: "Regular Wash",
         amount: "₹112/kg",
         oldPrice: "₹140/kg",
         details: "Perfect for blankets, comforters, heavy jackets, and other bulky items."
@@ -183,6 +184,12 @@ const ServiceDetail = () => {
                         <Truck className="h-3 w-3" />
                         <span>Free pickup & delivery included</span>
                       </div>
+                      {price.minimumOrder && (
+                        <div className="mt-2 text-xs text-orange-700 flex items-center gap-1">
+                          <Info className="h-3 w-3" />
+                          <span>Minimum order: {price.minimumOrder}kg</span>
+                        </div>
+                      )}
                     </div>
                     <div className="text-right">
                       {service.discount > 0 ? (
@@ -300,3 +307,4 @@ const ServiceDetail = () => {
 };
 
 export default ServiceDetail;
+
