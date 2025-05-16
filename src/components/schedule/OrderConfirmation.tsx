@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, Clock, Home, Loader2, Truck } from "lucide-react";
-import { OrderData } from "@/pages/Schedule";
+import { OrderData, SelectedService } from "@/pages/Schedule";
 import { format } from "date-fns";
 
 interface OrderConfirmationProps {
@@ -20,7 +20,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
   const handleSubmitOrder = async () => {
     // Validate that we have all the required information
     if (
-      !orderData.serviceId || 
+      orderData.services.length === 0 || 
       !orderData.addressId || 
       !orderData.pickupDate || 
       !orderData.pickupSlotId ||
@@ -44,31 +44,39 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         throw new Error("You must be logged in to place an order");
       }
 
-      const { data, error } = await supabase
-        .from("orders")
-        .insert([
-          {
-            service_id: orderData.serviceId,
-            address_id: orderData.addressId,
-            pickup_date: format(orderData.pickupDate, 'yyyy-MM-dd'),
-            pickup_slot_id: orderData.pickupSlotId,
-            delivery_date: format(orderData.deliveryDate, 'yyyy-MM-dd'),
-            delivery_slot_id: orderData.deliverySlotId,
-            special_instructions: orderData.specialInstructions || null,
-            estimated_weight: orderData.estimatedWeight || null,
-            total_amount: orderData.totalAmount || null,
-            user_id: authData.user.id // Add user_id here
-          },
-        ])
-        .select();
-        
-      if (error) {
-        throw error;
+      // Create a separate order for each service
+      const orderPromises = orderData.services.map(service => {
+        return supabase
+          .from("orders")
+          .insert([
+            {
+              service_id: service.id,
+              address_id: orderData.addressId,
+              pickup_date: format(orderData.pickupDate!, 'yyyy-MM-dd'),
+              pickup_slot_id: orderData.pickupSlotId,
+              delivery_date: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
+              delivery_slot_id: orderData.deliverySlotId,
+              special_instructions: orderData.specialInstructions || null,
+              estimated_weight: orderData.estimatedWeight || null,
+              total_amount: orderData.estimatedWeight ? (service.price * orderData.estimatedWeight) : null,
+              user_id: authData.user.id // Add user_id here
+            },
+          ])
+          .select();
+      });
+
+      // Wait for all orders to be created
+      const results = await Promise.all(orderPromises);
+      
+      // Check if any order failed
+      const errors = results.filter(result => result.error);
+      if (errors.length > 0) {
+        throw new Error(`Failed to create ${errors.length} orders`);
       }
       
       toast({
-        title: "Order placed successfully!",
-        description: "Your laundry pickup has been scheduled",
+        title: "Orders placed successfully!",
+        description: `${orderData.services.length} laundry services have been scheduled`,
       });
       
       onComplete();
@@ -97,29 +105,34 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         </div>
         
         <div className="p-6 space-y-6">
-          {/* Service */}
-          <div className="flex items-start">
-            <div className="bg-gray-100 p-2 rounded-lg">
-              <span className="text-2xl">{orderData.serviceName === "Wash & Fold" ? "👕" : 
-                orderData.serviceName === "Wash & Iron" ? "👔" : 
-                orderData.serviceName === "Heavy Wash" ? "🧺" : "✨"}</span>
-            </div>
-            <div className="ml-4">
-              <h3 className="font-bold">Service</h3>
-              <p className="text-gray-600">{orderData.serviceName}</p>
-              {orderData.estimatedWeight && orderData.servicePrice && (
-                <div className="mt-1">
-                  <p className="text-sm">
-                    <span className="font-medium">Estimated Weight:</span> {orderData.estimatedWeight}kg
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Price per kg:</span> ₹{orderData.servicePrice}
-                  </p>
-                  <p className="font-medium">
-                    <span>Estimated Total:</span> ₹{(orderData.estimatedWeight * orderData.servicePrice).toFixed(2)}
-                  </p>
+          {/* Services */}
+          <div>
+            <h3 className="font-bold mb-3">Selected Services</h3>
+            <div className="space-y-3">
+              {orderData.services.map((service, index) => (
+                <div key={service.id} className="flex items-start">
+                  <div className="bg-gray-100 p-2 rounded-lg">
+                    <span className="text-2xl">
+                      {service.name.includes("Wash & Fold") ? "👕" : 
+                       service.name.includes("Wash & Iron") ? "👔" : 
+                       service.name.includes("Heavy Wash") ? "🧺" : "✨"}
+                    </span>
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-bold">{service.name}</h4>
+                    {orderData.estimatedWeight && (
+                      <div className="mt-1">
+                        <p className="text-sm">
+                          <span className="font-medium">Price:</span> ₹{service.price}/kg
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-medium">Estimated Total:</span> ₹{(service.price * orderData.estimatedWeight).toFixed(2)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
           </div>
           
@@ -183,7 +196,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
             <span className="text-gray-600">Cash on delivery</span>
           </div>
           
-          {orderData.totalAmount && (
+          {orderData.totalAmount && orderData.estimatedWeight && (
             <div className="flex items-center justify-between font-bold text-lg">
               <span>Total</span>
               <span>₹{orderData.totalAmount.toFixed(2)}</span>
