@@ -50,7 +50,7 @@ export const ServiceWeightEstimateDialog = ({
               "5 pair of socks"
             ].map((item, index) => (
               <li key={index} className="flex items-center gap-3">
-                <div className="bg-blue-600 rounded-full p-1 flex items-center justify-center">
+                <div className="bg-black rounded-full p-1 flex items-center justify-center">
                   <Check className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-base">{item}</span>
@@ -71,11 +71,9 @@ export const ServiceWeightEstimateDialog = ({
             Schedule Pickup
           </Button>
           <Button 
+            variant="default"
             onClick={() => navigate("/schedule")}
-            style={{
-              backgroundColor: serviceColor ? serviceColor : undefined,
-            }}
-            className={buttonClassName}
+            className={`bg-black hover:bg-gray-800 ${buttonClassName}`}
           >
             Get Exact Estimate
           </Button>
