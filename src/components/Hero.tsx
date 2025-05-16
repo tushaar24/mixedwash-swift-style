@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MessageSquareText } from "lucide-react";
+import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
@@ -42,9 +42,9 @@ export const Hero = () => {
               <Button 
                 variant="outline" 
                 className="border-gray-300 hover:bg-gray-100 px-6 py-4 h-auto text-lg w-full sm:w-auto"
-                onClick={() => window.location.href = "#contact"}
+                onClick={() => navigate("/contact")}
               >
-                <MessageSquareText className="mr-2 h-5 w-5" />
+                <MessageSquare className="mr-2 h-5 w-5" />
                 Contact Us
               </Button>
             </div>
