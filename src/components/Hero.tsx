@@ -9,8 +9,9 @@ export const Hero = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-              Laundry and Dry Cleaning
-              <span className="block">with Next Day Delivery</span>
+              <span className="block mb-2">Laundry and</span>
+              <span className="block mb-2">Dry Cleaning</span>
+              <span className="text-3xl md:text-4xl lg:text-5xl text-gray-700">with Next Day Delivery</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-lg">
               Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
