@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -7,6 +8,7 @@ import { ArrowLeft, WashingMachine, Package, Weight, Shirt, BadgePercent, Truck,
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
+import { ServiceWeightEstimateDialog } from "@/components/ServiceWeightEstimateDialog";
 import { 
   Carousel,
   CarouselContent,
@@ -22,6 +24,7 @@ const servicesData = {
     icon: <WashingMachine className="h-8 w-8 text-white" />,
     iconBg: "bg-blue-600",
     color: "bg-blue-50",
+    themeColor: "#2563EB", // Added theme color
     description: "For everyday laundry, bedsheets and towels.",
     discount: 20,
     minimumOrder: null,
@@ -40,6 +43,7 @@ const servicesData = {
     icon: <Shirt className="h-8 w-8 text-white" />,
     iconBg: "bg-pink-500",
     color: "bg-pink-50",
+    themeColor: "#EC4899", // Added theme color
     description: "Your outfits, wrinkle-free and crisp.",
     discount: 20,
     minimumOrder: null,
@@ -58,6 +62,7 @@ const servicesData = {
     icon: <Package className="h-8 w-8 text-white" />,
     iconBg: "bg-teal-500",
     color: "bg-teal-50",
+    themeColor: "#14B8A6", // Added theme color
     description: "Big laundry loads handled with ease.",
     discount: 20,
     minimumOrder: null,
@@ -75,6 +80,7 @@ const servicesData = {
     icon: <Weight className="h-8 w-8 text-white" />,
     iconBg: "bg-green-500",
     color: "bg-green-50",
+    themeColor: "#22C55E", // Added theme color
     description: "Delicate care, speedy turnaround.",
     discount: 0,
     minimumOrder: null,
@@ -266,12 +272,18 @@ const ServiceDetail = () => {
             
             <div className="bg-blue-50 border border-blue-200 p-4 sm:p-6 rounded-lg">
               <h3 className="font-medium text-base sm:text-lg">Not sure how much you have?</h3>
-              <Button 
-                className="mt-2 sm:mt-3 bg-blue-700 hover:bg-blue-800 text-sm sm:text-base"
-                onClick={() => navigate("/schedule")}
+              <ServiceWeightEstimateDialog 
+                serviceName={service.name} 
+                serviceColor={service.themeColor}
+                buttonClassName="mt-2 sm:mt-3 text-sm sm:text-base"
               >
-                Get an estimate
-              </Button>
+                <Button 
+                  className="mt-2 sm:mt-3 text-sm sm:text-base"
+                  style={{ backgroundColor: service.themeColor }}
+                >
+                  Get an estimate
+                </Button>
+              </ServiceWeightEstimateDialog>
             </div>
           </div>
           
@@ -335,7 +347,8 @@ const ServiceDetail = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 sm:py-6 shadow-lg z-10">
         <div className="max-w-5xl mx-auto px-4 flex flex-col items-center justify-center">
           <Button 
-            className="bg-black hover:bg-gray-800 px-8 sm:px-12 py-5 sm:py-7 text-base sm:text-lg font-semibold w-full max-w-md"
+            style={{ backgroundColor: service.themeColor }}
+            className="px-8 sm:px-12 py-5 sm:py-7 text-base sm:text-lg font-semibold w-full max-w-md hover:opacity-90"
             size="lg"
             onClick={() => navigate("/schedule")}
           >
