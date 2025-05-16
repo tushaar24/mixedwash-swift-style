@@ -1,8 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, MessageSquareText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const ConvenienceSection = () => {
+  const navigate = useNavigate();
+  
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,7 +44,7 @@ export const ConvenienceSection = () => {
             <div className="pt-6">
               <Button 
                 className="bg-black hover:bg-gray-800 text-white px-6 py-6 h-auto group"
-                onClick={() => window.location.href = "#contact"}  
+                onClick={() => navigate("/contact")}  
               >
                 <MessageSquareText className="mr-2 h-5 w-5" />
                 Have Questions? Contact Us
