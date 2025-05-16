@@ -1,8 +1,9 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BadgePercent, Truck } from "lucide-react";
+import { ArrowRight, BadgePercent, Clock, Truck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Badge } from "@/components/ui/badge";
 
 export const Services = () => {
   const services = [
@@ -62,7 +63,16 @@ export const Services = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service, index) => (
-            <Card key={index} className="border-none shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+            <Card key={index} className="border-none shadow-md hover:shadow-lg transition-shadow overflow-hidden relative">
+              {/* 24-hour delivery badge */}
+              <Badge 
+                variant="outline" 
+                className="absolute top-3 right-3 bg-purple-100 text-purple-800 border border-purple-300 flex items-center gap-1 px-2 py-1 z-10"
+              >
+                <Clock className="h-3 w-3" />
+                <span className="text-xs">24h delivery</span>
+              </Badge>
+              
               <CardHeader className="pb-2">
                 <div className="text-5xl pb-4">{service.icon}</div>
                 <CardTitle className="text-xl font-bold">{service.title}</CardTitle>
