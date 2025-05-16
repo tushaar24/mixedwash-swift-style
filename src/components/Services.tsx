@@ -18,7 +18,7 @@ export const Services = () => {
       oldPrice: "₹95/kg",
       discount: 20,
       route: "wash-fold",
-      minimumOrder: 3
+      minimumOrder: 4
     },
     {
       title: "Wash & Iron",
@@ -28,7 +28,7 @@ export const Services = () => {
       oldPrice: "₹150/kg",
       discount: 20,
       route: "wash-iron",
-      minimumOrder: 4
+      minimumOrder: 3
     },
     {
       title: "Heavy Wash",
