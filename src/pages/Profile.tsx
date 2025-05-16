@@ -58,15 +58,29 @@ const Profile = () => {
       try {
         console.log("Fetching profile data for user:", user.id);
         
-        // Fetch orders with related data
+        // First, fetch time slots separately
+        const { data: timeSlots, error: timeSlotsError } = await supabase
+          .from("time_slots")
+          .select("*");
+          
+        if (timeSlotsError) {
+          console.error("Error fetching time slots:", timeSlotsError);
+          throw timeSlotsError;
+        }
+        
+        // Create a map for easy slot lookup
+        const slotsMap = new Map();
+        timeSlots?.forEach(slot => {
+          slotsMap.set(slot.id, slot);
+        });
+        
+        // Then fetch orders without joined relations
         const { data: ordersData, error: ordersError } = await supabase
           .from("orders")
           .select(`
             *,
             service:services(*),
-            address:addresses(*),
-            pickup_slot:time_slots(*),
-            delivery_slot:time_slots(*)
+            address:addresses(*)
           `)
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
@@ -78,15 +92,13 @@ const Profile = () => {
         
         console.log("Orders data fetched:", ordersData?.length || 0);
         
-        // Process orders to ensure they match our type
+        // Process orders to add the time slot data from our map
         const processedOrders = ordersData?.map((order: any) => {
-          // Handle any possible errors in joined relations
-          const processedOrder: Order = {
+          return {
             ...order,
-            pickup_slot: order.pickup_slot || null,
-            delivery_slot: order.delivery_slot || null
+            pickup_slot: slotsMap.get(order.pickup_slot_id) || null,
+            delivery_slot: slotsMap.get(order.delivery_slot_id) || null
           };
-          return processedOrder;
         }) || [];
         
         // Fetch addresses
