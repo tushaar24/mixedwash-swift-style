@@ -19,11 +19,16 @@ enum ScheduleStep {
   ORDER_CONFIRMATION = 3,
 }
 
+// Represent a selected service
+export interface SelectedService {
+  id: string;
+  name: string;
+  price: number;
+}
+
 // Order data interface
 export interface OrderData {
-  serviceId: string | null;
-  serviceName: string | null;
-  servicePrice: number | null;
+  services: SelectedService[];
   addressId: string | null;
   pickupDate: Date | null;
   pickupSlotId: string | null;
@@ -41,9 +46,7 @@ const Schedule = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(ScheduleStep.SERVICE_SELECTION);
   const [orderData, setOrderData] = useState<OrderData>({
-    serviceId: null,
-    serviceName: null,
-    servicePrice: null,
+    services: [],
     addressId: null,
     pickupDate: null,
     pickupSlotId: null,

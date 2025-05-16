@@ -3,9 +3,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { ArrowRight, BadgePercent, Loader2 } from "lucide-react";
-import { OrderData } from "@/pages/Schedule";
+import { OrderData, SelectedService } from "@/pages/Schedule";
 
 interface Service {
   id: string;
@@ -25,7 +26,9 @@ interface ServiceSelectionProps {
 export const ServiceSelection = ({ orderData, updateOrderData, onNext }: ServiceSelectionProps) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(orderData.serviceId);
+  const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(
+    new Set(orderData.services.map(service => service.id))
+  );
 
   // Fetch services from Supabase
   useEffect(() => {
@@ -55,27 +58,52 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
     fetchServices();
   }, []);
 
-  // Select a service
-  const handleServiceSelect = (service: Service) => {
-    setSelectedServiceId(service.id);
+  // Toggle service selection
+  const toggleServiceSelection = (service: Service) => {
+    const newSelectedServiceIds = new Set(selectedServiceIds);
+    
+    if (newSelectedServiceIds.has(service.id)) {
+      newSelectedServiceIds.delete(service.id);
+    } else {
+      newSelectedServiceIds.add(service.id);
+    }
+    
+    setSelectedServiceIds(newSelectedServiceIds);
+    
+    // Update selected services in order data
+    const selectedServices = services
+      .filter(s => newSelectedServiceIds.has(s.id))
+      .map(s => ({
+        id: s.id,
+        name: s.name,
+        price: s.discount_price !== null ? s.discount_price : s.price,
+      }));
+    
+    // Calculate total amount based on all selected services
+    const totalAmount = calculateTotalAmount(selectedServices, orderData.estimatedWeight);
+    
     updateOrderData({
-      serviceId: service.id,
-      serviceName: service.name,
-      // Use discount_price if available, otherwise use regular price
-      servicePrice: service.discount_price !== null ? service.discount_price : service.price,
-      // Calculate total amount based on estimated weight (if any)
-      totalAmount: orderData.estimatedWeight 
-        ? (service.discount_price !== null ? service.discount_price : service.price) * orderData.estimatedWeight 
-        : null,
+      services: selectedServices,
+      totalAmount: totalAmount
     });
   };
 
+  // Calculate total amount
+  const calculateTotalAmount = (selectedServices: SelectedService[], weight: number | null): number | null => {
+    if (!weight || selectedServices.length === 0) return null;
+    
+    // Calculate total based on all selected services
+    return selectedServices.reduce((total, service) => {
+      return total + (service.price * weight);
+    }, 0);
+  };
+  
   // Continue to next step
   const handleContinue = () => {
-    if (!selectedServiceId) {
+    if (selectedServiceIds.size === 0) {
       toast({
-        title: "Please select a service",
-        description: "You need to select a service to continue",
+        title: "Please select at least one service",
+        description: "You need to select one or more services to continue",
       });
       return;
     }
@@ -95,8 +123,8 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold">Select a Service</h1>
-        <p className="text-gray-600 mt-2">Choose the laundry service you need</p>
+        <h1 className="text-2xl font-bold">Select Services</h1>
+        <p className="text-gray-600 mt-2">Choose one or more laundry services you need</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -104,16 +132,23 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
           <Card 
             key={service.id}
             className={`transition-all cursor-pointer hover:shadow-md ${
-              selectedServiceId === service.id 
+              selectedServiceIds.has(service.id) 
                 ? "ring-2 ring-black shadow-md" 
                 : "hover:scale-[1.01] border-gray-200"
             }`}
-            onClick={() => handleServiceSelect(service)}
+            onClick={() => toggleServiceSelection(service)}
           >
             <CardContent className="p-4">
               <div className="flex items-start">
-                <div className="text-4xl mr-4">{service.icon}</div>
-                <div className="flex-1">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    checked={selectedServiceIds.has(service.id)} 
+                    onCheckedChange={() => toggleServiceSelection(service)}
+                    className="data-[state=checked]:bg-black data-[state=checked]:border-black"
+                  />
+                  <div className="text-4xl mr-2">{service.icon}</div>
+                </div>
+                <div className="flex-1 ml-2">
                   <h3 className="font-bold text-lg">{service.name}</h3>
                   <p className="text-sm text-gray-600">{service.description}</p>
                   
@@ -137,19 +172,26 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
                     )}
                   </div>
                 </div>
-                
-                {selectedServiceId === service.id && (
-                  <div className="h-6 w-6 bg-black rounded-full flex items-center justify-center">
-                    <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+      
+      {/* Selected services summary */}
+      {orderData.services.length > 0 && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-medium mb-2">Selected Services ({orderData.services.length})</h3>
+          <ul className="space-y-2">
+            {orderData.services.map((service) => (
+              <li key={service.id} className="flex justify-between items-center">
+                <span>{service.name}</span>
+                <span className="font-medium">₹{service.price}/kg</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       
       {/* Weight estimate input */}
       <div className="mt-8 p-4 bg-gray-50 rounded-lg">
@@ -167,21 +209,23 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
             value={orderData.estimatedWeight || ""}
             onChange={(e) => {
               const weight = parseFloat(e.target.value) || null;
+              const totalAmount = weight && orderData.services.length > 0 
+                ? calculateTotalAmount(orderData.services, weight)
+                : null;
+                
               updateOrderData({ 
                 estimatedWeight: weight,
-                totalAmount: weight && orderData.servicePrice 
-                  ? weight * orderData.servicePrice 
-                  : null
+                totalAmount: totalAmount
               });
             }}
           />
           <span className="text-gray-600">kg</span>
           
-          {orderData.estimatedWeight && orderData.servicePrice && (
+          {orderData.estimatedWeight && orderData.services.length > 0 && orderData.totalAmount && (
             <div className="ml-4 bg-white px-3 py-1 border border-gray-200 rounded-md">
               <span className="font-medium">Estimated Total: </span>
               <span className="text-green-700 font-bold">
-                ₹{(orderData.estimatedWeight * orderData.servicePrice).toFixed(2)}
+                ₹{orderData.totalAmount.toFixed(2)}
               </span>
             </div>
           )}
@@ -192,7 +236,7 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
         <Button 
           onClick={handleContinue}
           className="bg-black hover:bg-gray-800 text-white px-6 py-6 h-auto text-base group"
-          disabled={!selectedServiceId}
+          disabled={selectedServiceIds.size === 0}
         >
           Continue to Address
           <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
