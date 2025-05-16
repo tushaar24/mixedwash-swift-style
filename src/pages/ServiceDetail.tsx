@@ -123,32 +123,32 @@ const ServiceDetail = () => {
       <Navbar />
       <main className="pb-24">
         {/* Service detail header */}
-        <div className={`${service.color} py-12`}>
+        <div className={`${service.color} py-8 sm:py-12`}>
           <div className="max-w-5xl mx-auto px-4">
             <Button 
               variant="ghost" 
-              className="mb-6 hover:bg-white/20"
+              className="mb-4 sm:mb-6 hover:bg-white/20"
               onClick={() => navigate("/")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
+              <span className="text-sm">Back to Home</span>
             </Button>
             
             {/* Other Services Section - Moved to this position */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">Other Services You Might Like</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="mb-6 sm:mb-8">
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Other Services You Might Like</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
                 {otherServices.map((otherService) => (
                   <Card 
                     key={otherService.id}
                     className="border border-gray-200 hover:border-gray-400 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer transform hover:scale-105 bg-white"
                     onClick={() => navigate(`/service/${otherService.id}`)}
                   >
-                    <CardContent className="p-4 flex items-center gap-2">
+                    <CardContent className="p-3 sm:p-4 flex items-center gap-2">
                       <div className={`${otherService.iconBg} p-2 rounded-full flex items-center justify-center`}>
                         {otherService.icon}
                       </div>
-                      <h3 className="font-medium">{otherService.name}</h3>
+                      <h3 className="font-medium text-sm sm:text-base">{otherService.name}</h3>
                     </CardContent>
                   </Card>
                 ))}
@@ -156,60 +156,60 @@ const ServiceDetail = () => {
             </div>
             
             <div className="flex items-center">
-              <div className={`${service.iconBg} p-4 rounded-full mr-4`}>
+              <div className={`${service.iconBg} p-3 sm:p-4 rounded-full mr-3 sm:mr-4`}>
                 {service.icon}
               </div>
               <div>
-                <h1 className="text-3xl font-bold">{service.name}</h1>
-                <p className="text-lg text-gray-600 mt-2">{service.description}</p>
+                <h1 className="text-2xl sm:text-3xl font-bold">{service.name}</h1>
+                <p className="text-base sm:text-lg text-gray-600 mt-1 sm:mt-2">{service.description}</p>
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row items-center gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mt-4 sm:mt-6">
               {service.discount > 0 && (
-                <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300">
-                  <BadgePercent className="h-4 w-4" />
-                  <span className="text-sm font-semibold">{service.discount}% OFF on your first order!</span>
+                <div className="inline-flex items-center gap-1 sm:gap-2 bg-amber-100 px-3 py-1 sm:px-4 sm:py-2 rounded-full text-amber-800 border border-amber-300 text-xs sm:text-sm w-full sm:w-auto">
+                  <BadgePercent className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="font-semibold">{service.discount}% OFF on your first order!</span>
                 </div>
               )}
-              <div className="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full text-blue-800 border border-blue-300">
-                <Truck className="h-4 w-4" />
-                <span className="text-sm font-semibold">Free pickup & delivery on all orders!</span>
+              <div className="inline-flex items-center gap-1 sm:gap-2 bg-blue-100 px-3 py-1 sm:px-4 sm:py-2 rounded-full text-blue-800 border border-blue-300 text-xs sm:text-sm w-full sm:w-auto mt-2 sm:mt-0">
+                <Truck className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="font-semibold">Free pickup & delivery on all orders!</span>
               </div>
             </div>
           </div>
         </div>
         
         {/* Pricing Section */}
-        <div className="max-w-5xl mx-auto px-4 mt-8">
-          <h2 className="text-2xl font-bold mb-6">Pricing</h2>
-          <div className="space-y-8">
+        <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Pricing</h2>
+          <div className="space-y-6 sm:space-y-8">
             {service.prices.map((price: any, index: number) => (
-              <Card key={index} className="border shadow-sm hover:shadow-md transition-all duration-300">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-xl font-medium">{price.title}</h3>
-                      <p className="text-gray-500 mt-2">{price.details}</p>
-                      <div className="mt-3 text-xs text-blue-700 flex items-center gap-1">
-                        <Truck className="h-3 w-3" />
+              <Card key={index} className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                    <div className="space-y-2 sm:space-y-3 flex-1">
+                      <h3 className="text-lg sm:text-xl font-medium">{price.title}</h3>
+                      <p className="text-gray-500 text-sm sm:text-base">{price.details}</p>
+                      <div className="mt-2 sm:mt-3 text-xs flex items-center gap-1 text-blue-700">
+                        <Truck className="h-3 w-3 flex-shrink-0" />
                         <span>Free pickup & delivery included</span>
                       </div>
                       {price.minimumOrder && (
-                        <div className="mt-2 text-xs text-orange-700 flex items-center gap-1">
-                          <Info className="h-3 w-3" />
+                        <div className="text-xs flex items-center gap-1 text-orange-700">
+                          <Info className="h-3 w-3 flex-shrink-0" />
                           <span>Minimum order: {price.minimumOrder}kg</span>
                         </div>
                       )}
                     </div>
-                    <div className="text-right">
+                    <div className="sm:text-right">
                       {service.discount > 0 ? (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-lg text-green-700">{price.amount}</span>
+                        <div className="space-y-1 sm:space-y-2">
+                          <div className="flex items-center sm:justify-end gap-2">
+                            <span className="font-bold text-xl sm:text-2xl text-green-700">{price.amount}</span>
                             <HoverCard>
                               <HoverCardTrigger>
-                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium inline-block">
                                   Save {service.discount}% on first order
                                 </span>
                               </HoverCardTrigger>
@@ -224,7 +224,7 @@ const ServiceDetail = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="font-semibold text-gray-800">{price.amount}</div>
+                        <div className="font-semibold text-xl sm:text-2xl text-gray-800">{price.amount}</div>
                       )}
                     </div>
                   </div>
@@ -232,10 +232,10 @@ const ServiceDetail = () => {
               </Card>
             ))}
             
-            <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg mt-8">
-              <h3 className="font-medium text-lg">Not sure how much you have?</h3>
+            <div className="bg-blue-50 border border-blue-200 p-4 sm:p-6 rounded-lg">
+              <h3 className="font-medium text-base sm:text-lg">Not sure how much you have?</h3>
               <Button 
-                className="mt-3 bg-blue-700 hover:bg-blue-800"
+                className="mt-2 sm:mt-3 bg-blue-700 hover:bg-blue-800 text-sm sm:text-base"
                 onClick={() => navigate("/schedule")}
               >
                 Get an estimate
@@ -244,17 +244,17 @@ const ServiceDetail = () => {
           </div>
           
           {/* About Service Section */}
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold mb-6">About {service.name}</h2>
-            <div className="grid gap-6 md:grid-cols-2">
+          <div className="mt-12 sm:mt-16">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">About {service.name}</h2>
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
               <Card>
-                <CardHeader>
-                  <CardTitle>Service Description</CardTitle>
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-lg sm:text-xl">Service Description</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base">
                   <p>Our {service.name} service provides professional cleaning for your garments with the utmost care and attention to detail. We use high-quality detergents and state-of-the-art machines to ensure your clothes come back fresh and clean.</p>
                   {service.minimumOrder && (
-                    <div className="mt-4 flex items-center gap-2 text-orange-700">
+                    <div className="mt-3 sm:mt-4 flex items-center gap-2 text-orange-700 text-sm">
                       <Info className="h-4 w-4 flex-shrink-0" />
                       <p><strong>Minimum order:</strong> {service.minimumOrder}kg</p>
                     </div>
@@ -263,10 +263,10 @@ const ServiceDetail = () => {
               </Card>
               
               <Card>
-                <CardHeader>
-                  <CardTitle>What's included</CardTitle>
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-lg sm:text-xl">What's included</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base">
                   <ul className="list-disc pl-5 space-y-1">
                     <li>Sorting by color and fabric type</li>
                     <li>Pre-treatment for stains</li>
@@ -278,19 +278,19 @@ const ServiceDetail = () => {
               </Card>
               
               <Card>
-                <CardHeader>
-                  <CardTitle>Process</CardTitle>
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-lg sm:text-xl">Process</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base">
                   <p>When your laundry arrives at our facility, our experienced team sorts it according to color and fabric type. Each load is then carefully processed using our professional-grade machines with the appropriate temperature and detergent for the specific fabric type.</p>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardHeader>
-                  <CardTitle>Turnaround Time</CardTitle>
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-lg sm:text-xl">Turnaround Time</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base">
                   <p>Standard turnaround time is 24 hours. Express service is available at an additional charge.</p>
                 </CardContent>
               </Card>
@@ -300,10 +300,10 @@ const ServiceDetail = () => {
       </main>
       
       {/* Sticky Schedule Pickup CTA - Updated to be centered and bigger with no pricing */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-6 shadow-lg z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 sm:py-6 shadow-lg z-10">
         <div className="max-w-5xl mx-auto px-4 flex flex-col items-center justify-center">
           <Button 
-            className="bg-black hover:bg-gray-800 px-12 py-7 text-lg font-semibold w-full max-w-md"
+            className="bg-black hover:bg-gray-800 px-8 sm:px-12 py-5 sm:py-7 text-base sm:text-lg font-semibold w-full max-w-md"
             size="lg"
             onClick={() => navigate("/schedule")}
           >
