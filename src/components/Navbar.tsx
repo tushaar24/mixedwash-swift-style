@@ -16,7 +16,7 @@ export const Navbar = () => {
       navigate("/auth");
     } else {
       // User is already logged in, navigate to scheduling page
-      navigate("/profile");
+      navigate("/schedule");
     }
   };
 
@@ -30,7 +30,12 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <span className="text-xl font-bold">MixedWash</span>
+            <span 
+              className="text-xl font-bold cursor-pointer"
+              onClick={() => navigate("/")}
+            >
+              MixedWash
+            </span>
           </div>
           
           {/* Desktop Menu */}
@@ -42,6 +47,12 @@ export const Navbar = () => {
             
             {user ? (
               <div className="flex items-center space-x-4">
+                <Button 
+                  onClick={handleScheduleClick}
+                  className="bg-black text-white hover:bg-gray-800"
+                >
+                  Schedule Pickup
+                </Button>
                 <Button 
                   variant="outline" 
                   onClick={() => navigate("/profile")}
@@ -86,6 +97,17 @@ export const Navbar = () => {
             
             {user ? (
               <>
+                <div className="px-3 py-2">
+                  <Button 
+                    className="w-full bg-black text-white hover:bg-gray-800"
+                    onClick={() => {
+                      handleScheduleClick();
+                      setIsOpen(false);
+                    }}
+                  >
+                    Schedule Pickup
+                  </Button>
+                </div>
                 <div className="px-3 py-2">
                   <Button 
                     variant="outline" 

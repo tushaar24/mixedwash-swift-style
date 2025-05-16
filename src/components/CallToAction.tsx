@@ -13,7 +13,7 @@ export const CallToAction = () => {
       navigate("/auth");
     } else {
       // User is already logged in, navigate to scheduling page
-      navigate("/profile");
+      navigate("/schedule");
     }
   };
 
