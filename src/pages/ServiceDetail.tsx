@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -26,13 +25,6 @@ const servicesData = {
         oldPrice: "₹95/kg",
         details: "Light and dark clothes washed together at 90°F. You can request 110°F instead.",
         minimumOrder: 4
-      },
-      {
-        title: "Segregated Wash",
-        amount: "₹72/kg",
-        oldPrice: "₹95/kg",
-        details: "We'll separate the items for you and wash at 90°F. Starts with two loads. You can request 110°F instead.",
-        minimumOrder: 8
       }
     ]
   },
@@ -51,13 +43,6 @@ const servicesData = {
         oldPrice: "₹150/kg",
         details: "Light and dark clothes washed together at 90°F and professionally ironed.",
         minimumOrder: 3
-      },
-      {
-        title: "Segregated Wash",
-        amount: "₹120/kg",
-        oldPrice: "₹150/kg",
-        details: "Each item is individually ironed to perfection, with special care for formal and delicate garments.",
-        minimumOrder: 6
       }
     ]
   },
@@ -307,4 +292,3 @@ const ServiceDetail = () => {
 };
 
 export default ServiceDetail;
-
