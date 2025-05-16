@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, WashingMachine, Package, Weight, Shirt, BadgePercent, Truck } from "lucide-react";
+import { ArrowLeft, WashingMachine, Package, Weight, Shirt, BadgePercent, Truck, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ const servicesData = {
     color: "bg-blue-50",
     description: "For everyday laundry, bedsheets and towels.",
     discount: 20,
+    minimumOrder: 3,
     prices: [
       {
         title: "Normal Wash",
@@ -40,6 +41,7 @@ const servicesData = {
     color: "bg-pink-50",
     description: "Your outfits, wrinkle-free and crisp.",
     discount: 20,
+    minimumOrder: 4,
     prices: [
       {
         title: "Normal Wash with ironing",
@@ -62,6 +64,7 @@ const servicesData = {
     color: "bg-teal-50",
     description: "Big laundry loads handled with ease.",
     discount: 20,
+    minimumOrder: null,
     prices: [
       {
         title: "Normal Heavy Wash",
@@ -84,6 +87,7 @@ const servicesData = {
     color: "bg-green-50",
     description: "Delicate care, speedy turnaround.",
     discount: 0,
+    minimumOrder: null,
     prices: [
       {
         title: "Standard dry cleaning",
@@ -157,6 +161,12 @@ const ServiceDetail = () => {
                 <Truck className="h-4 w-4" />
                 <span className="text-sm font-semibold">Free pickup & delivery on all orders!</span>
               </div>
+              {service.minimumOrder && (
+                <div className="inline-flex items-center gap-2 bg-orange-100 px-4 py-2 rounded-full text-orange-800 border border-orange-300">
+                  <Info className="h-4 w-4" />
+                  <span className="text-sm font-semibold">Minimum order: {service.minimumOrder}kg</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -176,6 +186,12 @@ const ServiceDetail = () => {
                         <Truck className="h-3 w-3" />
                         <span>Free pickup & delivery included</span>
                       </div>
+                      {service.minimumOrder && (
+                        <div className="mt-2 text-xs text-orange-700 flex items-center gap-1">
+                          <Info className="h-3 w-3" />
+                          <span>Minimum order: {service.minimumOrder}kg</span>
+                        </div>
+                      )}
                     </div>
                     <div className="text-right">
                       {service.discount > 0 ? (
@@ -228,6 +244,12 @@ const ServiceDetail = () => {
                 </CardHeader>
                 <CardContent>
                   <p>Our {service.name} service provides professional cleaning for your garments with the utmost care and attention to detail. We use high-quality detergents and state-of-the-art machines to ensure your clothes come back fresh and clean.</p>
+                  {service.minimumOrder && (
+                    <div className="mt-4 flex items-center gap-2 text-orange-700">
+                      <Info className="h-4 w-4 flex-shrink-0" />
+                      <p><strong>Minimum order:</strong> {service.minimumOrder}kg</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
               

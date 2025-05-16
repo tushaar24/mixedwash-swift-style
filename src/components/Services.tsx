@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BadgePercent, Clock, Truck } from "lucide-react";
+import { ArrowRight, BadgePercent, Clock, Truck, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,8 @@ export const Services = () => {
       newPrice: "₹72/kg",
       oldPrice: "₹95/kg",
       discount: 20,
-      route: "wash-fold"
+      route: "wash-fold",
+      minimumOrder: 3
     },
     {
       title: "Wash & Iron",
@@ -26,7 +27,8 @@ export const Services = () => {
       newPrice: "₹120/kg",
       oldPrice: "₹150/kg",
       discount: 20,
-      route: "wash-iron"
+      route: "wash-iron",
+      minimumOrder: 4
     },
     {
       title: "Heavy Wash",
@@ -35,7 +37,8 @@ export const Services = () => {
       newPrice: "₹112/kg",
       oldPrice: "₹140/kg",
       discount: 20,
-      route: "heavy-wash"
+      route: "heavy-wash",
+      minimumOrder: null
     },
     {
       title: "Dry Cleaning",
@@ -44,7 +47,8 @@ export const Services = () => {
       newPrice: "starts at ₹100",
       oldPrice: "",
       discount: 0,
-      route: "dry-cleaning"
+      route: "dry-cleaning",
+      minimumOrder: null
     }
   ];
 
@@ -122,6 +126,13 @@ export const Services = () => {
                   <Truck className="h-3 w-3" />
                   <span>Free pickup & delivery included</span>
                 </div>
+                
+                {service.minimumOrder && (
+                  <div className="mt-2 text-xs text-orange-700 flex items-center gap-1">
+                    <Info className="h-3 w-3" />
+                    <span>Min. order: {service.minimumOrder}kg</span>
+                  </div>
+                )}
                 
                 {/* Arrow indicator - now always visible */}
                 <div className="mt-4 flex justify-end">
