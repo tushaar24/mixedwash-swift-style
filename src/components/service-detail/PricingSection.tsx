@@ -1,0 +1,160 @@
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Info, Truck } from "lucide-react";
+import { ServiceWeightEstimateDialog } from "@/components/ServiceWeightEstimateDialog";
+import { useState } from "react";
+
+interface PricingSectionProps {
+  service: any;
+  serviceId: string | undefined;
+}
+
+export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
+  const [activeTab, setActiveTab] = useState("men");
+  
+  return (
+    <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Pricing</h2>
+      
+      {/* Add service charge note for dry cleaning */}
+      {service.serviceCharge && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm flex items-start gap-2">
+          <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+          <p>{service.serviceCharge}</p>
+        </div>
+      )}
+      
+      <div className="space-y-6 sm:space-y-8">
+        {serviceId === 'dry-cleaning' ? (
+          // Dry Cleaning specific price display with tables and tabs
+          <Card className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+            <Tabs defaultValue="men" className="w-full" onValueChange={(value) => setActiveTab(value)}>
+              <TabsList className="grid grid-cols-2 w-full">
+                <TabsTrigger value="men">Men's Wear</TabsTrigger>
+                <TabsTrigger value="women">Women's Wear</TabsTrigger>
+              </TabsList>
+              <TabsContent value="men" className="p-4 sm:p-6 pt-4">
+                <div className="overflow-x-auto">
+                  <Table className="border-collapse">
+                    <TableHeader>
+                      <TableRow className="bg-black">
+                        <TableHead className="text-left text-white font-bold">Item's Name</TableHead>
+                        <TableHead className="text-right text-white font-bold">Price (₹)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {service.prices[0].items.map((item: any, itemIndex: number) => (
+                        <TableRow key={itemIndex} className="border-t border-gray-200">
+                          <TableCell className="text-left py-2">{item.name}</TableCell>
+                          <TableCell className="text-right py-2 font-medium">{item.price}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                <div className="mt-4 text-xs flex items-center gap-1 text-blue-700">
+                  <Truck className="h-3 w-3 flex-shrink-0" />
+                  <span>Free pickup & delivery included</span>
+                </div>
+              </TabsContent>
+              <TabsContent value="women" className="p-4 sm:p-6 pt-4">
+                <div className="overflow-x-auto">
+                  <Table className="border-collapse">
+                    <TableHeader>
+                      <TableRow className="bg-black">
+                        <TableHead className="text-left text-white font-bold">Item's Name</TableHead>
+                        <TableHead className="text-right text-white font-bold">Price (₹)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {service.prices[1].items.map((item: any, itemIndex: number) => (
+                        <TableRow key={itemIndex} className="border-t border-gray-200">
+                          <TableCell className="text-left py-2">{item.name}</TableCell>
+                          <TableCell className="text-right py-2 font-medium">{item.price}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                <div className="mt-4 text-xs flex items-center gap-1 text-blue-700">
+                  <Truck className="h-3 w-3 flex-shrink-0" />
+                  <span>Free pickup & delivery included</span>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </Card>
+        ) : (
+          // Regular services pricing display
+          service.prices.map((price: any, index: number) => (
+            <Card key={index} className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                  <div className="space-y-2 sm:space-y-3 flex-1">
+                    <h3 className="text-lg sm:text-xl font-medium">{price.title}</h3>
+                    <p className="text-gray-500 text-sm sm:text-base">{price.details}</p>
+                    <div className="mt-2 sm:mt-3 text-xs flex items-center gap-1 text-blue-700">
+                      <Truck className="h-3 w-3 flex-shrink-0" />
+                      <span>Free pickup & delivery included</span>
+                    </div>
+                    {price.minimumOrder && (
+                      <div className="text-xs flex items-center gap-1 text-orange-700">
+                        <Info className="h-3 w-3 flex-shrink-0" />
+                        <span>Minimum order: {price.minimumOrder}kg</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="sm:text-right">
+                    {service.discount > 0 ? (
+                      <div className="space-y-1 sm:space-y-2">
+                        <div className="flex items-center sm:justify-end gap-2">
+                          <span className="font-bold text-xl sm:text-2xl text-green-700">{price.amount}</span>
+                          <HoverCard>
+                            <HoverCardTrigger>
+                              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium inline-block">
+                                Save {service.discount}% on first order
+                              </span>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="p-2 text-xs w-48">
+                              Discount applied for first-time customers! Regular price is {price.oldPrice}.
+                            </HoverCardContent>
+                          </HoverCard>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          <span className="line-through">{price.oldPrice}</span>
+                          <span className="ml-1 text-xs">regular price</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="font-semibold text-xl sm:text-2xl text-gray-800">{price.amount}</div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+        
+        <div className="bg-blue-50 border border-blue-200 p-4 sm:p-6 rounded-lg">
+          <h3 className="font-medium text-base sm:text-lg">Not sure how much you have?</h3>
+          <ServiceWeightEstimateDialog 
+            serviceName={service.name} 
+            serviceColor={service.themeColor}
+            buttonClassName="mt-2 sm:mt-3 text-sm sm:text-base"
+          >
+            <Button 
+              className="mt-2 sm:mt-3 text-sm sm:text-base bg-black hover:bg-gray-800"
+            >
+              Get an estimate
+            </Button>
+          </ServiceWeightEstimateDialog>
+        </div>
+      </div>
+    </div>
+  );
+};
