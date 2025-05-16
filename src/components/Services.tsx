@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BadgePercent } from "lucide-react";
+import { ArrowRight, BadgePercent, Truck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
@@ -48,9 +48,15 @@ export const Services = () => {
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
             We offer a variety of services to meet all your laundry needs, with next-day delivery standard.
           </p>
-          <div className="mt-3 inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300">
-            <BadgePercent className="h-4 w-4" />
-            <span className="text-sm font-semibold">20% OFF on your first order!</span>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+            <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300">
+              <BadgePercent className="h-4 w-4" />
+              <span className="text-sm font-semibold">20% OFF on your first order!</span>
+            </div>
+            <div className="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full text-blue-800 border border-blue-300">
+              <Truck className="h-4 w-4" />
+              <span className="text-sm font-semibold">Free pickup & delivery on all orders!</span>
+            </div>
           </div>
         </div>
         
@@ -87,6 +93,10 @@ export const Services = () => {
                 ) : (
                   <div className="font-semibold text-gray-800">{service.newPrice}</div>
                 )}
+                <div className="mt-3 text-xs text-blue-700 flex items-center gap-1">
+                  <Truck className="h-3 w-3" />
+                  <span>Free pickup & delivery included</span>
+                </div>
               </CardContent>
             </Card>
           ))}
