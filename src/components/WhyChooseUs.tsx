@@ -5,22 +5,22 @@ export const WhyChooseUs = () => {
   const benefits = [
     {
       title: "Next-Day Delivery",
-      description: "Always speedy, never pricey.",
+      description: "Quick turnaround without the extra cost.",
       icon: <Clock className="h-10 w-10" />
     },
     {
       title: "Trust & Reliability",
-      description: "Pickup and delivery that shows up on time, every time.",
+      description: "We show up exactly when promised—every single time.",
       icon: <Check className="h-10 w-10" />
     },
     {
       title: "Free Reprocessing Guarantee",
-      description: "Ensuring your satisfaction.",
+      description: "Not satisfied? We'll wash it again, completely free.",
       icon: <Shirt className="h-10 w-10" />
     },
     {
-      title: "Safety Assured",
-      description: "Zero lost items, every wash.",
+      title: "Your Clothes, Safe & Sound",
+      description: "We take care of your clothes like they're our own. No lost items, guaranteed.",
       icon: <Shield className="h-10 w-10" />
     }
   ];
