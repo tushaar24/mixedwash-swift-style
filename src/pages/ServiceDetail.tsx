@@ -7,6 +7,13 @@ import { ArrowLeft, WashingMachine, Package, Weight, Shirt, BadgePercent, Truck,
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext
+} from "@/components/ui/carousel";
 
 // Service data
 const servicesData = {
@@ -134,10 +141,12 @@ const ServiceDetail = () => {
               <span className="text-sm">Back to Home</span>
             </Button>
             
-            {/* Other Services Section - Moved to this position */}
+            {/* Other Services Section - Now with Carousel for mobile */}
             <div className="mb-6 sm:mb-8">
               <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Other Services You Might Like</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+              
+              {/* Desktop view - Grid layout */}
+              <div className="hidden md:grid md:grid-cols-3 gap-3 sm:gap-4">
                 {otherServices.map((otherService) => (
                   <Card 
                     key={otherService.id}
@@ -152,6 +161,29 @@ const ServiceDetail = () => {
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+              
+              {/* Mobile view - Horizontal scrollable carousel */}
+              <div className="md:hidden">
+                <Carousel className="w-full">
+                  <CarouselContent className="-ml-2 md:-ml-4">
+                    {otherServices.map((otherService) => (
+                      <CarouselItem key={otherService.id} className="pl-2 md:pl-4 basis-4/5 sm:basis-2/3">
+                        <Card 
+                          className="border border-gray-200 hover:border-gray-400 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer bg-white h-full"
+                          onClick={() => navigate(`/service/${otherService.id}`)}
+                        >
+                          <CardContent className="p-3 flex items-center gap-2 h-full">
+                            <div className={`${otherService.iconBg} p-2 rounded-full flex items-center justify-center`}>
+                              {otherService.icon}
+                            </div>
+                            <h3 className="font-medium text-sm">{otherService.name}</h3>
+                          </CardContent>
+                        </Card>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                </Carousel>
               </div>
             </div>
             
@@ -299,7 +331,7 @@ const ServiceDetail = () => {
         </div>
       </main>
       
-      {/* Sticky Schedule Pickup CTA - Updated to be centered and bigger with no pricing */}
+      {/* Sticky Schedule Pickup CTA */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 sm:py-6 shadow-lg z-10">
         <div className="max-w-5xl mx-auto px-4 flex flex-col items-center justify-center">
           <Button 
