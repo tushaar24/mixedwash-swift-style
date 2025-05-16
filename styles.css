@@ -1,4 +1,3 @@
-
 /* Reset */
 * {
   margin: 0;
@@ -35,7 +34,7 @@ a {
   justify-content: center;
   border: none;
   border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -60,7 +59,7 @@ a {
 }
 
 .btn-lg {
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   font-size: 1.125rem;
 }
 
@@ -478,7 +477,7 @@ a {
   background: none;
   border: none;
   text-align: left;
-  padding: 1.5rem 0;
+  padding: 1.5rem 0.75rem;
   font-size: 1.125rem;
   font-weight: 500;
   cursor: pointer;
@@ -500,7 +499,7 @@ a {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
-  padding: 0 0 0 0;
+  padding: 0 0.75rem 0 0.75rem;
 }
 
 .accordion-item.active .accordion-content {
