@@ -1,20 +1,26 @@
 
+import { Calendar, Home, Package } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+
 export const HowItWorks = () => {
   const steps = [
     {
       number: "1",
       title: "Schedule your pickup effortlessly",
-      description: "Use our simple booking system to schedule a convenient time for us to collect your laundry."
+      description: "Use our simple booking system to schedule a convenient time for us to collect your laundry.",
+      icon: <Calendar className="h-8 w-8 text-blue-600" />
     },
     {
       number: "2",
       title: "We pick up your laundry at your doorstep",
-      description: "Our friendly team arrives at your doorstep at the scheduled time to collect your items."
+      description: "Our friendly team arrives at your doorstep at the scheduled time to collect and weigh your items.",
+      icon: <Home className="h-8 w-8 text-blue-600" />
     },
     {
       number: "3",
       title: "Clean laundry delivered next day, guaranteed",
-      description: "Your fresh, clean laundry is delivered back to you the next day, no extra charge."
+      description: "Your fresh, clean laundry is delivered back to you the next day, no extra charge.",
+      icon: <Package className="h-8 w-8 text-blue-600" />
     }
   ];
 
@@ -26,21 +32,31 @@ export const HowItWorks = () => {
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
             Book. Pickup. Deliver. It's that simple.
           </p>
+          <div className="inline-flex items-center gap-2 mt-4 bg-blue-100 px-4 py-2 rounded-full text-blue-800 border border-blue-300">
+            <span className="text-sm font-semibold">Free pickup & delivery on all orders!</span>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {steps.map((step, index) => (
-            <div key={index} className="bg-white p-8 rounded-xl shadow-md relative">
-              <div className="bg-black text-white w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mb-4">
-                {step.number}
-              </div>
-              <h3 className="text-xl font-bold mb-3">{step.title}</h3>
-              <p className="text-gray-600">{step.description}</p>
-              
-              {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-12 right-0 w-8 h-1 bg-black transform translate-x-full"></div>
-              )}
-            </div>
+            <Card key={index} className="border-none shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
+              <CardContent className="p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="bg-blue-100 text-blue-800 w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                    {step.number}
+                  </div>
+                  <div className="bg-gray-100 p-3 rounded-lg">{step.icon}</div>
+                </div>
+                
+                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                <p className="text-gray-600">{step.description}</p>
+                
+                {index < steps.length - 1 && (
+                  <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-1 bg-blue-400 transform rotate-180"></div>
+                )}
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
