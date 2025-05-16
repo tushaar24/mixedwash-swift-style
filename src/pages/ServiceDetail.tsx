@@ -119,7 +119,6 @@ const ServiceDetail = () => {
     .map(([id, serviceData]: [string, any]) => ({
       id,
       name: serviceData.name,
-      description: serviceData.description,
       icon: serviceData.icon,
       iconBg: serviceData.iconBg,
       color: serviceData.color
@@ -151,14 +150,11 @@ const ServiceDetail = () => {
                     className="border border-gray-200 hover:border-gray-400 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer transform hover:scale-105 bg-white"
                     onClick={() => navigate(`/service/${otherService.id}`)}
                   >
-                    <CardContent className="p-4 flex items-center">
-                      <div className={`${otherService.iconBg} p-2 rounded-full mr-3 flex items-center justify-center`}>
+                    <CardContent className="p-4 flex items-center gap-2">
+                      <div className={`${otherService.iconBg} p-2 rounded-full flex items-center justify-center`}>
                         {otherService.icon}
                       </div>
-                      <div>
-                        <h3 className="font-medium">{otherService.name}</h3>
-                        <p className="text-sm text-gray-500">{otherService.description}</p>
-                      </div>
+                      <h3 className="font-medium">{otherService.name}</h3>
                     </CardContent>
                   </Card>
                 ))}
