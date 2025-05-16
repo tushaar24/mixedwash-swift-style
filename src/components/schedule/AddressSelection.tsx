@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -212,7 +211,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold">Select a Pickup Address</h1>
         <p className="text-gray-600 mt-2">Choose where we should pick up your laundry</p>
@@ -396,7 +395,8 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         </DialogContent>
       </Dialog>
       
-      <div className="pt-8 flex justify-between">
+      {/* Back button (not sticky) */}
+      <div className="pt-8">
         <Button 
           onClick={onBack}
           variant="outline"
@@ -405,10 +405,13 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
           <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
           Back to Services
         </Button>
-        
+      </div>
+      
+      {/* Sticky Continue button at bottom center */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center z-10">
         <Button 
           onClick={handleContinue}
-          className="bg-black hover:bg-gray-800 text-white px-6 py-6 h-auto text-base group"
+          className="bg-black hover:bg-gray-800 text-white px-8 py-6 h-auto text-base group min-w-48"
           disabled={!selectedAddressId}
         >
           Continue to Schedule
