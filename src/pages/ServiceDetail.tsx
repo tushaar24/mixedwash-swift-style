@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -24,6 +23,12 @@ import {
   CarouselPrevious,
   CarouselNext
 } from "@/components/ui/carousel";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent
+} from "@/components/ui/tabs";
 
 // Service data
 const servicesData = {
@@ -158,6 +163,7 @@ const ServiceDetail = () => {
   const { serviceId } = useParams();
   const navigate = useNavigate();
   const [service, setService] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("men");
   
   useEffect(() => {
     // Find the service data based on the serviceId
@@ -276,41 +282,65 @@ const ServiceDetail = () => {
           <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Pricing</h2>
           <div className="space-y-6 sm:space-y-8">
             {serviceId === 'dry-cleaning' ? (
-              // Dry Cleaning specific price display with tables
-              <>
-                {service.prices.map((priceCategory: any, categoryIndex: number) => (
-                  <Card key={categoryIndex} className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-                    <CardHeader className="p-4 sm:p-6 pb-0">
-                      <CardTitle className="text-lg sm:text-xl font-medium">{priceCategory.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 sm:p-6">
-                      <div className="overflow-x-auto">
-                        <Table className="border-collapse">
-                          <TableHeader>
-                            <TableRow className="bg-black">
-                              <TableHead className="text-left text-white font-bold">Item's Name</TableHead>
-                              <TableHead className="text-right text-white font-bold">Price (₹)</TableHead>
+              // Dry Cleaning specific price display with tables and tabs
+              <Card className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                <Tabs defaultValue="men" className="w-full" onValueChange={(value) => setActiveTab(value)}>
+                  <TabsList className="grid grid-cols-2 w-full">
+                    <TabsTrigger value="men">Men's Wear</TabsTrigger>
+                    <TabsTrigger value="women">Women's Wear</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="men" className="p-4 sm:p-6 pt-4">
+                    <div className="overflow-x-auto">
+                      <Table className="border-collapse">
+                        <TableHeader>
+                          <TableRow className="bg-black">
+                            <TableHead className="text-left text-white font-bold">Item's Name</TableHead>
+                            <TableHead className="text-right text-white font-bold">Price (₹)</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {service.prices[0].items.map((item: any, itemIndex: number) => (
+                            <TableRow key={itemIndex} className="border-t border-gray-200">
+                              <TableCell className="text-left py-2">{item.name}</TableCell>
+                              <TableCell className="text-right py-2 font-medium">{item.price}</TableCell>
                             </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {priceCategory.items.map((item: any, itemIndex: number) => (
-                              <TableRow key={itemIndex} className="border-t border-gray-200">
-                                <TableCell className="text-left py-2">{item.name}</TableCell>
-                                <TableCell className="text-right py-2 font-medium">{item.price}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                      
-                      <div className="mt-4 text-xs flex items-center gap-1 text-blue-700">
-                        <Truck className="h-3 w-3 flex-shrink-0" />
-                        <span>Free pickup & delivery included</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    
+                    <div className="mt-4 text-xs flex items-center gap-1 text-blue-700">
+                      <Truck className="h-3 w-3 flex-shrink-0" />
+                      <span>Free pickup & delivery included</span>
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="women" className="p-4 sm:p-6 pt-4">
+                    <div className="overflow-x-auto">
+                      <Table className="border-collapse">
+                        <TableHeader>
+                          <TableRow className="bg-black">
+                            <TableHead className="text-left text-white font-bold">Item's Name</TableHead>
+                            <TableHead className="text-right text-white font-bold">Price (₹)</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {service.prices[1].items.map((item: any, itemIndex: number) => (
+                            <TableRow key={itemIndex} className="border-t border-gray-200">
+                              <TableCell className="text-left py-2">{item.name}</TableCell>
+                              <TableCell className="text-right py-2 font-medium">{item.price}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    
+                    <div className="mt-4 text-xs flex items-center gap-1 text-blue-700">
+                      <Truck className="h-3 w-3 flex-shrink-0" />
+                      <span>Free pickup & delivery included</span>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </Card>
             ) : (
               // Regular services pricing display
               service.prices.map((price: any, index: number) => (
