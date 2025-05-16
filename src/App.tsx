@@ -15,7 +15,6 @@ import React from "react";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // We need to wrap everything in a React.StrictMode to ensure hooks work properly
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>

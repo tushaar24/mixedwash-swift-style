@@ -7,24 +7,27 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "@/context/AuthContext";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { user, isFirstLogin } = useAuth();
 
   useEffect(() => {
     // Check if user is already logged in
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
+    if (user) {
+      if (isFirstLogin) {
+        // Redirect to profile page for first-time users to complete their profile
         navigate("/profile");
+      } else {
+        // Redirect to home for returning users
+        navigate("/");
       }
-    };
-    
-    checkUser();
-  }, [navigate]);
+    }
+  }, [user, isFirstLogin, navigate]);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +43,7 @@ const Auth = () => {
         description: "You are now logged in.",
       });
       
-      navigate("/profile");
+      // Navigation will happen in the useEffect when user state updates
     } catch (error: any) {
       toast({
         title: "Error signing in",
@@ -97,6 +100,11 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  // If already logged in and checked, don't render the auth form
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
