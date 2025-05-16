@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MessageSquareText } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export const Hero = () => {
   return (
@@ -15,26 +15,11 @@ export const Hero = () => {
             <p className="text-xl text-gray-600 max-w-lg">
               Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
             </p>
-            
-            {/* Redesigned CTA section */}
-            <div className="pt-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  className="bg-black hover:bg-gray-800 text-white px-6 py-6 text-lg h-auto group"
-                >
-                  Schedule Your Laundry Pickup
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="border-gray-300 hover:bg-gray-100 px-6 py-6 h-auto text-lg"
-                  onClick={() => window.location.href = "#contact"}
-                >
-                  <MessageSquareText className="mr-2 h-5 w-5" />
-                  Contact Us
-                </Button>
-              </div>
+            <div className="pt-2">
+              <Button className="bg-black hover:bg-gray-800 text-white px-8 py-6 text-lg h-auto group">
+                Schedule Your Laundry Pickup
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
             </div>
           </div>
           
