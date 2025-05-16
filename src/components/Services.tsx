@@ -63,7 +63,10 @@ export const Services = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service, index) => (
-            <Card key={index} className="border-none shadow-md hover:shadow-lg transition-shadow overflow-hidden relative">
+            <Card 
+              key={index} 
+              className="border-none shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative cursor-pointer hover:scale-105 group"
+            >
               {/* 24-hour delivery badge - updated to black and white */}
               <Badge 
                 variant="outline" 
@@ -106,6 +109,11 @@ export const Services = () => {
                 <div className="mt-3 text-xs text-blue-700 flex items-center gap-1">
                   <Truck className="h-3 w-3" />
                   <span>Free pickup & delivery included</span>
+                </div>
+                
+                {/* Arrow indicator that shows on hover */}
+                <div className="mt-4 flex justify-end">
+                  <ArrowRight className="h-5 w-5 text-black opacity-0 transform translate-x-[-10px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                 </div>
               </CardContent>
             </Card>
