@@ -5,8 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, WashingMachine, Package, Weight, Shirt } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 // Service data
 const servicesData = {
@@ -143,65 +142,83 @@ const ServiceDetail = () => {
           </div>
         </div>
         
-        {/* Tabs section */}
+        {/* Pricing Section */}
         <div className="max-w-5xl mx-auto px-4 mt-8">
-          <Tabs defaultValue="prices" className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="prices" className="text-base">Prices</TabsTrigger>
-              <TabsTrigger value="about" className="text-base">About service</TabsTrigger>
-            </TabsList>
-            
-            {/* Prices tab content */}
-            <TabsContent value="prices" className="space-y-8">
-              {service.prices.map((price: any, index: number) => (
-                <div key={index} className="border-b border-gray-200 pb-8">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-xl font-medium">{price.title}</h3>
-                      <p className="text-gray-500 mt-2">{price.details}</p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold">{price.totalAmount}</div>
-                      <div className="text-gray-500">{price.amount}</div>
-                    </div>
+          <h2 className="text-2xl font-bold mb-6">Pricing</h2>
+          <div className="space-y-8">
+            {service.prices.map((price: any, index: number) => (
+              <div key={index} className="border-b border-gray-200 pb-8">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-medium">{price.title}</h3>
+                    <p className="text-gray-500 mt-2">{price.details}</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">{price.totalAmount}</div>
+                    <div className="text-gray-500">{price.amount}</div>
                   </div>
                 </div>
-              ))}
-              
-              <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg mt-8">
-                <h3 className="font-medium text-lg">Not sure how much you have?</h3>
-                <Button 
-                  className="mt-3 bg-blue-700 hover:bg-blue-800"
-                  onClick={() => navigate("/schedule")}
-                >
-                  Get an estimate
-                </Button>
               </div>
-            </TabsContent>
+            ))}
             
-            {/* About tab content */}
-            <TabsContent value="about">
-              <div className="prose max-w-none">
-                <h3>About {service.name} Service</h3>
-                <p>Our {service.name} service provides professional cleaning for your garments with the utmost care and attention to detail. We use high-quality detergents and state-of-the-art machines to ensure your clothes come back fresh and clean.</p>
-                
-                <h4>What's included:</h4>
-                <ul>
-                  <li>Sorting by color and fabric type</li>
-                  <li>Pre-treatment for stains</li>
-                  <li>Quality detergents and fabric softeners</li>
-                  <li>Careful inspection before delivery</li>
-                  <li>Next-day delivery at no extra cost</li>
-                </ul>
-                
-                <h4>Process:</h4>
-                <p>When your laundry arrives at our facility, our experienced team sorts it according to color and fabric type. Each load is then carefully processed using our professional-grade machines with the appropriate temperature and detergent for the specific fabric type.</p>
-                
-                <h4>Turnaround Time:</h4>
-                <p>Standard turnaround time is 24 hours. Express service is available at an additional charge.</p>
-              </div>
-            </TabsContent>
-          </Tabs>
+            <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg mt-8">
+              <h3 className="font-medium text-lg">Not sure how much you have?</h3>
+              <Button 
+                className="mt-3 bg-blue-700 hover:bg-blue-800"
+                onClick={() => navigate("/schedule")}
+              >
+                Get an estimate
+              </Button>
+            </div>
+          </div>
+          
+          {/* About Service Section */}
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold mb-6">About {service.name}</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Service Description</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Our {service.name} service provides professional cleaning for your garments with the utmost care and attention to detail. We use high-quality detergents and state-of-the-art machines to ensure your clothes come back fresh and clean.</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>What's included</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Sorting by color and fabric type</li>
+                    <li>Pre-treatment for stains</li>
+                    <li>Quality detergents and fabric softeners</li>
+                    <li>Careful inspection before delivery</li>
+                    <li>Next-day delivery at no extra cost</li>
+                  </ul>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Process</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>When your laundry arrives at our facility, our experienced team sorts it according to color and fabric type. Each load is then carefully processed using our professional-grade machines with the appropriate temperature and detergent for the specific fabric type.</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Turnaround Time</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Standard turnaround time is 24 hours. Express service is available at an additional charge.</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </main>
       
