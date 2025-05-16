@@ -56,16 +56,10 @@ const servicesData = {
     minimumOrder: null,
     prices: [
       {
-        title: "Regular Wash",
+        title: "Price per kg",
         amount: "₹112/kg",
         oldPrice: "₹140/kg",
         details: "Perfect for blankets, comforters, heavy jackets, and other bulky items."
-      },
-      {
-        title: "Segregated Heavy Wash",
-        amount: "₹112/kg",
-        oldPrice: "₹140/kg",
-        details: "Special treatment for heavily soiled items, includes pre-treatment and extra wash cycles."
       }
     ]
   },
