@@ -1,29 +1,42 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BadgePercent } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 export const Services = () => {
   const services = [
     {
       title: "Wash & Fold",
       description: "Fresh and folded clothes, ready tomorrow.",
-      icon: "👕"
+      icon: "👕",
+      newPrice: "₹72/kg",
+      oldPrice: "₹95/kg",
+      discount: 20
     },
     {
       title: "Wash & Iron",
       description: "Your outfits, wrinkle-free and crisp.",
-      icon: "👔"
+      icon: "👔",
+      newPrice: "₹120/kg",
+      oldPrice: "₹150/kg",
+      discount: 20
     },
     {
       title: "Heavy Wash",
       description: "Big laundry loads handled with ease.",
-      icon: "🧺"
+      icon: "🧺",
+      newPrice: "₹112/kg",
+      oldPrice: "₹140/kg",
+      discount: 20
     },
     {
       title: "Dry Cleaning",
       description: "Delicate care, speedy turnaround.",
-      icon: "✨"
+      icon: "✨",
+      newPrice: "Special rates",
+      oldPrice: "",
+      discount: 0
     }
   ];
 
@@ -35,6 +48,10 @@ export const Services = () => {
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
             We offer a variety of services to meet all your laundry needs, with next-day delivery standard.
           </p>
+          <div className="mt-3 inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300">
+            <BadgePercent className="h-4 w-4" />
+            <span className="text-sm font-semibold">20% OFF on your first order!</span>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -45,7 +62,31 @@ export const Services = () => {
                 <CardTitle className="text-xl font-bold">{service.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">{service.description}</p>
+                <p className="text-gray-600 mb-4">{service.description}</p>
+                
+                {service.discount > 0 ? (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-lg text-green-700">{service.newPrice}</span>
+                      <HoverCard>
+                        <HoverCardTrigger>
+                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                            Save {service.discount}%
+                          </span>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="p-2 text-xs w-48">
+                          Discount applied for first-time customers! Regular price is {service.oldPrice}.
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      <span className="line-through">{service.oldPrice}</span>
+                      <span className="ml-1 text-xs">regular price</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="font-semibold text-gray-800">{service.newPrice}</div>
+                )}
               </CardContent>
             </Card>
           ))}
