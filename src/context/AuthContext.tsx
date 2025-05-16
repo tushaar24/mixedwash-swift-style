@@ -70,26 +70,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Set up auth state listener FIRST with setTimeout approach to avoid deadlocks
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event, session);
-        setSession(session);
-        setUser(session?.user ?? null);
+      async (event, newSession) => {
+        console.log("Auth state changed:", event, newSession);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         
         // Check if this is a first login when the session changes
-        if (session?.user) {
-          const profileData = await fetchProfile(session.user.id);
-          setProfile(profileData);
-          
-          if (profileData && (profileData.username || profileData.mobile_number)) {
-            setIsFirstLogin(false);
-          } else {
-            setIsFirstLogin(true);
-          }
+        if (newSession?.user) {
+          setTimeout(async () => {
+            const profileData = await fetchProfile(newSession.user.id);
+            setProfile(profileData);
+            
+            if (profileData && (profileData.username || profileData.mobile_number)) {
+              setIsFirstLogin(false);
+            } else {
+              setIsFirstLogin(true);
+            }
+            setIsLoading(false);
+          }, 0);
+        } else {
+          // Clear profile when signed out
+          setProfile(null);
+          setIsFirstLogin(false);
+          setIsLoading(false);
         }
-        
-        setIsLoading(false);
       }
     );
 

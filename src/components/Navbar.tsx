@@ -24,12 +24,20 @@ export const Navbar = () => {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Error signing out:", error);
+        throw error;
+      }
+      
       toast({
         title: "Signed out",
         description: "You have been successfully signed out",
       });
-      navigate("/");
+      
+      // Force navigation to home page
+      window.location.href = "/";
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
