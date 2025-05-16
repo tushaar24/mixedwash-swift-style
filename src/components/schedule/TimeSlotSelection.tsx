@@ -81,6 +81,8 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   // Select a time slot
   const handleTimeSlotSelect = (timeSlot: TimeSlot) => {
     setSelectedTimeSlotId(timeSlot.id);
+    
+    // Update both pickup and delivery slot information
     updateOrderData({
       pickupSlotId: timeSlot.id,
       pickupSlotLabel: timeSlot.label,
@@ -106,6 +108,19 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
         description: "You need to select a pickup time slot to continue",
       });
       return;
+    }
+    
+    // Additional check to ensure all required data is set before continuing
+    if (!orderData.deliveryDate || !orderData.deliverySlotId) {
+      // Re-update orderData with delivery information to ensure it's set
+      const selectedSlot = timeSlots.find(slot => slot.id === selectedTimeSlotId);
+      if (selectedSlot) {
+        updateOrderData({
+          deliveryDate: deliveryDate,
+          deliverySlotId: selectedSlotId,
+          deliverySlotLabel: selectedSlot.label
+        });
+      }
     }
     
     onNext();

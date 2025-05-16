@@ -36,9 +36,16 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         deliverySlotId: orderData.deliverySlotId
       });
       
+      // Create a more specific error message
+      let missingFields = [];
+      if (orderData.services.length === 0) missingFields.push("Services");
+      if (!orderData.addressId) missingFields.push("Address");
+      if (!orderData.pickupDate || !orderData.pickupSlotId) missingFields.push("Pickup schedule");
+      if (!orderData.deliveryDate || !orderData.deliverySlotId) missingFields.push("Delivery schedule");
+      
       toast({
         title: "Missing information",
-        description: "Please complete all the previous steps before confirming your order",
+        description: `Please complete these steps: ${missingFields.join(", ")}`,
         variant: "destructive",
       });
       return;

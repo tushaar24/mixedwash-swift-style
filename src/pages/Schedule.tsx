@@ -72,6 +72,10 @@ const Schedule = () => {
 
   // Handle next step transitions
   const handleNextStep = () => {
+    // Log the current state before moving to the next step
+    console.log("Current step:", currentStep);
+    console.log("Order data before next step:", orderData);
+    
     setCurrentStep((prev) => prev + 1);
     window.scrollTo(0, 0);
   };
@@ -84,7 +88,11 @@ const Schedule = () => {
 
   // Update order data
   const updateOrderData = (data: Partial<OrderData>) => {
-    setOrderData((prev) => ({ ...prev, ...data }));
+    setOrderData((prev) => {
+      const updated = { ...prev, ...data };
+      console.log("Updated order data:", updated);
+      return updated;
+    });
   };
 
   // If still checking authentication, show loading
