@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -278,8 +277,7 @@ const ServiceDetail = () => {
                 buttonClassName="mt-2 sm:mt-3 text-sm sm:text-base"
               >
                 <Button 
-                  className="mt-2 sm:mt-3 text-sm sm:text-base"
-                  style={{ backgroundColor: service.themeColor }}
+                  className="mt-2 sm:mt-3 text-sm sm:text-base bg-black hover:bg-gray-800"
                 >
                   Get an estimate
                 </Button>
@@ -347,8 +345,7 @@ const ServiceDetail = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-4 sm:py-6 shadow-lg z-10">
         <div className="max-w-5xl mx-auto px-4 flex flex-col items-center justify-center">
           <Button 
-            style={{ backgroundColor: service.themeColor }}
-            className="px-8 sm:px-12 py-5 sm:py-7 text-base sm:text-lg font-semibold w-full max-w-md hover:opacity-90"
+            className="bg-black hover:bg-gray-800 px-8 sm:px-12 py-5 sm:py-7 text-base sm:text-lg font-semibold w-full max-w-md"
             size="lg"
             onClick={() => navigate("/schedule")}
           >

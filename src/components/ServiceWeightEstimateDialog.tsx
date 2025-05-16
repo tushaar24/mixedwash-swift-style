@@ -63,19 +63,13 @@ export const ServiceWeightEstimateDialog = ({
           </div>
         </div>
 
-        <DialogFooter className="sm:justify-between flex-col sm:flex-row gap-3">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate("/schedule")}
-          >
-            Schedule Pickup
-          </Button>
+        <DialogFooter className="flex justify-center">
           <Button 
             variant="default"
             onClick={() => navigate("/schedule")}
-            className={`bg-black hover:bg-gray-800 ${buttonClassName}`}
+            className="bg-black hover:bg-gray-800 px-8"
           >
-            Get Exact Estimate
+            Schedule Pickup
           </Button>
         </DialogFooter>
       </DialogContent>
