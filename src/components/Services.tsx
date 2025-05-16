@@ -4,8 +4,11 @@ import { ArrowRight, BadgePercent, Clock, Truck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 export const Services = () => {
+  const navigate = useNavigate();
+  
   const services = [
     {
       title: "Wash & Fold",
@@ -13,7 +16,8 @@ export const Services = () => {
       icon: "👕",
       newPrice: "₹72/kg",
       oldPrice: "₹95/kg",
-      discount: 20
+      discount: 20,
+      route: "wash-fold"
     },
     {
       title: "Wash & Iron",
@@ -21,7 +25,8 @@ export const Services = () => {
       icon: "👔",
       newPrice: "₹120/kg",
       oldPrice: "₹150/kg",
-      discount: 20
+      discount: 20,
+      route: "wash-iron"
     },
     {
       title: "Heavy Wash",
@@ -29,7 +34,8 @@ export const Services = () => {
       icon: "🧺",
       newPrice: "₹112/kg",
       oldPrice: "₹140/kg",
-      discount: 20
+      discount: 20,
+      route: "heavy-wash"
     },
     {
       title: "Dry Cleaning",
@@ -37,9 +43,14 @@ export const Services = () => {
       icon: "✨",
       newPrice: "starts at ₹100",
       oldPrice: "",
-      discount: 0
+      discount: 0,
+      route: "dry-cleaning"
     }
   ];
+
+  const handleServiceClick = (route: string) => {
+    navigate(`/service/${route}`);
+  };
 
   return (
     <section id="services" className="bg-gray-50">
@@ -66,6 +77,7 @@ export const Services = () => {
             <Card 
               key={index} 
               className="border-none shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative cursor-pointer hover:scale-105 group"
+              onClick={() => handleServiceClick(service.route)}
             >
               {/* 24-hour delivery badge - updated to black and white */}
               <Badge 
@@ -121,8 +133,11 @@ export const Services = () => {
         </div>
         
         <div className="mt-12 text-center">
-          <Button className="bg-black hover:bg-gray-800 text-white group px-6 py-5 h-auto text-base">
-            Explore Services
+          <Button 
+            className="bg-black hover:bg-gray-800 text-white group px-6 py-5 h-auto text-base"
+            onClick={() => navigate("/schedule")}
+          >
+            Schedule a Pickup
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
