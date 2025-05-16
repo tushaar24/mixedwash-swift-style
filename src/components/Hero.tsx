@@ -32,6 +32,7 @@ export const Hero = () => {
             </div>
           </div>
           
+          {/* Phone mockup - visible on md screens and up */}
           <div className="hidden md:flex justify-center items-center">
             <div className="relative">
               {/* Phone frame */}
@@ -64,6 +65,17 @@ export const Hero = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          
+          {/* Mobile image - only visible on small screens */}
+          <div className="md:hidden mt-6">
+            <div className="bg-gray-100 rounded-xl overflow-hidden shadow-md">
+              <img 
+                src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" 
+                alt="Clean, folded laundry" 
+                className="w-full h-64 object-cover"
+              />
             </div>
           </div>
         </div>
