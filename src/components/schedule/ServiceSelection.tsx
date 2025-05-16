@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -121,7 +120,7 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold">Select Services</h1>
         <p className="text-gray-600 mt-2">Choose one or more laundry services you need</p>
@@ -232,10 +231,11 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
         </div>
       </div>
       
-      <div className="pt-8 flex justify-end">
+      {/* Sticky Continue button at bottom center */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center z-10">
         <Button 
           onClick={handleContinue}
-          className="bg-black hover:bg-gray-800 text-white px-6 py-6 h-auto text-base group"
+          className="bg-black hover:bg-gray-800 text-white px-8 py-6 h-auto text-base group min-w-48"
           disabled={selectedServiceIds.size === 0}
         >
           Continue to Address
