@@ -4,8 +4,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, WashingMachine, Package, Weight, Shirt } from "lucide-react";
+import { ArrowLeft, WashingMachine, Package, Weight, Shirt } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 // Service data
 const servicesData = {
@@ -17,13 +18,13 @@ const servicesData = {
     description: "For everyday laundry, bedsheets and towels.",
     prices: [
       {
-        title: "Mixed wash",
+        title: "Normal Wash",
         amount: "₹72/kg",
         totalAmount: "₹1080 (per 15kg)",
         details: "Light and dark clothes washed together at 90°F. You can request 110°F instead."
       },
       {
-        title: "Separate wash of light and dark clothes",
+        title: "Segregated Wash",
         amount: "₹72/kg",
         totalAmount: "₹1800 (per 25kg)",
         details: "We'll separate the items for you and wash at 90°F. Starts with two loads. You can request 110°F instead."
@@ -38,13 +39,13 @@ const servicesData = {
     description: "Your outfits, wrinkle-free and crisp.",
     prices: [
       {
-        title: "Mixed wash with ironing",
+        title: "Normal Wash with ironing",
         amount: "₹120/kg",
         totalAmount: "₹1800 (per 15kg)",
         details: "Light and dark clothes washed together at 90°F and professionally ironed."
       },
       {
-        title: "Premium ironing service",
+        title: "Segregated Wash with premium ironing",
         amount: "₹120/kg",
         totalAmount: "₹3000 (per 25kg)",
         details: "Each item is individually ironed to perfection, with special care for formal and delicate garments."
@@ -59,13 +60,13 @@ const servicesData = {
     description: "Big laundry loads handled with ease.",
     prices: [
       {
-        title: "Heavy items wash",
+        title: "Normal Heavy Wash",
         amount: "₹112/kg",
         totalAmount: "₹1680 (per 15kg)",
         details: "Perfect for blankets, comforters, heavy jackets, and other bulky items."
       },
       {
-        title: "Deep clean treatment",
+        title: "Segregated Heavy Wash",
         amount: "₹112/kg",
         totalAmount: "₹2800 (per 25kg)",
         details: "Special treatment for heavily soiled items, includes pre-treatment and extra wash cycles."
@@ -117,7 +118,7 @@ const ServiceDetail = () => {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      <main className="pb-12">
+      <main className="pb-24">
         {/* Service detail header */}
         <div className={`${service.color} py-12`}>
           <div className="max-w-5xl mx-auto px-4">
@@ -164,13 +165,6 @@ const ServiceDetail = () => {
                       <div className="text-gray-500">{price.amount}</div>
                     </div>
                   </div>
-                  
-                  <div className="mt-4 flex justify-end">
-                    <Button className="bg-gray-100 hover:bg-gray-200 text-black">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add
-                    </Button>
-                  </div>
                 </div>
               ))}
               
@@ -205,18 +199,29 @@ const ServiceDetail = () => {
                 
                 <h4>Turnaround Time:</h4>
                 <p>Standard turnaround time is 24 hours. Express service is available at an additional charge.</p>
-                
-                <Button 
-                  className="mt-6 bg-black hover:bg-gray-800"
-                  onClick={() => navigate("/schedule")}
-                >
-                  Schedule a Pickup
-                </Button>
               </div>
             </TabsContent>
           </Tabs>
         </div>
       </main>
+      
+      {/* Sticky Schedule Pickup CTA */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-10">
+        <div className="max-w-5xl mx-auto px-4 flex justify-between items-center">
+          <div>
+            <div className="text-sm text-gray-500">From</div>
+            <div className="font-bold">{service.prices[0].amount}</div>
+          </div>
+          <Button 
+            className="bg-black hover:bg-gray-800 px-10"
+            size="lg"
+            onClick={() => navigate("/schedule")}
+          >
+            Schedule Pickup
+          </Button>
+        </div>
+      </div>
+      
       <Footer />
     </div>
   );
