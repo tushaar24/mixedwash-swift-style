@@ -1,8 +1,22 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquareText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 export const Hero = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const handleScheduleClick = () => {
+    if (!user) {
+      navigate("/auth");
+    } else {
+      // User is already logged in, navigate to scheduling page
+      navigate("/profile");
+    }
+  };
+
   return (
     <div className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
@@ -17,7 +31,10 @@ export const Hero = () => {
               Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
             </p>
             <div className="pt-2 flex flex-col space-y-4">
-              <Button className="bg-black hover:bg-gray-800 text-white px-6 py-4 text-lg h-auto group w-full sm:w-auto">
+              <Button 
+                className="bg-black hover:bg-gray-800 text-white px-6 py-4 text-lg h-auto group w-full sm:w-auto"
+                onClick={handleScheduleClick}
+              >
                 Schedule Your Laundry Pickup
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
