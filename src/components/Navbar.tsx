@@ -2,14 +2,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User } from "lucide-react";
+import { LogOut, Menu, X, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const handleScheduleClick = () => {
     if (!user) {
@@ -21,8 +23,21 @@ export const Navbar = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -61,7 +76,14 @@ export const Navbar = () => {
                   <User className="w-4 h-4" />
                   <span>Profile</span>
                 </Button>
-                <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </Button>
               </div>
             ) : (
               <Button className="bg-black text-white hover:bg-gray-800" onClick={handleScheduleClick}>
@@ -124,13 +146,14 @@ export const Navbar = () => {
                 <div className="px-3 py-2">
                   <Button 
                     variant="outline" 
-                    className="w-full"
+                    className="w-full flex items-center justify-center space-x-2"
                     onClick={() => {
                       handleSignOut();
                       setIsOpen(false);
                     }}
                   >
-                    Sign Out
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
                   </Button>
                 </div>
               </>
