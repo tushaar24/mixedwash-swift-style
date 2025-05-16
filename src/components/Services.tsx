@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,7 +42,14 @@ export const Services = () => {
     {
       title: "Dry Cleaning",
       description: "Delicate care, speedy turnaround.",
-      icon: <Sparkles className="h-10 w-10" />, // Changed from Weight to Sparkles icon to better match other icons
+      icon: <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-blazer">
+        <path d="M14.04 13.13a3 3 0 0 0 4.1-4.1C19.6 7.95 21 6.9 21 5a2 2 0 1 0-4 0 3 3 0 1 1-3 3" />
+        <path d="M16.24 10.63a3.97 3.97 0 0 0 1.12-4.38" />
+        <path d="m9 18 3 3V10" />
+        <path d="m12 21-3 3" />
+        <path d="M19 15V5c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h7" />
+        <path d="M7.38 7c2 0 3.74.88 4.62 2.19" />
+      </svg>,
       newPrice: "starts at ₹100",
       oldPrice: "",
       discount: 0,
