@@ -123,6 +123,12 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     setSavingAddress(true);
     
     try {
+      // Get the current authenticated user
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData || !authData.user) {
+        throw new Error("You must be logged in to add an address");
+      }
+
       // Check if this is the first address, make it default if so
       if (addresses.length === 0) {
         newAddress.is_default = true;
@@ -130,7 +136,10 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
       
       const { data, error } = await supabase
         .from("addresses")
-        .insert([newAddress])
+        .insert([{
+          ...newAddress,
+          user_id: authData.user.id // Add the user_id here
+        }])
         .select();
         
       if (error) {

@@ -38,6 +38,12 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
     setSubmitting(true);
     
     try {
+      // Get the current authenticated user
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData || !authData.user) {
+        throw new Error("You must be logged in to place an order");
+      }
+
       const { data, error } = await supabase
         .from("orders")
         .insert([
@@ -51,6 +57,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
             special_instructions: orderData.specialInstructions || null,
             estimated_weight: orderData.estimatedWeight || null,
             total_amount: orderData.totalAmount || null,
+            user_id: authData.user.id // Add user_id here
           },
         ])
         .select();
