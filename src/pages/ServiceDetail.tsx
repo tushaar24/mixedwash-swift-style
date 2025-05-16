@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -165,12 +164,6 @@ const ServiceDetail = () => {
                 <Truck className="h-4 w-4" />
                 <span className="text-sm font-semibold">Free pickup & delivery on all orders!</span>
               </div>
-              {service.minimumOrder && (
-                <div className="inline-flex items-center gap-2 bg-orange-100 px-4 py-2 rounded-full text-orange-800 border border-orange-300">
-                  <Info className="h-4 w-4" />
-                  <span className="text-sm font-semibold">Minimum order: {service.minimumOrder}kg</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -190,12 +183,6 @@ const ServiceDetail = () => {
                         <Truck className="h-3 w-3" />
                         <span>Free pickup & delivery included</span>
                       </div>
-                      {price.minimumOrder && (
-                        <div className="mt-2 text-xs text-orange-700 flex items-center gap-1">
-                          <Info className="h-3 w-3" />
-                          <span>Minimum order: {price.minimumOrder}kg</span>
-                        </div>
-                      )}
                     </div>
                     <div className="text-right">
                       {service.discount > 0 ? (
