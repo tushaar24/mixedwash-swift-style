@@ -54,9 +54,9 @@ export interface Order {
   total_amount?: number;
   created_at: string;
   updated_at: string;
-  // Include joined relations
+  // Include joined relations with optional error handling
   address?: Address;
   service?: Service;
-  pickup_slot?: TimeSlot;
-  delivery_slot?: TimeSlot;
+  pickup_slot?: TimeSlot | any; // Allow for error cases
+  delivery_slot?: TimeSlot | any; // Allow for error cases
 }

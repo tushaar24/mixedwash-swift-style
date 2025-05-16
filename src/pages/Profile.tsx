@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
-import { Order, Address } from "@/types/models";
+import { Order, Address, TimeSlot } from "@/types/models";
 
 const Profile = () => {
   const [name, setName] = useState("");
@@ -45,6 +45,17 @@ const Profile = () => {
 
         if (ordersError) throw ordersError;
         
+        // Process orders to ensure they match our type
+        const processedOrders = ordersData.map((order: any) => {
+          // Handle any possible errors in joined relations
+          const processedOrder: Order = {
+            ...order,
+            pickup_slot: order.pickup_slot?.id ? order.pickup_slot : null,
+            delivery_slot: order.delivery_slot?.id ? order.delivery_slot : null
+          };
+          return processedOrder;
+        });
+        
         // Fetch addresses
         const { data: addressesData, error: addressesError } = await supabase
           .from("addresses")
@@ -53,7 +64,7 @@ const Profile = () => {
 
         if (addressesError) throw addressesError;
 
-        setOrders(ordersData as Order[]);
+        setOrders(processedOrders as Order[]);
         setAddresses(addressesData);
       } catch (error: any) {
         console.error("Error fetching user data:", error);
@@ -222,14 +233,14 @@ const Profile = () => {
                               <p className="text-sm font-medium text-gray-500">Pickup</p>
                               <p className="text-sm">
                                 {new Date(order.pickup_date).toLocaleDateString()} | {" "}
-                                {order.pickup_slot?.label}
+                                {order.pickup_slot?.label || "N/A"}
                               </p>
                             </div>
                             <div>
                               <p className="text-sm font-medium text-gray-500">Delivery</p>
                               <p className="text-sm">
                                 {new Date(order.delivery_date).toLocaleDateString()} | {" "}
-                                {order.delivery_slot?.label}
+                                {order.delivery_slot?.label || "N/A"}
                               </p>
                             </div>
                           </div>
