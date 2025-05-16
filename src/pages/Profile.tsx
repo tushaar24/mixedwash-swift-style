@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { Order, Address, TimeSlot } from "@/types/models";
+import { Loader2 } from "lucide-react";
 
 const Profile = () => {
   const [name, setName] = useState("");
@@ -18,6 +18,8 @@ const Profile = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user, isFirstLogin, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -29,7 +31,12 @@ const Profile = () => {
     }
 
     const fetchOrdersAndAddresses = async () => {
+      setDataLoading(true);
+      setError(null);
+      
       try {
+        console.log("Fetching profile data for user:", user.id);
+        
         // Fetch orders with related data
         const { data: ordersData, error: ordersError } = await supabase
           .from("orders")
@@ -43,18 +50,23 @@ const Profile = () => {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
 
-        if (ordersError) throw ordersError;
+        if (ordersError) {
+          console.error("Error fetching orders:", ordersError);
+          throw ordersError;
+        }
+        
+        console.log("Orders data fetched:", ordersData?.length || 0);
         
         // Process orders to ensure they match our type
-        const processedOrders = ordersData.map((order: any) => {
+        const processedOrders = ordersData?.map((order: any) => {
           // Handle any possible errors in joined relations
           const processedOrder: Order = {
             ...order,
-            pickup_slot: order.pickup_slot?.id ? order.pickup_slot : null,
-            delivery_slot: order.delivery_slot?.id ? order.delivery_slot : null
+            pickup_slot: order.pickup_slot || null,
+            delivery_slot: order.delivery_slot || null
           };
           return processedOrder;
-        });
+        }) || [];
         
         // Fetch addresses
         const { data: addressesData, error: addressesError } = await supabase
@@ -62,17 +74,25 @@ const Profile = () => {
           .select("*")
           .eq("user_id", user.id);
 
-        if (addressesError) throw addressesError;
+        if (addressesError) {
+          console.error("Error fetching addresses:", addressesError);
+          throw addressesError;
+        }
+        
+        console.log("Addresses data fetched:", addressesData?.length || 0);
 
         setOrders(processedOrders as Order[]);
-        setAddresses(addressesData);
+        setAddresses(addressesData || []);
       } catch (error: any) {
         console.error("Error fetching user data:", error);
+        setError(error.message || "Failed to load your profile data");
         toast({
           title: "Error",
-          description: "Failed to load your profile data",
+          description: "Failed to load your profile data. Please try again later.",
           variant: "destructive",
         });
+      } finally {
+        setDataLoading(false);
       }
     };
 
@@ -165,6 +185,46 @@ const Profile = () => {
                   {loading ? "Saving..." : "Complete Profile"}
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Loading state for profile data
+  if (dataLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-4" />
+          <p className="text-gray-500">Loading your profile...</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-red-500">Error</CardTitle>
+              <CardDescription>
+                We encountered an issue loading your profile
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p>{error}</p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
             </CardContent>
           </Card>
         </main>
