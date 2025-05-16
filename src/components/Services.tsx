@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,7 +103,7 @@ export const Services = () => {
                 </div>
                 <CardTitle className="text-xl font-bold">{service.title}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col h-full">
                 <p className="text-gray-600 mb-4">{service.description}</p>
                 
                 {service.discount > 0 ? (
@@ -128,6 +129,7 @@ export const Services = () => {
                 ) : (
                   <div className="font-semibold text-gray-800">{service.newPrice}</div>
                 )}
+                
                 <div className="mt-3 text-xs text-blue-700 flex items-center gap-1">
                   <Truck className="h-3 w-3" />
                   <span>Free pickup & delivery included</span>
@@ -147,8 +149,8 @@ export const Services = () => {
                   </div>
                 )}
                 
-                {/* Arrow indicator - now always visible */}
-                <div className="mt-4 flex justify-end">
+                {/* Arrow indicator with consistent positioning */}
+                <div className="mt-auto pt-4 flex justify-end">
                   <ArrowRight className="h-5 w-5 text-black group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </CardContent>
