@@ -7,7 +7,7 @@ export const ConvenienceSection = () => {
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Content Column - Now First */}
+          {/* Content Column - Left Side */}
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-gray-800 border border-gray-300">
               <Clock className="h-4 w-4" />
@@ -54,12 +54,12 @@ export const ConvenienceSection = () => {
             </div>
           </div>
           
-          {/* Image Column - Now Second (right side) */}
-          <div className="relative flex justify-center lg:justify-end">
+          {/* Image Column - Right Side */}
+          <div className="relative flex justify-center lg:justify-end order-first lg:order-last">
             <div className="absolute -top-6 -left-6 w-20 h-20 bg-gray-100 rounded-full opacity-70"></div>
             <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-gray-100 rounded-full opacity-70"></div>
             
-            <div className="relative rounded-2xl overflow-hidden shadow-xl max-w-md">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl max-w-sm">
               <img
                 src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=600"
                 alt="Convenience of laundry service"
