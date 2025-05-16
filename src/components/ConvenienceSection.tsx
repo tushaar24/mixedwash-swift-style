@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Clock, MessageSquareText } from "lucide-react";
+import { ArrowRight, Clock, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const ConvenienceSection = () => {
@@ -46,7 +46,7 @@ export const ConvenienceSection = () => {
                 className="bg-black hover:bg-gray-800 text-white px-6 py-6 h-auto group"
                 onClick={() => navigate("/contact")}  
               >
-                <MessageSquareText className="mr-2 h-5 w-5" />
+                <MessageSquare className="mr-2 h-5 w-5" />
                 Have Questions? Contact Us
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>

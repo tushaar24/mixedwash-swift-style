@@ -2,7 +2,7 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Whatsapp } from "lucide-react";
+import { Mail, Phone, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Contact = () => {
@@ -58,7 +58,7 @@ const Contact = () => {
             {/* WhatsApp */}
             <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center text-center">
               <div className="bg-black p-4 rounded-full mb-6">
-                <Whatsapp className="h-8 w-8 text-white" />
+                <MessageSquare className="h-8 w-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-2">WhatsApp</h3>
               <p className="text-gray-600 mb-4">Chat with us on WhatsApp</p>
@@ -66,7 +66,7 @@ const Contact = () => {
                 onClick={handleWhatsAppClick}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
-                <Whatsapp className="mr-2 h-5 w-5" />
+                <MessageSquare className="mr-2 h-5 w-5" />
                 Chat on WhatsApp
               </Button>
             </div>
