@@ -135,11 +135,35 @@ const ServiceDetail = () => {
             <Button 
               variant="ghost" 
               className="mb-6 hover:bg-white/20"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              Back to Home
             </Button>
+            
+            {/* Other Services Section - Moved to this position */}
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">Other Services You Might Like</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {otherServices.map((otherService) => (
+                  <Card 
+                    key={otherService.id}
+                    className="border border-gray-200 hover:border-gray-400 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer transform hover:scale-105 bg-white"
+                    onClick={() => navigate(`/service/${otherService.id}`)}
+                  >
+                    <CardContent className="p-4 flex items-center">
+                      <div className={`${otherService.iconBg} p-2 rounded-full mr-3 flex items-center justify-center`}>
+                        {otherService.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{otherService.name}</h3>
+                        <p className="text-sm text-gray-500">{otherService.description}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
             
             <div className="flex items-center">
               <div className={`${service.iconBg} p-4 rounded-full mr-4`}>
@@ -162,32 +186,6 @@ const ServiceDetail = () => {
                 <Truck className="h-4 w-4" />
                 <span className="text-sm font-semibold">Free pickup & delivery on all orders!</span>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Other Services Section */}
-        <div className="bg-gray-50 py-8 border-b border-gray-200">
-          <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-xl font-semibold mb-4">Other Services You Might Like</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {otherServices.map((otherService) => (
-                <Card 
-                  key={otherService.id}
-                  className="border hover:border-gray-400 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer transform hover:scale-102"
-                  onClick={() => navigate(`/service/${otherService.id}`)}
-                >
-                  <CardContent className="p-4 flex items-center">
-                    <div className={`${otherService.iconBg} p-2 rounded-full mr-3 flex items-center justify-center`}>
-                      {otherService.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-medium">{otherService.name}</h3>
-                      <p className="text-sm text-gray-500">{otherService.description}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
             </div>
           </div>
         </div>
