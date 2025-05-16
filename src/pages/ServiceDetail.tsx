@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, WashingMachine, Iron, Package, Weight } from "lucide-react";
+import { ArrowLeft, Plus, WashingMachine, Package, Weight, Shirt } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Service data
@@ -32,7 +32,7 @@ const servicesData = {
   },
   "wash-iron": {
     name: "Wash & Iron",
-    icon: <Iron className="h-8 w-8 text-white" />,
+    icon: <Shirt className="h-8 w-8 text-white" />,
     iconBg: "bg-pink-500",
     color: "bg-pink-50",
     description: "Your outfits, wrinkle-free and crisp.",
