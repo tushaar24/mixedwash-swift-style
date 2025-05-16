@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -8,6 +9,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
 import { ServiceWeightEstimateDialog } from "@/components/ServiceWeightEstimateDialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { 
   Carousel,
   CarouselContent,
@@ -83,18 +92,63 @@ const servicesData = {
     description: "Delicate care, speedy turnaround.",
     discount: 0,
     minimumOrder: null,
+    // Updated with detailed price items for dry cleaning
     prices: [
       {
-        title: "Standard dry cleaning",
-        amount: "₹200/item",
+        title: "Men's Wear",
+        amount: "",
         oldPrice: "",
-        details: "Professional dry cleaning for suits, dresses, and delicate fabrics."
+        details: "",
+        items: [
+          { name: "Sweater", price: 250 },
+          { name: "Hoodie - Half", price: 200 },
+          { name: "Hoodie - Full", price: 250 },
+          { name: "Jacket - Puffed", price: 250 },
+          { name: "Jacket - Denim", price: 250 },
+          { name: "Thin Jacket - Athletic", price: 200 },
+          { name: "Track Pant", price: 150 },
+          { name: "Shorts", price: 120 },
+          { name: "Sherwani (Top)", price: 400 },
+          { name: "Lungi", price: 200 },
+          { name: "Dhoti", price: 200 },
+          { name: "Kurta", price: 180 },
+          { name: "Waist Coat", price: 130 },
+          { name: "Blazer", price: 300 },
+          { name: "Denim Pant", price: 180 },
+          { name: "Trouser", price: 180 },
+          { name: "Pyjama", price: 150 },
+          { name: "Sweatshirt", price: 220 },
+          { name: "T-shirt", price: 150 },
+          { name: "Shirt", price: 150 }
+        ]
       },
       {
-        title: "Premium dry cleaning",
-        amount: "₹300/item",
+        title: "Women's Wear",
+        amount: "",
         oldPrice: "",
-        details: "Enhanced treatment for special garments, includes stain removal and pressing."
+        details: "",
+        items: [
+          { name: "Jacket - Denim", price: 300 },
+          { name: "Petticoat", price: 150 },
+          { name: "Lehenga", price: 400 },
+          { name: "Skirt - Long", price: 200 },
+          { name: "Skirt - Short", price: 150 },
+          { name: "Hoodie", price: 250 },
+          { name: "Pullover Jacket", price: 200 },
+          { name: "Sweatshirt", price: 250 },
+          { name: "Coat (Knee Length)", price: 400 },
+          { name: "Long Coat", price: 350 },
+          { name: "Dupatta", price: 120 },
+          { name: "Blouse", price: 120 },
+          { name: "Denim Trouser", price: 180 },
+          { name: "Pyjama", price: 150 },
+          { name: "Saree (Embroidered)", price: 350 },
+          { name: "Saree (Plain)", price: 300 },
+          { name: "Blazer", price: 300 },
+          { name: "Leggings", price: 150 },
+          { name: "Kurti", price: 200 },
+          { name: "Shirt", price: 150 }
+        ]
       }
     ]
   }
@@ -221,53 +275,92 @@ const ServiceDetail = () => {
         <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">
           <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Pricing</h2>
           <div className="space-y-6 sm:space-y-8">
-            {service.prices.map((price: any, index: number) => (
-              <Card key={index} className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                    <div className="space-y-2 sm:space-y-3 flex-1">
-                      <h3 className="text-lg sm:text-xl font-medium">{price.title}</h3>
-                      <p className="text-gray-500 text-sm sm:text-base">{price.details}</p>
-                      <div className="mt-2 sm:mt-3 text-xs flex items-center gap-1 text-blue-700">
+            {serviceId === 'dry-cleaning' ? (
+              // Dry Cleaning specific price display with tables
+              <>
+                {service.prices.map((priceCategory: any, categoryIndex: number) => (
+                  <Card key={categoryIndex} className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                    <CardHeader className="p-4 sm:p-6 pb-0">
+                      <CardTitle className="text-lg sm:text-xl font-medium">{priceCategory.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="overflow-x-auto">
+                        <Table className="border-collapse">
+                          <TableHeader>
+                            <TableRow className="bg-black">
+                              <TableHead className="text-left text-white font-bold">Item's Name</TableHead>
+                              <TableHead className="text-right text-white font-bold">Price (₹)</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {priceCategory.items.map((item: any, itemIndex: number) => (
+                              <TableRow key={itemIndex} className="border-t border-gray-200">
+                                <TableCell className="text-left py-2">{item.name}</TableCell>
+                                <TableCell className="text-right py-2 font-medium">{item.price}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      
+                      <div className="mt-4 text-xs flex items-center gap-1 text-blue-700">
                         <Truck className="h-3 w-3 flex-shrink-0" />
                         <span>Free pickup & delivery included</span>
                       </div>
-                      {price.minimumOrder && (
-                        <div className="text-xs flex items-center gap-1 text-orange-700">
-                          <Info className="h-3 w-3 flex-shrink-0" />
-                          <span>Minimum order: {price.minimumOrder}kg</span>
+                    </CardContent>
+                  </Card>
+                ))}
+              </>
+            ) : (
+              // Regular services pricing display
+              service.prices.map((price: any, index: number) => (
+                <Card key={index} className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                      <div className="space-y-2 sm:space-y-3 flex-1">
+                        <h3 className="text-lg sm:text-xl font-medium">{price.title}</h3>
+                        <p className="text-gray-500 text-sm sm:text-base">{price.details}</p>
+                        <div className="mt-2 sm:mt-3 text-xs flex items-center gap-1 text-blue-700">
+                          <Truck className="h-3 w-3 flex-shrink-0" />
+                          <span>Free pickup & delivery included</span>
                         </div>
-                      )}
-                    </div>
-                    <div className="sm:text-right">
-                      {service.discount > 0 ? (
-                        <div className="space-y-1 sm:space-y-2">
-                          <div className="flex items-center sm:justify-end gap-2">
-                            <span className="font-bold text-xl sm:text-2xl text-green-700">{price.amount}</span>
-                            <HoverCard>
-                              <HoverCardTrigger>
-                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium inline-block">
-                                  Save {service.discount}% on first order
-                                </span>
-                              </HoverCardTrigger>
-                              <HoverCardContent className="p-2 text-xs w-48">
-                                Discount applied for first-time customers! Regular price is {price.oldPrice}.
-                              </HoverCardContent>
-                            </HoverCard>
+                        {price.minimumOrder && (
+                          <div className="text-xs flex items-center gap-1 text-orange-700">
+                            <Info className="h-3 w-3 flex-shrink-0" />
+                            <span>Minimum order: {price.minimumOrder}kg</span>
                           </div>
-                          <div className="text-sm text-gray-500">
-                            <span className="line-through">{price.oldPrice}</span>
-                            <span className="ml-1 text-xs">regular price</span>
+                        )}
+                      </div>
+                      <div className="sm:text-right">
+                        {service.discount > 0 ? (
+                          <div className="space-y-1 sm:space-y-2">
+                            <div className="flex items-center sm:justify-end gap-2">
+                              <span className="font-bold text-xl sm:text-2xl text-green-700">{price.amount}</span>
+                              <HoverCard>
+                                <HoverCardTrigger>
+                                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium inline-block">
+                                    Save {service.discount}% on first order
+                                  </span>
+                                </HoverCardTrigger>
+                                <HoverCardContent className="p-2 text-xs w-48">
+                                  Discount applied for first-time customers! Regular price is {price.oldPrice}.
+                                </HoverCardContent>
+                              </HoverCard>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              <span className="line-through">{price.oldPrice}</span>
+                              <span className="ml-1 text-xs">regular price</span>
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="font-semibold text-xl sm:text-2xl text-gray-800">{price.amount}</div>
-                      )}
+                        ) : (
+                          <div className="font-semibold text-xl sm:text-2xl text-gray-800">{price.amount}</div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            )}
             
             <div className="bg-blue-50 border border-blue-200 p-4 sm:p-6 rounded-lg">
               <h3 className="font-medium text-base sm:text-lg">Not sure how much you have?</h3>
