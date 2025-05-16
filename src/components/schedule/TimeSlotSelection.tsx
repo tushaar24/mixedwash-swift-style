@@ -236,10 +236,6 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">{slot.label}</p>
-                        <p className="text-sm text-gray-600">
-                          {format(new Date(`2000-01-01T${slot.start_time}`), 'h:mm a')} - 
-                          {format(new Date(`2000-01-01T${slot.end_time}`), ' h:mm a')}
-                        </p>
                       </div>
                       
                       {selectedTimeSlotId === slot.id && (
