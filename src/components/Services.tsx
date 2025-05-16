@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BadgePercent, Clock, Truck, Info } from "lucide-react";
+import { ArrowRight, BadgePercent, Clock, Truck, Info, Weight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +43,7 @@ export const Services = () => {
     {
       title: "Dry Cleaning",
       description: "Delicate care, speedy turnaround.",
-      icon: "✨",
+      icon: <Weight className="h-10 w-10" />, // Changed from "✨" to Weight icon to match service detail page
       newPrice: "starts at ₹100",
       oldPrice: "",
       discount: 0,
@@ -92,7 +93,9 @@ export const Services = () => {
               </Badge>
               
               <CardHeader className="pb-2">
-                <div className="text-5xl pb-4">{service.icon}</div>
+                <div className="text-5xl pb-4">
+                  {typeof service.icon === 'string' ? service.icon : service.icon}
+                </div>
                 <CardTitle className="text-xl font-bold">{service.title}</CardTitle>
               </CardHeader>
               <CardContent>

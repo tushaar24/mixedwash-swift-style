@@ -33,10 +33,17 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   // Next day delivery date
   const deliveryDate = pickupDate ? addDays(pickupDate, 1) : null;
 
-  // Fetch time slots from Supabase
+  // Fetch time slots from Supabase and filter to only include the three specified slots
   useEffect(() => {
     const fetchTimeSlots = async () => {
       try {
+        // Define the specific time slots we want to display
+        const desiredTimeSlots = [
+          { label: "12pm - 3pm", start_time: "12:00:00", end_time: "15:00:00" },
+          { label: "3pm - 6pm", start_time: "15:00:00", end_time: "18:00:00" },
+          { label: "6pm - 9pm", start_time: "18:00:00", end_time: "21:00:00" }
+        ];
+        
         const { data, error } = await supabase
           .from("time_slots")
           .select("*")
@@ -46,7 +53,43 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
           throw error;
         }
         
-        setTimeSlots(data || []);
+        // Filter the data to only include the desired time slots
+        // If the exact slots don't exist in the database, use our predefined ones
+        if (data && data.length > 0) {
+          const filteredSlots = data.filter(slot => 
+            desiredTimeSlots.some(desiredSlot => 
+              desiredSlot.label === slot.label || 
+              (desiredSlot.start_time === slot.start_time && desiredSlot.end_time === slot.end_time)
+            )
+          );
+          
+          // If we found all our desired slots in the database, use those
+          if (filteredSlots.length === desiredTimeSlots.length) {
+            setTimeSlots(filteredSlots);
+          } else {
+            // Otherwise, use our predefined slots but with database IDs if available
+            const mergedSlots = desiredTimeSlots.map(desiredSlot => {
+              const matchedSlot = data.find(dbSlot => 
+                dbSlot.start_time === desiredSlot.start_time && 
+                dbSlot.end_time === desiredSlot.end_time
+              );
+              
+              return matchedSlot || {
+                id: `slot-${desiredSlot.start_time}`,
+                ...desiredSlot
+              };
+            });
+            
+            setTimeSlots(mergedSlots);
+          }
+        } else {
+          // If no data returned, use our predefined slots
+          setTimeSlots(desiredTimeSlots.map((slot, index) => ({
+            id: `slot-${index}`,
+            ...slot
+          })));
+        }
+        
       } catch (error: any) {
         toast({
           title: "Error fetching time slots",
