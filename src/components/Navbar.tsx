@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu, X, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -10,8 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // Check if we're on the home page
+  const isHomePage = location.pathname === "/";
 
   const handleScheduleClick = () => {
     if (!user) {
@@ -63,10 +67,15 @@ export const Navbar = () => {
           
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#services" className="text-black hover:text-gray-600 transition-colors">Services</a>
-            <a href="#why-choose-us" className="text-black hover:text-gray-600 transition-colors">Why Us</a>
-            <a href="#how-it-works" className="text-black hover:text-gray-600 transition-colors">How It Works</a>
-            <a href="#faq" className="text-black hover:text-gray-600 transition-colors">FAQ</a>
+            {/* Only show these navigation links on the home page */}
+            {isHomePage && (
+              <>
+                <a href="#services" className="text-black hover:text-gray-600 transition-colors">Services</a>
+                <a href="#why-choose-us" className="text-black hover:text-gray-600 transition-colors">Why Us</a>
+                <a href="#how-it-works" className="text-black hover:text-gray-600 transition-colors">How It Works</a>
+                <a href="#faq" className="text-black hover:text-gray-600 transition-colors">FAQ</a>
+              </>
+            )}
             
             {user ? (
               <div className="flex items-center space-x-4">
@@ -120,10 +129,15 @@ export const Navbar = () => {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg absolute w-full z-10">
-            <a href="#services" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Services</a>
-            <a href="#why-choose-us" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Why Us</a>
-            <a href="#how-it-works" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>How It Works</a>
-            <a href="#faq" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>FAQ</a>
+            {/* Only show these navigation links on the home page */}
+            {isHomePage && (
+              <>
+                <a href="#services" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Services</a>
+                <a href="#why-choose-us" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Why Us</a>
+                <a href="#how-it-works" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>How It Works</a>
+                <a href="#faq" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>FAQ</a>
+              </>
+            )}
             
             {user ? (
               <>
