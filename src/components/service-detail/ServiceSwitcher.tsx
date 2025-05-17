@@ -18,6 +18,11 @@ interface ServiceSwitcherProps {
 export const ServiceSwitcher = ({ otherServices }: ServiceSwitcherProps) => {
   const navigate = useNavigate();
   
+  const handleServiceClick = (serviceId: string) => {
+    // Force a full navigation to the new service detail page to ensure proper loading
+    window.location.href = `/service/${serviceId}`;
+  };
+  
   return (
     <div className="mb-6 sm:mb-8">
       <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Other Services You Might Like</h2>
@@ -28,7 +33,7 @@ export const ServiceSwitcher = ({ otherServices }: ServiceSwitcherProps) => {
           <Card 
             key={otherService.id}
             className="border border-gray-200 hover:border-gray-400 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer transform hover:scale-105 bg-white"
-            onClick={() => navigate(`/service/${otherService.id}`)}
+            onClick={() => handleServiceClick(otherService.id)}
           >
             <CardContent className="p-3 sm:p-4 flex items-center gap-2">
               <div className={`${otherService.iconBg} p-2 rounded-full flex items-center justify-center`}>
@@ -48,7 +53,7 @@ export const ServiceSwitcher = ({ otherServices }: ServiceSwitcherProps) => {
               <CarouselItem key={otherService.id} className="pl-2 md:pl-4 basis-4/5 sm:basis-2/3">
                 <Card 
                   className="border border-gray-200 hover:border-gray-400 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer bg-white h-full"
-                  onClick={() => navigate(`/service/${otherService.id}`)}
+                  onClick={() => handleServiceClick(otherService.id)}
                 >
                   <CardContent className="p-3 flex items-center gap-2 h-full">
                     <div className={`${otherService.iconBg} p-2 rounded-full flex items-center justify-center`}>
