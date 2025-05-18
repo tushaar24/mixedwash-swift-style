@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -132,6 +133,9 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       deliverySlotId: timeSlot.id,
       deliverySlotLabel: timeSlot.label,
     });
+    
+    // Log the updated state for debugging
+    console.log("Selected time slot:", timeSlot);
   };
 
   // Continue to next step
@@ -153,19 +157,33 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     }
     
     // Additional check to ensure all required data is set before continuing
-    if (!orderData.deliveryDate || !orderData.deliverySlotId) {
-      // Re-update orderData with delivery information to ensure it's set
-      const selectedSlot = timeSlots.find(slot => slot.id === selectedTimeSlotId);
-      if (selectedSlot) {
-        updateOrderData({
-          deliveryDate: deliveryDate,
-          deliverySlotId: selectedTimeSlotId, // Fixed: Changed from selectedSlotId to selectedTimeSlotId
-          deliverySlotLabel: selectedSlot.label
-        });
-      }
+    const selectedSlot = timeSlots.find(slot => slot.id === selectedTimeSlotId);
+    if (selectedSlot) {
+      // Make a final update to ensure all data is set correctly
+      updateOrderData({
+        pickupDate: pickupDate,
+        deliveryDate: deliveryDate,
+        pickupSlotId: selectedTimeSlotId,
+        pickupSlotLabel: selectedSlot.label,
+        deliverySlotId: selectedTimeSlotId,
+        deliverySlotLabel: selectedSlot.label
+      });
+      
+      // Log the final state for debugging
+      console.log("Final order data before continuing:", {
+        pickupDate,
+        deliveryDate,
+        pickupSlotId: selectedTimeSlotId,
+        pickupSlotLabel: selectedSlot.label,
+        deliverySlotId: selectedTimeSlotId,
+        deliverySlotLabel: selectedSlot.label
+      });
     }
     
-    onNext();
+    // Small delay to ensure state is updated before continuing
+    setTimeout(() => {
+      onNext();
+    }, 100);
   };
 
   // Loading state
