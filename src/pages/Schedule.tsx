@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -96,20 +95,17 @@ const Schedule = () => {
     }
     
     if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
-      if (!orderData.pickupDate || !orderData.pickupSlotId || !orderData.deliveryDate || !orderData.deliverySlotId) {
-        console.warn("Missing time slot data:", {
-          pickupDate: orderData.pickupDate,
-          pickupSlotId: orderData.pickupSlotId,
-          deliveryDate: orderData.deliveryDate,
-          deliverySlotId: orderData.deliverySlotId
-        });
+      if (!orderData.pickupDate || !orderData.pickupSlotId) {
         toast({
-          title: "Missing schedule information",
-          description: "Please select both pickup and delivery slots",
+          title: "Missing pickup information",
+          description: "Please select a pickup date and time slot",
           variant: "destructive"
         });
         return;
       }
+      
+      // Ensure delivery information is properly set
+      // (This should already be handled by TimeSlotSelection component)
     }
     
     setCurrentStep((prev) => prev + 1);

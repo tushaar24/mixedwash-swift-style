@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -88,40 +87,34 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       return;
     }
     
-    // Additional check to ensure all required data is set before continuing
+    // Get the selected time slot
     const selectedSlot = timeSlots.find(slot => slot.id === selectedTimeSlotId);
-    if (selectedSlot) {
-      // Make a final update to ensure all data is set correctly
-      updateOrderData({
-        pickupDate: pickupDate,
-        deliveryDate: deliveryDate,
-        pickupSlotId: selectedSlot.id,
-        pickupSlotLabel: selectedSlot.label,
-        deliverySlotId: selectedSlot.id,
-        deliverySlotLabel: selectedSlot.label
-      });
-      
-      // Log the final state for debugging
-      console.log("Final order data before continuing:", {
-        pickupDate,
-        deliveryDate,
-        pickupSlotId: selectedSlot.id,
-        pickupSlotLabel: selectedSlot.label,
-        deliverySlotId: selectedSlot.id,
-        deliverySlotLabel: selectedSlot.label
-      });
-      
-      // Small delay to ensure state is updated before continuing
-      setTimeout(() => {
-        onNext();
-      }, 100);
-    } else {
+    if (!selectedSlot) {
       toast({
         title: "Error with time slot",
         description: "The selected time slot could not be found. Please select again.",
         variant: "destructive",
       });
+      return;
     }
+    
+    // Make a final update to ensure all data is set correctly before continuing
+    const updatedOrderData = {
+      pickupDate: pickupDate,
+      deliveryDate: deliveryDate,
+      pickupSlotId: selectedSlot.id,
+      pickupSlotLabel: selectedSlot.label,
+      deliverySlotId: selectedSlot.id,
+      deliverySlotLabel: selectedSlot.label
+    };
+    
+    updateOrderData(updatedOrderData);
+    
+    // Log the final state for debugging
+    console.log("Final order data before continuing:", updatedOrderData);
+    
+    // Continue to next step
+    onNext();
   };
 
   return (
