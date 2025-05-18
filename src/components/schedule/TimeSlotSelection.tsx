@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -118,7 +119,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold">Schedule Pickup & Delivery</h1>
         <p className="text-gray-600 mt-2">Select when you want us to pick up your laundry</p>
@@ -222,24 +223,27 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
         ></textarea>
       </div>
       
-      <div className="pt-8 flex justify-between">
-        <Button 
-          onClick={onBack}
-          variant="outline"
-          className="px-6 py-6 h-auto text-base group"
-        >
-          <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-          Back to Address
-        </Button>
-        
-        <Button 
-          onClick={handleContinue}
-          className="bg-black hover:bg-gray-800 text-white px-6 py-6 h-auto text-base group"
-          disabled={!pickupDate || !selectedTimeSlotId}
-        >
-          Continue to Confirm
-          <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-        </Button>
+      {/* Sticky button container */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-10">
+        <div className="max-w-3xl mx-auto flex justify-between">
+          <Button 
+            onClick={onBack}
+            variant="outline"
+            className="px-6 py-2 h-auto text-base group"
+          >
+            <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+            Back
+          </Button>
+          
+          <Button 
+            onClick={handleContinue}
+            className="bg-black hover:bg-gray-800 text-white px-6 py-2 h-auto text-base group"
+            disabled={!pickupDate || !selectedTimeSlotId}
+          >
+            Continue to Confirm
+            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </div>
       </div>
     </div>
   );
