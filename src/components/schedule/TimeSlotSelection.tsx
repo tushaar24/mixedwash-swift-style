@@ -34,16 +34,11 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   // Next day delivery date
   const deliveryDate = pickupDate ? addDays(pickupDate, 1) : null;
 
-  // Fetch time slots from Supabase and filter to only include the three specified slots
+  // Fetch time slots from Supabase
   useEffect(() => {
     const fetchTimeSlots = async () => {
       try {
-        // Define the specific time slots we want to display
-        const desiredTimeSlots = [
-          { label: "12pm - 3pm", start_time: "12:00:00", end_time: "15:00:00" },
-          { label: "3pm - 6pm", start_time: "15:00:00", end_time: "18:00:00" },
-          { label: "6pm - 9pm", start_time: "18:00:00", end_time: "21:00:00" }
-        ];
+        setLoading(true);
         
         const { data, error } = await supabase
           .from("time_slots")
@@ -54,49 +49,33 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
           throw error;
         }
         
-        // Filter the data to only include the desired time slots
-        // If the exact slots don't exist in the database, use our predefined ones
         if (data && data.length > 0) {
-          const filteredSlots = data.filter(slot => 
-            desiredTimeSlots.some(desiredSlot => 
-              desiredSlot.label === slot.label || 
-              (desiredSlot.start_time === slot.start_time && desiredSlot.end_time === slot.end_time)
-            )
-          );
-          
-          // If we found all our desired slots in the database, use those
-          if (filteredSlots.length === desiredTimeSlots.length) {
-            setTimeSlots(filteredSlots);
-          } else {
-            // Otherwise, use our predefined slots but with database IDs if available
-            const mergedSlots = desiredTimeSlots.map(desiredSlot => {
-              const matchedSlot = data.find(dbSlot => 
-                dbSlot.start_time === desiredSlot.start_time && 
-                dbSlot.end_time === desiredSlot.end_time
-              );
-              
-              return matchedSlot || {
-                id: `slot-${desiredSlot.start_time}`,
-                ...desiredSlot
-              };
-            });
-            
-            setTimeSlots(mergedSlots);
-          }
+          console.log("Fetched time slots:", data);
+          setTimeSlots(data);
         } else {
-          // If no data returned, use our predefined slots
-          setTimeSlots(desiredTimeSlots.map((slot, index) => ({
-            id: `slot-${index}`,
-            ...slot
-          })));
+          console.log("No time slots found in database, using defaults");
+          // If no slots in database, create default slots
+          const defaultSlots = [
+            { id: "default-12pm", label: "12pm - 3pm", start_time: "12:00:00", end_time: "15:00:00" },
+            { id: "default-3pm", label: "3pm - 6pm", start_time: "15:00:00", end_time: "18:00:00" },
+            { id: "default-6pm", label: "6pm - 9pm", start_time: "18:00:00", end_time: "21:00:00" }
+          ];
+          setTimeSlots(defaultSlots);
         }
-        
       } catch (error: any) {
+        console.error("Error fetching time slots:", error);
         toast({
           title: "Error fetching time slots",
           description: error.message,
           variant: "destructive",
         });
+        // Use default slots if there's an error
+        const defaultSlots = [
+          { id: "default-12pm", label: "12pm - 3pm", start_time: "12:00:00", end_time: "15:00:00" },
+          { id: "default-3pm", label: "3pm - 6pm", start_time: "15:00:00", end_time: "18:00:00" },
+          { id: "default-6pm", label: "6pm - 9pm", start_time: "18:00:00", end_time: "21:00:00" }
+        ];
+        setTimeSlots(defaultSlots);
       } finally {
         setLoading(false);
       }
@@ -123,6 +102,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
   // Select a time slot
   const handleTimeSlotSelect = (timeSlot: TimeSlot) => {
+    console.log("Selecting time slot:", timeSlot);
     setSelectedTimeSlotId(timeSlot.id);
     
     // Update both pickup and delivery slot information
@@ -133,9 +113,6 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       deliverySlotId: timeSlot.id,
       deliverySlotLabel: timeSlot.label,
     });
-    
-    // Log the updated state for debugging
-    console.log("Selected time slot:", timeSlot);
   };
 
   // Continue to next step
@@ -163,9 +140,9 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       updateOrderData({
         pickupDate: pickupDate,
         deliveryDate: deliveryDate,
-        pickupSlotId: selectedTimeSlotId,
+        pickupSlotId: selectedSlot.id,
         pickupSlotLabel: selectedSlot.label,
-        deliverySlotId: selectedTimeSlotId,
+        deliverySlotId: selectedSlot.id,
         deliverySlotLabel: selectedSlot.label
       });
       
@@ -173,17 +150,23 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       console.log("Final order data before continuing:", {
         pickupDate,
         deliveryDate,
-        pickupSlotId: selectedTimeSlotId,
+        pickupSlotId: selectedSlot.id,
         pickupSlotLabel: selectedSlot.label,
-        deliverySlotId: selectedTimeSlotId,
+        deliverySlotId: selectedSlot.id,
         deliverySlotLabel: selectedSlot.label
       });
+      
+      // Small delay to ensure state is updated before continuing
+      setTimeout(() => {
+        onNext();
+      }, 100);
+    } else {
+      toast({
+        title: "Error with time slot",
+        description: "The selected time slot could not be found. Please select again.",
+        variant: "destructive",
+      });
     }
-    
-    // Small delay to ensure state is updated before continuing
-    setTimeout(() => {
-      onNext();
-    }, 100);
   };
 
   // Loading state

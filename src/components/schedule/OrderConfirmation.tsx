@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -75,62 +76,138 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         console.error("Error fetching time slots:", timeSlotsError);
         throw new Error("Could not fetch time slots");
       }
+
+      console.log("Available time slots:", timeSlots);
       
-      // Find the correct time slots based on their labels or time ranges
-      const pickupSlotLabel = orderData.pickupSlotLabel;
-      const deliverySlotLabel = orderData.deliverySlotLabel;
-      
+      // Find the correct time slots based on their labels
       let pickupSlotId = null;
       let deliverySlotId = null;
       
-      // Match time slots by label
+      // If time slots exist in the database
       if (timeSlots && timeSlots.length > 0) {
-        const pickupSlot = timeSlots.find(slot => slot.label === pickupSlotLabel);
-        const deliverySlot = timeSlots.find(slot => slot.label === deliverySlotLabel);
+        // First try to match by label
+        const pickupSlot = timeSlots.find(slot => 
+          slot.label === orderData.pickupSlotLabel
+        );
+        
+        const deliverySlot = timeSlots.find(slot => 
+          slot.label === orderData.deliverySlotLabel
+        );
         
         if (pickupSlot) {
           pickupSlotId = pickupSlot.id;
-          console.log(`Found pickup slot ID ${pickupSlotId} for label ${pickupSlotLabel}`);
+          console.log(`Found pickup slot by label: ${pickupSlotId}`);
         }
         
         if (deliverySlot) {
           deliverySlotId = deliverySlot.id;
-          console.log(`Found delivery slot ID ${deliverySlotId} for label ${deliverySlotLabel}`);
+          console.log(`Found delivery slot by label: ${deliverySlotId}`);
         }
         
-        // If we couldn't find by label, try to extract time from the original ID
-        if (!pickupSlotId && orderData.pickupSlotId) {
-          const timeMatch = orderData.pickupSlotId.toString().match(/(\d{1,2}):(\d{2}):(\d{2})/);
-          if (timeMatch) {
-            const startTime = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:${timeMatch[3]}`;
-            const matchedSlot = timeSlots.find(slot => slot.start_time === startTime);
+        // If we couldn't find by label, try to match by time
+        if (!pickupSlotId) {
+          // Try to extract time from label
+          const pickupTimeMatch = orderData.pickupSlotLabel?.match(/(\d+)(am|pm)\s*-\s*(\d+)(am|pm)/i);
+          if (pickupTimeMatch) {
+            const startHour = parseInt(pickupTimeMatch[1]);
+            const startAmPm = pickupTimeMatch[2].toLowerCase();
+            let startTime = startHour;
+            if (startAmPm === 'pm' && startHour < 12) startTime += 12;
+            if (startAmPm === 'am' && startHour === 12) startTime = 0;
+            
+            // Find slot with matching start time
+            const matchedSlot = timeSlots.find(slot => {
+              const slotHour = parseInt(slot.start_time.split(':')[0]);
+              return slotHour === startTime;
+            });
+            
             if (matchedSlot) {
               pickupSlotId = matchedSlot.id;
-              console.log(`Found pickup slot ID ${pickupSlotId} by time ${startTime}`);
+              console.log(`Found pickup slot by time: ${pickupSlotId}`);
             }
           }
         }
         
-        if (!deliverySlotId && orderData.deliverySlotId) {
-          const timeMatch = orderData.deliverySlotId.toString().match(/(\d{1,2}):(\d{2}):(\d{2})/);
-          if (timeMatch) {
-            const startTime = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:${timeMatch[3]}`;
-            const matchedSlot = timeSlots.find(slot => slot.start_time === startTime);
+        // Same for delivery slot
+        if (!deliverySlotId) {
+          const deliveryTimeMatch = orderData.deliverySlotLabel?.match(/(\d+)(am|pm)\s*-\s*(\d+)(am|pm)/i);
+          if (deliveryTimeMatch) {
+            const startHour = parseInt(deliveryTimeMatch[1]);
+            const startAmPm = deliveryTimeMatch[2].toLowerCase();
+            let startTime = startHour;
+            if (startAmPm === 'pm' && startHour < 12) startTime += 12;
+            if (startAmPm === 'am' && startHour === 12) startTime = 0;
+            
+            const matchedSlot = timeSlots.find(slot => {
+              const slotHour = parseInt(slot.start_time.split(':')[0]);
+              return slotHour === startTime;
+            });
+            
             if (matchedSlot) {
               deliverySlotId = matchedSlot.id;
-              console.log(`Found delivery slot ID ${deliverySlotId} by time ${startTime}`);
+              console.log(`Found delivery slot by time: ${deliverySlotId}`);
             }
           }
         }
+        
+        // If we have default IDs (from client-side), map them to database IDs
+        if (!pickupSlotId && orderData.pickupSlotId?.startsWith('default-')) {
+          // Extract time from default ID (e.g., default-12pm)
+          const timeStr = orderData.pickupSlotId.replace('default-', '');
+          const hour = parseInt(timeStr);
+          
+          // Find matching time slot in database
+          const matchedSlot = timeSlots.find(slot => {
+            const slotHour = parseInt(slot.start_time.split(':')[0]);
+            return slotHour === hour || 
+                  (hour === 12 && slotHour === 12) || 
+                  (hour === 3 && slotHour === 15) || 
+                  (hour === 6 && slotHour === 18);
+          });
+          
+          if (matchedSlot) {
+            pickupSlotId = matchedSlot.id;
+            console.log(`Mapped default pickup ID to: ${pickupSlotId}`);
+          }
+        }
+        
+        if (!deliverySlotId && orderData.deliverySlotId?.startsWith('default-')) {
+          const timeStr = orderData.deliverySlotId.replace('default-', '');
+          const hour = parseInt(timeStr);
+          
+          const matchedSlot = timeSlots.find(slot => {
+            const slotHour = parseInt(slot.start_time.split(':')[0]);
+            return slotHour === hour || 
+                  (hour === 12 && slotHour === 12) || 
+                  (hour === 3 && slotHour === 15) || 
+                  (hour === 6 && slotHour === 18);
+          });
+          
+          if (matchedSlot) {
+            deliverySlotId = matchedSlot.id;
+            console.log(`Mapped default delivery ID to: ${deliverySlotId}`);
+          }
+        }
+      }
+      
+      // If we still don't have valid IDs, use the first available slot as fallback
+      if (!pickupSlotId && timeSlots && timeSlots.length > 0) {
+        pickupSlotId = timeSlots[0].id;
+        console.log(`Using first available slot as fallback for pickup: ${pickupSlotId}`);
+      }
+      
+      if (!deliverySlotId && timeSlots && timeSlots.length > 0) {
+        deliverySlotId = timeSlots[0].id;
+        console.log(`Using first available slot as fallback for delivery: ${deliverySlotId}`);
       }
       
       // If we still don't have valid slot IDs, we can't proceed
       if (!pickupSlotId) {
-        throw new Error(`Pickup slot not found for ${pickupSlotLabel || orderData.pickupSlotId}`);
+        throw new Error(`Pickup slot not found for "${orderData.pickupSlotLabel || orderData.pickupSlotId}"`);
       }
       
       if (!deliverySlotId) {
-        throw new Error(`Delivery slot not found for ${deliverySlotLabel || orderData.deliverySlotId}`);
+        throw new Error(`Delivery slot not found for "${deliverySlotLabel || orderData.deliverySlotId}"`);
       }
 
       // Create a separate order for each service

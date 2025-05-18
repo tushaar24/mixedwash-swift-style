@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -76,6 +77,24 @@ const Schedule = () => {
     console.log("Order data before next step:", orderData);
     
     // Validate current step data before proceeding
+    if (currentStep === ScheduleStep.SERVICE_SELECTION && orderData.services.length === 0) {
+      toast({
+        title: "No services selected",
+        description: "Please select at least one laundry service",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (currentStep === ScheduleStep.ADDRESS_SELECTION && !orderData.addressId) {
+      toast({
+        title: "No address selected",
+        description: "Please select or add a delivery address",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
       if (!orderData.pickupDate || !orderData.pickupSlotId || !orderData.deliveryDate || !orderData.deliverySlotId) {
         console.warn("Missing time slot data:", {
