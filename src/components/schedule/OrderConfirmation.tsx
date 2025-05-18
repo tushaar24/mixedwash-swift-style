@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -67,138 +66,24 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         deliveryDate: orderData.deliveryDate
       });
 
-      // First, fetch all available time slots from the database
-      const { data: timeSlots, error: timeSlotsError } = await supabase
-        .from("time_slots")
-        .select("id, label, start_time, end_time");
+      // Create standardized time slot mapping based on our three fixed slots
+      const timeSlotMapping = {
+        "Afternoon (12PM - 3PM)": "afternoon-12pm",
+        "Afternoon (3PM - 6PM)": "afternoon-3pm",
+        "Evening (6PM - 9PM)": "evening-6pm"
+      };
       
-      if (timeSlotsError) {
-        console.error("Error fetching time slots:", timeSlotsError);
-        throw new Error("Could not fetch time slots");
-      }
-
-      console.log("Available time slots:", timeSlots);
+      // Get slot IDs from the mapping based on labels
+      let pickupSlotId = orderData.pickupSlotId;
+      let deliverySlotId = orderData.deliverySlotId;
       
-      // Find the correct time slots based on their labels
-      let pickupSlotId = null;
-      let deliverySlotId = null;
-      
-      // If time slots exist in the database
-      if (timeSlots && timeSlots.length > 0) {
-        // First try to match by label
-        const pickupSlot = timeSlots.find(slot => 
-          slot.label === orderData.pickupSlotLabel
-        );
-        
-        const deliverySlot = timeSlots.find(slot => 
-          slot.label === orderData.deliverySlotLabel
-        );
-        
-        if (pickupSlot) {
-          pickupSlotId = pickupSlot.id;
-          console.log(`Found pickup slot by label: ${pickupSlotId}`);
-        }
-        
-        if (deliverySlot) {
-          deliverySlotId = deliverySlot.id;
-          console.log(`Found delivery slot by label: ${deliverySlotId}`);
-        }
-        
-        // If we couldn't find by label, try to match by time
-        if (!pickupSlotId) {
-          // Try to extract time from label
-          const pickupTimeMatch = orderData.pickupSlotLabel?.match(/(\d+)(am|pm)\s*-\s*(\d+)(am|pm)/i);
-          if (pickupTimeMatch) {
-            const startHour = parseInt(pickupTimeMatch[1]);
-            const startAmPm = pickupTimeMatch[2].toLowerCase();
-            let startTime = startHour;
-            if (startAmPm === 'pm' && startHour < 12) startTime += 12;
-            if (startAmPm === 'am' && startHour === 12) startTime = 0;
-            
-            // Find slot with matching start time
-            const matchedSlot = timeSlots.find(slot => {
-              const slotHour = parseInt(slot.start_time.split(':')[0]);
-              return slotHour === startTime;
-            });
-            
-            if (matchedSlot) {
-              pickupSlotId = matchedSlot.id;
-              console.log(`Found pickup slot by time: ${pickupSlotId}`);
-            }
-          }
-        }
-        
-        // Same for delivery slot
-        if (!deliverySlotId) {
-          const deliveryTimeMatch = orderData.deliverySlotLabel?.match(/(\d+)(am|pm)\s*-\s*(\d+)(am|pm)/i);
-          if (deliveryTimeMatch) {
-            const startHour = parseInt(deliveryTimeMatch[1]);
-            const startAmPm = deliveryTimeMatch[2].toLowerCase();
-            let startTime = startHour;
-            if (startAmPm === 'pm' && startHour < 12) startTime += 12;
-            if (startAmPm === 'am' && startHour === 12) startTime = 0;
-            
-            const matchedSlot = timeSlots.find(slot => {
-              const slotHour = parseInt(slot.start_time.split(':')[0]);
-              return slotHour === startTime;
-            });
-            
-            if (matchedSlot) {
-              deliverySlotId = matchedSlot.id;
-              console.log(`Found delivery slot by time: ${deliverySlotId}`);
-            }
-          }
-        }
-        
-        // If we have default IDs (from client-side), map them to database IDs
-        if (!pickupSlotId && orderData.pickupSlotId?.startsWith('default-')) {
-          // Extract time from default ID (e.g., default-12pm)
-          const timeStr = orderData.pickupSlotId.replace('default-', '');
-          const hour = parseInt(timeStr);
-          
-          // Find matching time slot in database
-          const matchedSlot = timeSlots.find(slot => {
-            const slotHour = parseInt(slot.start_time.split(':')[0]);
-            return slotHour === hour || 
-                  (hour === 12 && slotHour === 12) || 
-                  (hour === 3 && slotHour === 15) || 
-                  (hour === 6 && slotHour === 18);
-          });
-          
-          if (matchedSlot) {
-            pickupSlotId = matchedSlot.id;
-            console.log(`Mapped default pickup ID to: ${pickupSlotId}`);
-          }
-        }
-        
-        if (!deliverySlotId && orderData.deliverySlotId?.startsWith('default-')) {
-          const timeStr = orderData.deliverySlotId.replace('default-', '');
-          const hour = parseInt(timeStr);
-          
-          const matchedSlot = timeSlots.find(slot => {
-            const slotHour = parseInt(slot.start_time.split(':')[0]);
-            return slotHour === hour || 
-                  (hour === 12 && slotHour === 12) || 
-                  (hour === 3 && slotHour === 15) || 
-                  (hour === 6 && slotHour === 18);
-          });
-          
-          if (matchedSlot) {
-            deliverySlotId = matchedSlot.id;
-            console.log(`Mapped default delivery ID to: ${deliverySlotId}`);
-          }
-        }
+      // If we have labels, use them to get the standardized IDs
+      if (orderData.pickupSlotLabel && timeSlotMapping[orderData.pickupSlotLabel as keyof typeof timeSlotMapping]) {
+        pickupSlotId = timeSlotMapping[orderData.pickupSlotLabel as keyof typeof timeSlotMapping];
       }
       
-      // If we still don't have valid IDs, use the first available slot as fallback
-      if (!pickupSlotId && timeSlots && timeSlots.length > 0) {
-        pickupSlotId = timeSlots[0].id;
-        console.log(`Using first available slot as fallback for pickup: ${pickupSlotId}`);
-      }
-      
-      if (!deliverySlotId && timeSlots && timeSlots.length > 0) {
-        deliverySlotId = timeSlots[0].id;
-        console.log(`Using first available slot as fallback for delivery: ${deliverySlotId}`);
+      if (orderData.deliverySlotLabel && timeSlotMapping[orderData.deliverySlotLabel as keyof typeof timeSlotMapping]) {
+        deliverySlotId = timeSlotMapping[orderData.deliverySlotLabel as keyof typeof timeSlotMapping];
       }
       
       // If we still don't have valid slot IDs, we can't proceed
@@ -207,7 +92,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
       }
       
       if (!deliverySlotId) {
-        throw new Error(`Delivery slot not found for "${deliverySlotLabel || orderData.deliverySlotId}"`);
+        throw new Error(`Delivery slot not found for "${orderData.deliverySlotLabel || orderData.deliverySlotId}"`);
       }
 
       // Create a separate order for each service

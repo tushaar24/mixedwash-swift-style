@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
@@ -24,8 +23,7 @@ interface TimeSlotSelectionProps {
 }
 
 export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }: TimeSlotSelectionProps) => {
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [pickupDate, setPickupDate] = useState<Date | null>(orderData.pickupDate || new Date());
   const [selectedTimeSlotId, setSelectedTimeSlotId] = useState<string | null>(orderData.pickupSlotId);
 
@@ -34,55 +32,12 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   // Next day delivery date
   const deliveryDate = pickupDate ? addDays(pickupDate, 1) : null;
 
-  // Fetch time slots from Supabase
-  useEffect(() => {
-    const fetchTimeSlots = async () => {
-      try {
-        setLoading(true);
-        
-        const { data, error } = await supabase
-          .from("time_slots")
-          .select("*")
-          .order("start_time");
-          
-        if (error) {
-          throw error;
-        }
-        
-        if (data && data.length > 0) {
-          console.log("Fetched time slots:", data);
-          setTimeSlots(data);
-        } else {
-          console.log("No time slots found in database, using defaults");
-          // If no slots in database, create default slots
-          const defaultSlots = [
-            { id: "default-12pm", label: "12pm - 3pm", start_time: "12:00:00", end_time: "15:00:00" },
-            { id: "default-3pm", label: "3pm - 6pm", start_time: "15:00:00", end_time: "18:00:00" },
-            { id: "default-6pm", label: "6pm - 9pm", start_time: "18:00:00", end_time: "21:00:00" }
-          ];
-          setTimeSlots(defaultSlots);
-        }
-      } catch (error: any) {
-        console.error("Error fetching time slots:", error);
-        toast({
-          title: "Error fetching time slots",
-          description: error.message,
-          variant: "destructive",
-        });
-        // Use default slots if there's an error
-        const defaultSlots = [
-          { id: "default-12pm", label: "12pm - 3pm", start_time: "12:00:00", end_time: "15:00:00" },
-          { id: "default-3pm", label: "3pm - 6pm", start_time: "15:00:00", end_time: "18:00:00" },
-          { id: "default-6pm", label: "6pm - 9pm", start_time: "18:00:00", end_time: "21:00:00" }
-        ];
-        setTimeSlots(defaultSlots);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchTimeSlots();
-  }, []);
+  // Fixed time slots for the application
+  const timeSlots: TimeSlot[] = [
+    { id: "afternoon-12pm", label: "Afternoon (12PM - 3PM)", start_time: "12:00:00", end_time: "15:00:00" },
+    { id: "afternoon-3pm", label: "Afternoon (3PM - 6PM)", start_time: "15:00:00", end_time: "18:00:00" },
+    { id: "evening-6pm", label: "Evening (6PM - 9PM)", start_time: "18:00:00", end_time: "21:00:00" }
+  ];
 
   // Select a date and reset time slot if needed
   const handleDateSelect = (date: Date | null) => {
@@ -168,15 +123,6 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       });
     }
   };
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
