@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -67,67 +66,92 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         deliveryDate: orderData.deliveryDate
       });
 
+      // First, fetch all available time slots from the database
+      const { data: timeSlots, error: timeSlotsError } = await supabase
+        .from("time_slots")
+        .select("id, label, start_time, end_time");
+      
+      if (timeSlotsError) {
+        console.error("Error fetching time slots:", timeSlotsError);
+        throw new Error("Could not fetch time slots");
+      }
+      
+      // Find the correct time slots based on their labels or time ranges
+      const pickupSlotLabel = orderData.pickupSlotLabel;
+      const deliverySlotLabel = orderData.deliverySlotLabel;
+      
+      let pickupSlotId = null;
+      let deliverySlotId = null;
+      
+      // Match time slots by label
+      if (timeSlots && timeSlots.length > 0) {
+        const pickupSlot = timeSlots.find(slot => slot.label === pickupSlotLabel);
+        const deliverySlot = timeSlots.find(slot => slot.label === deliverySlotLabel);
+        
+        if (pickupSlot) {
+          pickupSlotId = pickupSlot.id;
+          console.log(`Found pickup slot ID ${pickupSlotId} for label ${pickupSlotLabel}`);
+        }
+        
+        if (deliverySlot) {
+          deliverySlotId = deliverySlot.id;
+          console.log(`Found delivery slot ID ${deliverySlotId} for label ${deliverySlotLabel}`);
+        }
+        
+        // If we couldn't find by label, try to extract time from the original ID
+        if (!pickupSlotId && orderData.pickupSlotId) {
+          const timeMatch = orderData.pickupSlotId.toString().match(/(\d{1,2}):(\d{2}):(\d{2})/);
+          if (timeMatch) {
+            const startTime = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:${timeMatch[3]}`;
+            const matchedSlot = timeSlots.find(slot => slot.start_time === startTime);
+            if (matchedSlot) {
+              pickupSlotId = matchedSlot.id;
+              console.log(`Found pickup slot ID ${pickupSlotId} by time ${startTime}`);
+            }
+          }
+        }
+        
+        if (!deliverySlotId && orderData.deliverySlotId) {
+          const timeMatch = orderData.deliverySlotId.toString().match(/(\d{1,2}):(\d{2}):(\d{2})/);
+          if (timeMatch) {
+            const startTime = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}:${timeMatch[3]}`;
+            const matchedSlot = timeSlots.find(slot => slot.start_time === startTime);
+            if (matchedSlot) {
+              deliverySlotId = matchedSlot.id;
+              console.log(`Found delivery slot ID ${deliverySlotId} by time ${startTime}`);
+            }
+          }
+        }
+      }
+      
+      // If we still don't have valid slot IDs, we can't proceed
+      if (!pickupSlotId) {
+        throw new Error(`Pickup slot not found for ${pickupSlotLabel || orderData.pickupSlotId}`);
+      }
+      
+      if (!deliverySlotId) {
+        throw new Error(`Delivery slot not found for ${deliverySlotLabel || orderData.deliverySlotId}`);
+      }
+
       // Create a separate order for each service
       const orderPromises = orderData.services.map(service => {
-        // Ensure slot IDs are valid UUIDs or extract UUIDs if they contain prefixes
-        let pickupSlotId = orderData.pickupSlotId;
-        let deliverySlotId = orderData.deliverySlotId;
-        
-        // If there's a UUID in the string, extract it
-        if (typeof pickupSlotId === 'string' && pickupSlotId.includes('-')) {
-          // Try to extract UUID pattern if slot ID is not a pure UUID
-          const uuidMatch = pickupSlotId.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
-          if (uuidMatch) pickupSlotId = uuidMatch[1];
-        }
-        
-        if (typeof deliverySlotId === 'string' && deliverySlotId.includes('-')) {
-          const uuidMatch = deliverySlotId.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
-          if (uuidMatch) deliverySlotId = uuidMatch[1];
-        }
-
-        // Fetch the time slot data to confirm it exists
         return supabase
-          .from("time_slots")
-          .select("id")
-          .eq("id", pickupSlotId)
-          .single()
-          .then(pickupSlotResult => {
-            if (pickupSlotResult.error) {
-              console.error("Error finding pickup slot:", pickupSlotResult.error);
-              throw new Error(`Pickup slot not found: ${pickupSlotId}`);
-            }
-            
-            return supabase
-              .from("time_slots")
-              .select("id")
-              .eq("id", deliverySlotId)
-              .single()
-              .then(deliverySlotResult => {
-                if (deliverySlotResult.error) {
-                  console.error("Error finding delivery slot:", deliverySlotResult.error);
-                  throw new Error(`Delivery slot not found: ${deliverySlotId}`);
-                }
-                
-                // Both slots exist, proceed with order creation
-                return supabase
-                  .from("orders")
-                  .insert([
-                    {
-                      service_id: service.id,
-                      address_id: orderData.addressId,
-                      pickup_date: format(orderData.pickupDate!, 'yyyy-MM-dd'),
-                      pickup_slot_id: pickupSlotId,
-                      delivery_date: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
-                      delivery_slot_id: deliverySlotId,
-                      special_instructions: orderData.specialInstructions || null,
-                      estimated_weight: orderData.estimatedWeight || null,
-                      total_amount: orderData.estimatedWeight ? (service.price * orderData.estimatedWeight) : null,
-                      user_id: authData.user.id
-                    },
-                  ])
-                  .select();
-              });
-          });
+          .from("orders")
+          .insert([
+            {
+              service_id: service.id,
+              address_id: orderData.addressId,
+              pickup_date: format(orderData.pickupDate!, 'yyyy-MM-dd'),
+              pickup_slot_id: pickupSlotId,
+              delivery_date: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
+              delivery_slot_id: deliverySlotId,
+              special_instructions: orderData.specialInstructions || null,
+              estimated_weight: orderData.estimatedWeight || null,
+              total_amount: orderData.estimatedWeight ? (service.price * orderData.estimatedWeight) : null,
+              user_id: authData.user.id
+            },
+          ])
+          .select();
       });
 
       try {
