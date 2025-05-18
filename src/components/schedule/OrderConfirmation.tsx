@@ -59,47 +59,103 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
       if (!authData || !authData.user) {
         throw new Error("You must be logged in to place an order");
       }
+      
+      console.log("Creating orders with data:", {
+        pickupSlotId: orderData.pickupSlotId,
+        deliverySlotId: orderData.deliverySlotId,
+        pickupDate: orderData.pickupDate,
+        deliveryDate: orderData.deliveryDate
+      });
 
       // Create a separate order for each service
       const orderPromises = orderData.services.map(service => {
+        // Ensure slot IDs are valid UUIDs or extract UUIDs if they contain prefixes
+        let pickupSlotId = orderData.pickupSlotId;
+        let deliverySlotId = orderData.deliverySlotId;
+        
+        // If there's a UUID in the string, extract it
+        if (typeof pickupSlotId === 'string' && pickupSlotId.includes('-')) {
+          // Try to extract UUID pattern if slot ID is not a pure UUID
+          const uuidMatch = pickupSlotId.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+          if (uuidMatch) pickupSlotId = uuidMatch[1];
+        }
+        
+        if (typeof deliverySlotId === 'string' && deliverySlotId.includes('-')) {
+          const uuidMatch = deliverySlotId.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+          if (uuidMatch) deliverySlotId = uuidMatch[1];
+        }
+
+        // Fetch the time slot data to confirm it exists
         return supabase
-          .from("orders")
-          .insert([
-            {
-              service_id: service.id,
-              address_id: orderData.addressId,
-              pickup_date: format(orderData.pickupDate!, 'yyyy-MM-dd'),
-              pickup_slot_id: orderData.pickupSlotId,
-              delivery_date: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
-              delivery_slot_id: orderData.deliverySlotId,
-              special_instructions: orderData.specialInstructions || null,
-              estimated_weight: orderData.estimatedWeight || null,
-              total_amount: orderData.estimatedWeight ? (service.price * orderData.estimatedWeight) : null,
-              user_id: authData.user.id // Add user_id here
-            },
-          ])
-          .select();
+          .from("time_slots")
+          .select("id")
+          .eq("id", pickupSlotId)
+          .single()
+          .then(pickupSlotResult => {
+            if (pickupSlotResult.error) {
+              console.error("Error finding pickup slot:", pickupSlotResult.error);
+              throw new Error(`Pickup slot not found: ${pickupSlotId}`);
+            }
+            
+            return supabase
+              .from("time_slots")
+              .select("id")
+              .eq("id", deliverySlotId)
+              .single()
+              .then(deliverySlotResult => {
+                if (deliverySlotResult.error) {
+                  console.error("Error finding delivery slot:", deliverySlotResult.error);
+                  throw new Error(`Delivery slot not found: ${deliverySlotId}`);
+                }
+                
+                // Both slots exist, proceed with order creation
+                return supabase
+                  .from("orders")
+                  .insert([
+                    {
+                      service_id: service.id,
+                      address_id: orderData.addressId,
+                      pickup_date: format(orderData.pickupDate!, 'yyyy-MM-dd'),
+                      pickup_slot_id: pickupSlotId,
+                      delivery_date: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
+                      delivery_slot_id: deliverySlotId,
+                      special_instructions: orderData.specialInstructions || null,
+                      estimated_weight: orderData.estimatedWeight || null,
+                      total_amount: orderData.estimatedWeight ? (service.price * orderData.estimatedWeight) : null,
+                      user_id: authData.user.id
+                    },
+                  ])
+                  .select();
+              });
+          });
       });
 
-      // Wait for all orders to be created
-      const results = await Promise.all(orderPromises);
-      
-      // Check if any order failed
-      const errors = results.filter(result => result.error);
-      if (errors.length > 0) {
-        throw new Error(`Failed to create ${errors.length} orders`);
+      try {
+        // Wait for all orders to be created
+        const results = await Promise.all(orderPromises);
+        
+        // Check if any order failed
+        const errors = results.filter(result => result.error);
+        if (errors.length > 0) {
+          console.error("Order creation errors:", errors);
+          throw new Error(`Failed to create ${errors.length} orders`);
+        }
+        
+        toast({
+          title: "Orders placed successfully!",
+          description: `${orderData.services.length} laundry services have been scheduled`,
+        });
+        
+        onComplete();
+      } catch (error: any) {
+        console.error("Error during order creation:", error);
+        throw error;
       }
-      
-      toast({
-        title: "Orders placed successfully!",
-        description: `${orderData.services.length} laundry services have been scheduled`,
-      });
-      
-      onComplete();
     } catch (error: any) {
+      console.error("Order submission error:", error);
       toast({
         title: "Error placing order",
-        description: error.message,
+        description: error.message || "Something went wrong during order placement",
         variant: "destructive",
       });
     } finally {
@@ -125,7 +181,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
           <div>
             <h3 className="font-bold mb-3">Selected Services</h3>
             <div className="space-y-3">
-              {orderData.services.map((service, index) => (
+              {orderData.services.map((service) => (
                 <div key={service.id} className="flex items-start">
                   <div className="bg-gray-100 p-2 rounded-lg">
                     <span className="text-2xl">

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -75,6 +74,24 @@ const Schedule = () => {
     // Log the current state before moving to the next step
     console.log("Current step:", currentStep);
     console.log("Order data before next step:", orderData);
+    
+    // Validate current step data before proceeding
+    if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
+      if (!orderData.pickupDate || !orderData.pickupSlotId || !orderData.deliveryDate || !orderData.deliverySlotId) {
+        console.warn("Missing time slot data:", {
+          pickupDate: orderData.pickupDate,
+          pickupSlotId: orderData.pickupSlotId,
+          deliveryDate: orderData.deliveryDate,
+          deliverySlotId: orderData.deliverySlotId
+        });
+        toast({
+          title: "Missing schedule information",
+          description: "Please select both pickup and delivery slots",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
     
     setCurrentStep((prev) => prev + 1);
     window.scrollTo(0, 0);
