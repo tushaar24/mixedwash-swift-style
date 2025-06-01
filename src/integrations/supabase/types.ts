@@ -48,6 +48,174 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_area: {
+        Row: {
+          created_at: string
+          id: string
+          label: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_customer_number: {
+        Row: {
+          created_at: string
+          id: string
+          phone_number: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          phone_number: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          phone_number?: number
+        }
+        Relationships: []
+      }
+      admin_facility: {
+        Row: {
+          created_at: string
+          facility_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          facility_name: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          facility_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_orders: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_address: string
+          customer_name: string
+          customer_phone_number: number
+          delivery_date: string | null
+          delivery_driver: string
+          facility_used: string
+          order_id: string
+          pickup_date: string
+          pickup_driver: string
+          pickup_slot: string
+          service_id: string
+          special_message: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_address: string
+          customer_name: string
+          customer_phone_number: number
+          delivery_date?: string | null
+          delivery_driver: string
+          facility_used: string
+          order_id?: string
+          pickup_date: string
+          pickup_driver: string
+          pickup_slot?: string
+          service_id?: string
+          special_message?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_address?: string
+          customer_name?: string
+          customer_phone_number?: number
+          delivery_date?: string | null
+          delivery_driver?: string
+          facility_used?: string
+          order_id?: string
+          pickup_date?: string
+          pickup_driver?: string
+          pickup_slot?: string
+          service_id?: string
+          special_message?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_slot: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          label: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          label: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          label?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      driver: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          phone_number: number
+          salary: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          phone_number: number
+          salary: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          phone_number?: number
+          salary?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           address_id: string

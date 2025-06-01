@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, Clock, Loader2 } from "lucide-react";
 import { OrderData } from "@/pages/Schedule";
 import { addDays, format, isBefore, startOfToday } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TimeSlot {
   id: string;
@@ -24,6 +25,8 @@ interface TimeSlotSelectionProps {
 
 export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }: TimeSlotSelectionProps) => {
   const [loading, setLoading] = useState(false);
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(true);
   const [pickupDate, setPickupDate] = useState<Date | null>(orderData.pickupDate || new Date());
   const [selectedTimeSlotId, setSelectedTimeSlotId] = useState<string | null>(orderData.pickupSlotId);
 
@@ -32,12 +35,41 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   // Next day delivery date
   const deliveryDate = pickupDate ? addDays(pickupDate, 1) : null;
 
-  // Fixed time slots for the application
-  const timeSlots: TimeSlot[] = [
-    { id: "afternoon-12pm", label: "Afternoon (12PM - 3PM)", start_time: "12:00:00", end_time: "15:00:00" },
-    { id: "afternoon-3pm", label: "Afternoon (3PM - 6PM)", start_time: "15:00:00", end_time: "18:00:00" },
-    { id: "evening-6pm", label: "Evening (6PM - 9PM)", start_time: "18:00:00", end_time: "21:00:00" }
-  ];
+  // Fetch time slots from database
+  useEffect(() => {
+    const fetchTimeSlots = async () => {
+      try {
+        setLoadingSlots(true);
+        const { data, error } = await supabase
+          .from("time_slots")
+          .select("*")
+          .order("start_time");
+
+        if (error) {
+          console.error("Error fetching time slots:", error);
+          toast({
+            title: "Error loading time slots",
+            description: "Failed to load available time slots. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          console.log("Fetched time slots:", data);
+          setTimeSlots(data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching time slots:", error);
+        toast({
+          title: "Error loading time slots",
+          description: "Failed to load available time slots. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+
+    fetchTimeSlots();
+  }, []);
 
   // Select a date and reset time slot if needed
   const handleDateSelect = (date: Date | null) => {
@@ -117,6 +149,20 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     // Continue to next step
     onNext();
   };
+
+  if (loadingSlots) {
+    return (
+      <div className="space-y-6 pb-24">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold">Schedule Pickup & Delivery</h1>
+          <p className="text-gray-600 mt-2">Loading available time slots...</p>
+        </div>
+        <div className="flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-24">

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -66,35 +67,6 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         deliveryDate: orderData.deliveryDate
       });
 
-      // Create standardized time slot mapping based on our three fixed slots
-      const timeSlotMapping = {
-        "Afternoon (12PM - 3PM)": "afternoon-12pm",
-        "Afternoon (3PM - 6PM)": "afternoon-3pm",
-        "Evening (6PM - 9PM)": "evening-6pm"
-      };
-      
-      // Get slot IDs from the mapping based on labels
-      let pickupSlotId = orderData.pickupSlotId;
-      let deliverySlotId = orderData.deliverySlotId;
-      
-      // If we have labels, use them to get the standardized IDs
-      if (orderData.pickupSlotLabel && timeSlotMapping[orderData.pickupSlotLabel as keyof typeof timeSlotMapping]) {
-        pickupSlotId = timeSlotMapping[orderData.pickupSlotLabel as keyof typeof timeSlotMapping];
-      }
-      
-      if (orderData.deliverySlotLabel && timeSlotMapping[orderData.deliverySlotLabel as keyof typeof timeSlotMapping]) {
-        deliverySlotId = timeSlotMapping[orderData.deliverySlotLabel as keyof typeof timeSlotMapping];
-      }
-      
-      // If we still don't have valid slot IDs, we can't proceed
-      if (!pickupSlotId) {
-        throw new Error(`Pickup slot not found for "${orderData.pickupSlotLabel || orderData.pickupSlotId}"`);
-      }
-      
-      if (!deliverySlotId) {
-        throw new Error(`Delivery slot not found for "${orderData.deliverySlotLabel || orderData.deliverySlotId}"`);
-      }
-
       // Create a separate order for each service
       const orderPromises = orderData.services.map(service => {
         return supabase
@@ -104,9 +76,9 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
               service_id: service.id,
               address_id: orderData.addressId,
               pickup_date: format(orderData.pickupDate!, 'yyyy-MM-dd'),
-              pickup_slot_id: pickupSlotId,
+              pickup_slot_id: orderData.pickupSlotId,
               delivery_date: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
-              delivery_slot_id: deliverySlotId,
+              delivery_slot_id: orderData.deliverySlotId,
               special_instructions: orderData.specialInstructions || null,
               estimated_weight: orderData.estimatedWeight || null,
               total_amount: orderData.estimatedWeight ? (service.price * orderData.estimatedWeight) : null,
