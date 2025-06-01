@@ -48,9 +48,9 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
                     </TableHeader>
                     <TableBody>
                       {service.prices[0].items.map((item: any, itemIndex: number) => (
-                        <TableRow key={itemIndex} className="border-t border-gray-200">
-                          <TableCell className="text-left py-2">{item.name}</TableCell>
-                          <TableCell className="text-right py-2 font-medium">{item.price}</TableCell>
+                        <TableRow key={itemIndex} className="border-t border-gray-200 hover:bg-gray-50">
+                          <TableCell className="text-left py-2 hover:text-gray-900">{item.name}</TableCell>
+                          <TableCell className="text-right py-2 font-medium hover:text-gray-900">{item.price}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -73,9 +73,9 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
                     </TableHeader>
                     <TableBody>
                       {service.prices[1].items.map((item: any, itemIndex: number) => (
-                        <TableRow key={itemIndex} className="border-t border-gray-200">
-                          <TableCell className="text-left py-2">{item.name}</TableCell>
-                          <TableCell className="text-right py-2 font-medium">{item.price}</TableCell>
+                        <TableRow key={itemIndex} className="border-t border-gray-200 hover:bg-gray-50">
+                          <TableCell className="text-left py-2 hover:text-gray-900">{item.name}</TableCell>
+                          <TableCell className="text-right py-2 font-medium hover:text-gray-900">{item.price}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
