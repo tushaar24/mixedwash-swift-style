@@ -156,7 +156,7 @@ export const DryCleaningItemsDialog = ({ selectedItems, onItemsChange }: DryClea
           Add Items {totalItems > 0 && `(${totalItems})`}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto pb-20">
         <DialogHeader>
           <DialogTitle>Select Dry Cleaning Items</DialogTitle>
         </DialogHeader>
@@ -196,8 +196,12 @@ export const DryCleaningItemsDialog = ({ selectedItems, onItemsChange }: DryClea
           </div>
         )}
         
-        <div className="flex justify-end mt-4">
-          <Button onClick={() => setIsOpen(false)} className="bg-black hover:bg-gray-800 text-white">
+        {/* Sticky Done button at bottom center */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center z-50">
+          <Button 
+            onClick={() => setIsOpen(false)} 
+            className="bg-black hover:bg-gray-800 text-white px-8 py-3 min-w-48"
+          >
             Done
           </Button>
         </div>
