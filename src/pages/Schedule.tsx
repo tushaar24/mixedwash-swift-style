@@ -9,6 +9,7 @@ import { TimeSlotSelection } from "@/components/schedule/TimeSlotSelection";
 import { OrderConfirmation } from "@/components/schedule/OrderConfirmation";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { addDays, startOfToday } from "date-fns";
 
 // Steps in the scheduling flow
 enum ScheduleStep {
@@ -44,13 +45,16 @@ const Schedule = () => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(ScheduleStep.SERVICE_SELECTION);
+  
+  // Initialize with today's date as default pickup date
+  const today = startOfToday();
   const [orderData, setOrderData] = useState<OrderData>({
     services: [],
     addressId: null,
-    pickupDate: null,
+    pickupDate: today,
     pickupSlotId: null,
     pickupSlotLabel: null,
-    deliveryDate: null,
+    deliveryDate: addDays(today, 1),
     deliverySlotId: null,
     deliverySlotLabel: null,
     specialInstructions: "",
