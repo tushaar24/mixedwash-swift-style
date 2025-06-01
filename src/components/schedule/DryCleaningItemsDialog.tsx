@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Minus, ShoppingBag } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -103,50 +104,47 @@ export const DryCleaningItemsDialog = ({ selectedItems, onItemsChange }: DryClea
   const totalItems = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  const renderItemSection = (title: string, items: typeof MENS_WEAR_ITEMS) => (
-    <div className="mb-6">
-      <h3 className="text-lg font-semibold mb-4 text-gray-800">{title}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {items.map((item) => {
-          const quantity = getItemQuantity(item.name);
-          
-          return (
-            <Card key={item.name} className="border-gray-200">
-              <CardContent className="p-3">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-medium text-sm">{item.name}</h4>
-                    <p className="text-sm text-gray-600">₹{item.price}</p>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => updateItemQuantity(item.name, Math.max(0, quantity - 1))}
-                      disabled={quantity === 0}
-                    >
-                      <Minus className="h-3 w-3" />
-                    </Button>
-                    
-                    <span className="w-6 text-center font-medium text-sm">{quantity}</span>
-                    
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => updateItemQuantity(item.name, quantity + 1)}
-                    >
-                      <Plus className="h-3 w-3" />
-                    </Button>
-                  </div>
+  const renderItemSection = (items: typeof MENS_WEAR_ITEMS) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {items.map((item) => {
+        const quantity = getItemQuantity(item.name);
+        
+        return (
+          <Card key={item.name} className="border-gray-200">
+            <CardContent className="p-3">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h4 className="font-medium text-sm">{item.name}</h4>
+                  <p className="text-sm text-gray-600">₹{item.price}</p>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => updateItemQuantity(item.name, Math.max(0, quantity - 1))}
+                    disabled={quantity === 0}
+                  >
+                    <Minus className="h-3 w-3" />
+                  </Button>
+                  
+                  <span className="w-6 text-center font-medium text-sm">{quantity}</span>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => updateItemQuantity(item.name, quantity + 1)}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 
@@ -164,8 +162,20 @@ export const DryCleaningItemsDialog = ({ selectedItems, onItemsChange }: DryClea
         </DialogHeader>
         
         <div className="mt-4">
-          {renderItemSection("Men's Wear", MENS_WEAR_ITEMS)}
-          {renderItemSection("Women's Wear", WOMENS_WEAR_ITEMS)}
+          <Tabs defaultValue="mens" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="mens">Men's Wear</TabsTrigger>
+              <TabsTrigger value="womens">Women's Wear</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="mens" className="mt-6">
+              {renderItemSection(MENS_WEAR_ITEMS)}
+            </TabsContent>
+            
+            <TabsContent value="womens" className="mt-6">
+              {renderItemSection(WOMENS_WEAR_ITEMS)}
+            </TabsContent>
+          </Tabs>
         </div>
         
         {selectedItems.length > 0 && (
