@@ -102,9 +102,9 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     });
   };
 
-  // Continue to next step
+  // Continue to next step - using orderData for validation instead of local state
   const handleContinue = () => {
-    if (!pickupDate) {
+    if (!orderData.pickupDate) {
       toast({
         title: "Please select a date",
         description: "You need to select a pickup date to continue",
@@ -112,7 +112,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       return;
     }
     
-    if (!selectedTimeSlotId) {
+    if (!orderData.pickupSlotId) {
       toast({
         title: "Please select a time slot",
         description: "You need to select a pickup time slot to continue",
@@ -121,7 +121,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     }
     
     // Get the selected time slot
-    const selectedSlot = timeSlots.find(slot => slot.id === selectedTimeSlotId);
+    const selectedSlot = timeSlots.find(slot => slot.id === orderData.pickupSlotId);
     if (!selectedSlot) {
       toast({
         title: "Error with time slot",
@@ -133,8 +133,8 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     
     // Make a final update to ensure all data is set correctly before continuing
     const updatedOrderData = {
-      pickupDate: pickupDate,
-      deliveryDate: deliveryDate,
+      pickupDate: orderData.pickupDate,
+      deliveryDate: orderData.deliveryDate,
       pickupSlotId: selectedSlot.id,
       pickupSlotLabel: selectedSlot.label,
       deliverySlotId: selectedSlot.id,
@@ -284,7 +284,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
           <Button 
             onClick={handleContinue}
             className="bg-black hover:bg-gray-800 text-white px-6 py-2 h-auto text-base group"
-            disabled={!pickupDate || !selectedTimeSlotId}
+            disabled={!orderData.pickupDate || !orderData.pickupSlotId}
           >
             Continue to Confirm
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
