@@ -41,9 +41,9 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
                 <div className="overflow-x-auto">
                   <Table className="border-collapse">
                     <TableHeader>
-                      <TableRow className="bg-black">
-                        <TableHead className="text-left text-white font-bold">Item's Name</TableHead>
-                        <TableHead className="text-right text-white font-bold">Price (₹)</TableHead>
+                      <TableRow className="bg-black hover:bg-black">
+                        <TableHead className="text-left text-white font-bold hover:text-white">Item's Name</TableHead>
+                        <TableHead className="text-right text-white font-bold hover:text-white">Price (₹)</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -66,9 +66,9 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
                 <div className="overflow-x-auto">
                   <Table className="border-collapse">
                     <TableHeader>
-                      <TableRow className="bg-black">
-                        <TableHead className="text-left text-white font-bold">Item's Name</TableHead>
-                        <TableHead className="text-right text-white font-bold">Price (₹)</TableHead>
+                      <TableRow className="bg-black hover:bg-black">
+                        <TableHead className="text-left text-white font-bold hover:text-white">Item's Name</TableHead>
+                        <TableHead className="text-right text-white font-bold hover:text-white">Price (₹)</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
