@@ -156,12 +156,15 @@ export const DryCleaningItemsDialog = ({ selectedItems, onItemsChange }: DryClea
           Add Items {totalItems > 0 && `(${totalItems})`}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Select Dry Cleaning Items</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col p-0">
+        <div className="p-6 pb-0">
+          <DialogHeader>
+            <DialogTitle>Select Dry Cleaning Items</DialogTitle>
+          </DialogHeader>
+        </div>
         
-        <div className="flex-1 overflow-y-auto">
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto px-6">
           <Tabs defaultValue="mens" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="mens">Men's Wear</TabsTrigger>
@@ -196,14 +199,16 @@ export const DryCleaningItemsDialog = ({ selectedItems, onItemsChange }: DryClea
           )}
         </div>
         
-        {/* Sticky Done button at bottom */}
-        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 flex justify-center mt-4">
-          <Button 
-            onClick={() => setIsOpen(false)} 
-            className="bg-black hover:bg-gray-800 text-white px-8 py-3 min-w-48"
-          >
-            Done
-          </Button>
+        {/* Non-scrollable footer section with Done button */}
+        <div className="border-t border-gray-200 p-6 bg-white">
+          <div className="flex justify-center">
+            <Button 
+              onClick={() => setIsOpen(false)} 
+              className="bg-black hover:bg-gray-800 text-white px-8 py-3 min-w-48"
+            >
+              Done
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
