@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Calendar, Clock, Home, Loader2, Truck } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Home, Loader2, Truck, ShoppingBag } from "lucide-react";
 import { OrderData, SelectedService } from "@/pages/Schedule";
 import { format } from "date-fns";
 
@@ -99,6 +98,37 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
           throw new Error(`Failed to create ${errors.length} orders`);
         }
         
+        // Save dry cleaning items if any
+        if (orderData.dryCleaningItems.length > 0) {
+          // Find the dry cleaning service order
+          const dryCleaningResult = results.find(result => 
+            orderData.services.some(service => 
+              service.id === result.data?.[0]?.service_id && 
+              service.name.toLowerCase().includes('dry cleaning')
+            )
+          );
+          
+          if (dryCleaningResult?.data?.[0]) {
+            const orderId = dryCleaningResult.data[0].id;
+            
+            // Insert dry cleaning items
+            const itemPromises = orderData.dryCleaningItems.map(item => 
+              supabase
+                .from("order_dry_cleaning_items")
+                .insert([
+                  {
+                    order_id: orderId,
+                    item_name: item.name,
+                    item_price: item.price,
+                    quantity: item.quantity
+                  }
+                ])
+            );
+            
+            await Promise.all(itemPromises);
+          }
+        }
+        
         toast({
           title: "Orders placed successfully!",
           description: `${orderData.services.length} laundry services have been scheduled`,
@@ -165,6 +195,30 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
               ))}
             </div>
           </div>
+          
+          {/* Dry Cleaning Items */}
+          {orderData.dryCleaningItems.length > 0 && (
+            <div className="flex items-start">
+              <div className="bg-gray-100 p-2 rounded-lg">
+                <ShoppingBag className="h-6 w-6 text-gray-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="font-bold">Dry Cleaning Items</h3>
+                <div className="mt-2 space-y-2">
+                  {orderData.dryCleaningItems.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center text-sm">
+                      <span>{item.name} × {item.quantity}</span>
+                      <span className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                  <div className="border-t border-gray-300 pt-2 flex justify-between items-center font-bold text-sm">
+                    <span>Items Total</span>
+                    <span>₹{orderData.dryCleaningItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Pickup Schedule */}
           <div className="flex items-start">

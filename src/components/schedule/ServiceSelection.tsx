@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { ArrowRight, BadgePercent, Loader2 } from "lucide-react";
-import { OrderData, SelectedService } from "@/pages/Schedule";
+import { OrderData, SelectedService, DryCleaningItem } from "@/pages/Schedule";
+import { DryCleaningItemsDialog } from "./DryCleaningItemsDialog";
 
 interface Service {
   id: string;
@@ -57,12 +58,30 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
     fetchServices();
   }, []);
 
+  // Check if dry cleaning service is selected
+  const isDryCleaningSelected = () => {
+    return services.some(service => 
+      selectedServiceIds.has(service.id) && 
+      service.name.toLowerCase().includes('dry cleaning')
+    );
+  };
+
+  // Handle dry cleaning items change
+  const handleDryCleaningItemsChange = (items: DryCleaningItem[]) => {
+    updateOrderData({ dryCleaningItems: items });
+  };
+
   // Toggle service selection
   const toggleServiceSelection = (service: Service) => {
     const newSelectedServiceIds = new Set(selectedServiceIds);
     
     if (newSelectedServiceIds.has(service.id)) {
       newSelectedServiceIds.delete(service.id);
+      
+      // If removing dry cleaning service, clear dry cleaning items
+      if (service.name.toLowerCase().includes('dry cleaning')) {
+        updateOrderData({ dryCleaningItems: [] });
+      }
     } else {
       newSelectedServiceIds.add(service.id);
     }
@@ -170,6 +189,16 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
                       <div className="font-bold">From ₹{service.price}</div>
                     )}
                   </div>
+                  
+                  {/* Add Items button for dry cleaning */}
+                  {selectedServiceIds.has(service.id) && service.name.toLowerCase().includes('dry cleaning') && (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <DryCleaningItemsDialog
+                        selectedItems={orderData.dryCleaningItems}
+                        onItemsChange={handleDryCleaningItemsChange}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>

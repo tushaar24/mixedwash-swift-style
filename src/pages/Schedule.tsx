@@ -26,6 +26,13 @@ export interface SelectedService {
   price: number;
 }
 
+// Dry cleaning item interface
+export interface DryCleaningItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 // Order data interface
 export interface OrderData {
   services: SelectedService[];
@@ -39,6 +46,7 @@ export interface OrderData {
   specialInstructions: string;
   estimatedWeight: number | null;
   totalAmount: number | null;
+  dryCleaningItems: DryCleaningItem[];
 }
 
 const Schedule = () => {
@@ -60,6 +68,7 @@ const Schedule = () => {
     specialInstructions: "",
     estimatedWeight: null,
     totalAmount: null,
+    dryCleaningItems: [],
   });
 
   // Check if user is logged in

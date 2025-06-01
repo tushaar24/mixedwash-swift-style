@@ -216,6 +216,36 @@ export type Database = {
         }
         Relationships: []
       }
+      order_dry_cleaning_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_name: string
+          item_price: number
+          order_id: string
+          quantity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_name: string
+          item_price: number
+          order_id: string
+          quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_name?: string
+          item_price?: number
+          order_id?: string
+          quantity?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           address_id: string
