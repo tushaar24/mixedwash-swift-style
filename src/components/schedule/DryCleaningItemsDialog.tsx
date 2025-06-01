@@ -151,7 +151,7 @@ export const DryCleaningItemsDialog = ({ selectedItems, onItemsChange }: DryClea
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full mt-3 bg-black text-white hover:bg-gray-800">
+        <Button variant="outline" className="w-full mt-3 bg-black text-white hover:bg-gray-800 hover:text-white">
           <ShoppingBag className="h-4 w-4 mr-2" />
           Add Items {totalItems > 0 && `(${totalItems})`}
         </Button>
