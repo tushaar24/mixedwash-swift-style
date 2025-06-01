@@ -156,12 +156,12 @@ export const DryCleaningItemsDialog = ({ selectedItems, onItemsChange }: DryClea
           Add Items {totalItems > 0 && `(${totalItems})`}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto pb-24">
+      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Select Dry Cleaning Items</DialogTitle>
         </DialogHeader>
         
-        <div className="mt-4">
+        <div className="flex-1 overflow-y-auto">
           <Tabs defaultValue="mens" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="mens">Men's Wear</TabsTrigger>
@@ -176,31 +176,31 @@ export const DryCleaningItemsDialog = ({ selectedItems, onItemsChange }: DryClea
               {renderItemSection(WOMENS_WEAR_ITEMS)}
             </TabsContent>
           </Tabs>
+          
+          {selectedItems.length > 0 && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-medium mb-2">Selected Items ({totalItems})</h3>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {selectedItems.map((item) => (
+                  <div key={item.name} className="flex justify-between items-center text-sm">
+                    <span>{item.name} × {item.quantity}</span>
+                    <span className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-gray-300 mt-2 pt-2 flex justify-between items-center font-bold">
+                <span>Total</span>
+                <span>₹{totalAmount.toFixed(2)}</span>
+              </div>
+            </div>
+          )}
         </div>
         
-        {selectedItems.length > 0 && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium mb-2">Selected Items ({totalItems})</h3>
-            <div className="space-y-2 max-h-32 overflow-y-auto">
-              {selectedItems.map((item) => (
-                <div key={item.name} className="flex justify-between items-center text-sm">
-                  <span>{item.name} × {item.quantity}</span>
-                  <span className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-300 mt-2 pt-2 flex justify-between items-center font-bold">
-              <span>Total</span>
-              <span>₹{totalAmount.toFixed(2)}</span>
-            </div>
-          </div>
-        )}
-        
-        {/* Fixed Done button at bottom center */}
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+        {/* Sticky Done button at bottom */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 flex justify-center mt-4">
           <Button 
             onClick={() => setIsOpen(false)} 
-            className="bg-black hover:bg-gray-800 text-white px-8 py-3 min-w-48 rounded-lg shadow-lg"
+            className="bg-black hover:bg-gray-800 text-white px-8 py-3 min-w-48"
           >
             Done
           </Button>
