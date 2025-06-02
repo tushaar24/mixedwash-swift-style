@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight, Home, Loader2, MapPin, Plus, Search, Locate } from "lucide-react";
-import { OrderData } from "@/pages/Schedule";
 import { GooglePlacesAutocomplete } from "./GooglePlacesAutocomplete";
 import { AddressDetailsForm } from "./AddressDetailsForm";
 
@@ -25,6 +25,21 @@ interface Address {
   state: string;
   postal_code: string;
   is_default: boolean;
+}
+
+export interface OrderData {
+  services: any[];
+  addressId: string | null;
+  pickupDate: Date | null;
+  pickupSlotId: string | null;
+  pickupSlotLabel: string | null;
+  deliveryDate: Date | null;
+  deliverySlotId: string | null;
+  deliverySlotLabel: string | null;
+  specialInstructions: string;
+  estimatedWeight: number | null;
+  totalAmount: number | null;
+  dryCleaningItems: any[];
 }
 
 interface AddressSelectionProps {
@@ -117,11 +132,11 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         
         try {
           // Use Google Geocoding API to get address from coordinates
-          const geocoder = new window.google.maps.Geocoder();
+          const geocoder = new (window as any).google.maps.Geocoder();
           const result = await new Promise((resolve, reject) => {
             geocoder.geocode(
               { location: { lat: latitude, lng: longitude } },
-              (results, status) => {
+              (results: any, status: any) => {
                 if (status === 'OK' && results[0]) {
                   resolve(results[0]);
                 } else {
@@ -131,7 +146,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
             );
           });
           
-          setSelectedPlaceAddress(result.formatted_address);
+          setSelectedPlaceAddress((result as any).formatted_address);
           setAddressDetailsOpen(true);
           
           toast({
@@ -325,7 +340,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         <Button 
           onClick={handleUseCurrentLocation}
           disabled={locatingUser}
-          className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-3 text-lg font-medium"
+          className="w-full h-16 bg-black hover:bg-gray-800 text-white flex items-center justify-center gap-3 text-lg font-medium"
         >
           {locatingUser ? (
             <Loader2 className="h-6 w-6 animate-spin" />
