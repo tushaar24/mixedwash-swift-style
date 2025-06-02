@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -138,11 +139,21 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
 
-      // Create new autocomplete instance
+      // Create new autocomplete instance with optimized settings for buildings
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
         componentRestrictions: { country: 'IN' },
-        fields: ['formatted_address', 'address_components', 'place_id', 'geometry', 'name', 'types'],
-        types: ['address'] // Focus on addresses
+        fields: [
+          'formatted_address', 
+          'address_components', 
+          'place_id', 
+          'geometry', 
+          'name', 
+          'types',
+          'business_status',
+          'vicinity'
+        ],
+        // Remove types restriction to get better building suggestions
+        // types: ['establishment', 'geocode'] would be more inclusive than just 'address'
       });
 
       console.log("Autocomplete instance created successfully");
@@ -297,20 +308,20 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
             Search Address in India
           </DialogTitle>
           <DialogDescription>
-            Type your address and select from the suggestions that appear
+            Type building names, landmarks, or addresses to get suggestions
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <label htmlFor="address-search" className="text-sm font-medium">
-              Start typing your Indian address
+              Enter building name, landmark, or full address
             </label>
             <Input
               ref={inputRef}
               id="address-search"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="e.g., HSR Layout, Bangalore or Connaught Place, New Delhi"
+              placeholder="e.g., Phoenix Mall Bangalore, Brigade Road, or DLF Cyber City Gurgaon"
               disabled={isLoading}
               autoComplete="off"
             />
@@ -377,9 +388,12 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
           <div className="text-xs text-gray-500 text-center space-y-1">
             <p>
               {googleReady 
-                ? "Address suggestions will appear as you type" 
+                ? "Building and landmark suggestions will appear as you type" 
                 : "Loading address suggestions..."
               }
+            </p>
+            <p className="text-blue-600">
+              Try typing: mall names, office complexes, apartment buildings, or landmarks
             </p>
             {!googleReady && (
               <p className="text-orange-500">
