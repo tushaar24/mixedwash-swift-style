@@ -29,42 +29,78 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [initializationAttempts, setInitializationAttempts] = useState(0);
   const autocompleteRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Use a separate effect to initialize autocomplete after the dialog is fully open
+  // Clear autocomplete when dialog closes
+  useEffect(() => {
+    if (!isOpen && autocompleteRef.current) {
+      console.log("Dialog closed, clearing autocomplete");
+      autocompleteRef.current = null;
+      setSearchValue("");
+    }
+  }, [isOpen]);
+
+  // Initialize autocomplete when conditions are met
   useEffect(() => {
     if (isOpen && window.google && inputRef.current && !autocompleteRef.current) {
-      // Small delay to ensure input is fully rendered
-      const timer = setTimeout(() => {
-        initializeAutocomplete();
-      }, 100);
-      return () => clearTimeout(timer);
+      console.log("Attempting to initialize autocomplete...");
+      // Multiple timeouts to ensure proper initialization
+      const timer1 = setTimeout(() => {
+        if (inputRef.current && !autocompleteRef.current) {
+          initializeAutocomplete();
+        }
+      }, 200);
+      
+      const timer2 = setTimeout(() => {
+        if (inputRef.current && !autocompleteRef.current && initializationAttempts < 3) {
+          console.log("Retry autocomplete initialization");
+          setInitializationAttempts(prev => prev + 1);
+          initializeAutocomplete();
+        }
+      }, 500);
+      
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
     }
-  }, [isOpen, scriptLoaded]);
+  }, [isOpen, scriptLoaded, initializationAttempts]);
 
   useEffect(() => {
     console.log("Dialog opened:", isOpen);
     if (isOpen && !window.google) {
       console.log("Loading Google Maps script...");
       loadGoogleMapsScript();
+    } else if (isOpen && window.google) {
+      console.log("Google Maps already available");
+      setScriptLoaded(true);
     }
   }, [isOpen]);
 
   const loadGoogleMapsScript = () => {
     if (document.querySelector('script[src*="maps.googleapis.com"]')) {
       console.log("Google Maps script already exists");
-      setScriptLoaded(true);
+      if (window.google && window.google.maps && window.google.maps.places) {
+        console.log("Google Places library is available");
+        setScriptLoaded(true);
+      }
       return;
     }
 
+    console.log("Creating new Google Maps script");
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDSOihPDFQdD9JampWVU_CD6RpdPM4qbnw&libraries=places&callback=initGooglePlaces`;
     script.async = true;
     script.defer = true;
     
-    script.onerror = () => {
-      console.error("Failed to load Google Maps script");
+    script.onload = () => {
+      console.log("Google Maps script loaded successfully");
+    };
+    
+    script.onerror = (error) => {
+      console.error("Failed to load Google Maps script:", error);
       toast({
         title: "Error loading Google Maps",
         description: "Please check your internet connection and try again",
@@ -74,7 +110,12 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     
     window.initGooglePlaces = () => {
       console.log("Google Maps callback executed");
-      setScriptLoaded(true);
+      if (window.google && window.google.maps && window.google.maps.places) {
+        console.log("Google Places library confirmed available");
+        setScriptLoaded(true);
+      } else {
+        console.error("Google Places library not available in callback");
+      }
     };
     
     document.head.appendChild(script);
@@ -98,12 +139,21 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     }
 
     try {
-      console.log("Initializing autocomplete...");
+      console.log("Initializing autocomplete with input:", inputRef.current);
+      
+      // Clear any existing autocomplete
+      if (autocompleteRef.current) {
+        console.log("Clearing existing autocomplete");
+        window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
+      }
+
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-        types: ['establishment', 'geocode'], // Include both establishments and geocoded addresses
-        componentRestrictions: { country: 'IN' },
-        fields: ['formatted_address', 'address_components', 'place_id', 'geometry', 'name']
+        types: [], // Remove type restrictions to get all places
+        componentRestrictions: { country: 'in' }, // Use lowercase 'in' for India
+        fields: ['formatted_address', 'address_components', 'place_id', 'geometry', 'name', 'types']
       });
+
+      console.log("Autocomplete object created:", autocompleteRef.current);
 
       autocompleteRef.current.addListener('place_changed', () => {
         console.log("Place changed event triggered");
@@ -112,9 +162,17 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         if (place && (place.formatted_address || place.name)) {
           handlePlaceSelect(place);
         } else {
-          console.log("No place details received");
+          console.log("No place details received or incomplete place data");
         }
       });
+      
+      // Test if autocomplete is working
+      setTimeout(() => {
+        if (inputRef.current) {
+          console.log("Testing autocomplete with focus");
+          inputRef.current.focus();
+        }
+      }, 100);
       
       console.log("Autocomplete initialized successfully");
     } catch (error) {
@@ -175,6 +233,20 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     handlePlaceSelect(manualPlace);
   };
 
+  // Debug information
+  const debugInfo = {
+    isOpen,
+    scriptLoaded,
+    hasGoogle: !!window.google,
+    hasGoogleMaps: !!(window.google && window.google.maps),
+    hasGooglePlaces: !!(window.google && window.google.maps && window.google.maps.places),
+    hasAutocomplete: !!autocompleteRef.current,
+    hasInputRef: !!inputRef.current,
+    initializationAttempts
+  };
+
+  console.log("Debug info:", debugInfo);
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -196,12 +268,25 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="e.g., Connaught Place, New Delhi or Mumbai Central"
               disabled={isLoading}
+              autoComplete="off"
             />
-            {!window.google && (
-              <p className="text-xs text-orange-600">
-                Loading Google Maps...
+            <div className="text-xs space-y-1">
+              {!window.google && (
+                <p className="text-orange-600">Loading Google Maps...</p>
+              )}
+              {window.google && !autocompleteRef.current && (
+                <p className="text-blue-600">Setting up address suggestions...</p>
+              )}
+              {autocompleteRef.current && (
+                <p className="text-green-600">✓ Address suggestions ready</p>
+              )}
+              <p className="text-gray-500">
+                Debug: G:{debugInfo.hasGoogle ? '✓' : '✗'} 
+                P:{debugInfo.hasGooglePlaces ? '✓' : '✗'} 
+                A:{debugInfo.hasAutocomplete ? '✓' : '✗'}
+                ({initializationAttempts} attempts)
               </p>
-            )}
+            </div>
           </div>
           
           <div className="flex gap-2">
@@ -227,7 +312,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
           </div>
           
           <p className="text-xs text-gray-500 text-center">
-            {window.google ? "Indian address suggestions will appear as you type" : "Loading address suggestions..."}
+            {autocompleteRef.current ? "Indian address suggestions will appear as you type" : "Loading address suggestions..."}
           </p>
         </div>
       </DialogContent>
