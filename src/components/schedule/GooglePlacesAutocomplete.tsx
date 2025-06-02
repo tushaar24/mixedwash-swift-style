@@ -129,10 +129,51 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     setIsLoading(true);
     
     try {
+      console.log("Google Place selected:", place);
+      
+      // Enhanced address processing for Google Places
+      let enhancedAddress = place.formatted_address || place.name;
+      
+      // If we have address components, try to build a better formatted address
+      if (place.address_components && place.address_components.length > 0) {
+        const components = place.address_components;
+        console.log("Address components:", components);
+        
+        // Extract components for better parsing
+        const streetNumber = components.find((c: any) => c.types.includes('street_number'))?.long_name || '';
+        const route = components.find((c: any) => c.types.includes('route'))?.long_name || '';
+        const sublocality = components.find((c: any) => 
+          c.types.includes('sublocality_level_1') || 
+          c.types.includes('sublocality_level_2') ||
+          c.types.includes('sublocality')
+        )?.long_name || '';
+        const locality = components.find((c: any) => c.types.includes('locality'))?.long_name || '';
+        const administrativeArea = components.find((c: any) => 
+          c.types.includes('administrative_area_level_1')
+        )?.long_name || '';
+        const postalCode = components.find((c: any) => c.types.includes('postal_code'))?.long_name || '';
+        
+        // Build a better formatted address
+        const addressParts = [];
+        if (streetNumber && route) {
+          addressParts.push(`${streetNumber} ${route}`);
+        } else if (route) {
+          addressParts.push(route);
+        }
+        if (sublocality) addressParts.push(sublocality);
+        if (locality) addressParts.push(locality);
+        if (administrativeArea) addressParts.push(administrativeArea);
+        if (postalCode) addressParts.push(postalCode);
+        
+        if (addressParts.length > 0) {
+          enhancedAddress = addressParts.join(', ');
+        }
+      }
+      
       onPlaceSelect({
-        formatted_address: place.formatted_address || place.name,
+        formatted_address: enhancedAddress,
         address_components: place.address_components || [],
-        place_id: place.place_id
+        place_id: place.place_id || ''
       });
       
       toast({
@@ -142,6 +183,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
       
       onOpenChange(false);
     } catch (error) {
+      console.error("Error processing place:", error);
       toast({
         title: "Error",
         description: "Failed to process the selected address",

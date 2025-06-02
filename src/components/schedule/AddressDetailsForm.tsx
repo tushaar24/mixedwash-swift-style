@@ -17,7 +17,7 @@ interface AddressDetailsFormProps {
 export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAddressSaved }: AddressDetailsFormProps) => {
   const [formData, setFormData] = useState({
     house_building: "",
-    address_line1: initialAddress || "",
+    address_line1: "",
     address_line2: "",
     area: "",
     city: "",
@@ -36,26 +36,72 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
   };
 
   const extractAddressComponents = (fullAddress: string) => {
-    // Simple parsing - in production, you'd use the Google Places address_components
+    console.log("Extracting address from:", fullAddress);
+    
+    // More sophisticated parsing for Indian addresses
     const parts = fullAddress.split(',').map(part => part.trim());
     
-    if (parts.length >= 3) {
-      return {
-        address_line1: parts[0] || "",
-        area: parts[1] || "",
-        city: parts[parts.length - 3] || "",
-        state: parts[parts.length - 2] || "",
-        postal_code: parts[parts.length - 1] || ""
-      };
-    }
-    
-    return {
-      address_line1: fullAddress,
+    let extractedData = {
+      address_line1: "",
       area: "",
       city: "",
       state: "",
       postal_code: ""
     };
+
+    if (parts.length >= 2) {
+      // For Indian addresses, typically:
+      // Format: Street/Road, Area/Locality, City, State PIN
+      
+      // Extract PIN code (usually 6 digits at the end)
+      const lastPart = parts[parts.length - 1];
+      const pinMatch = lastPart.match(/\b\d{6}\b/);
+      if (pinMatch) {
+        extractedData.postal_code = pinMatch[0];
+        // Remove PIN from the last part to get state
+        extractedData.state = lastPart.replace(pinMatch[0], "").trim();
+      } else if (parts.length >= 2) {
+        // If no PIN found, assume last part is state
+        extractedData.state = lastPart;
+      }
+
+      // Extract city (second last part, or last if no PIN)
+      if (parts.length >= 3) {
+        const cityIndex = pinMatch ? parts.length - 2 : parts.length - 1;
+        extractedData.city = parts[cityIndex];
+      } else if (parts.length === 2 && !pinMatch) {
+        extractedData.city = parts[1];
+      }
+
+      // Extract area/locality (usually before city)
+      if (parts.length >= 4) {
+        extractedData.area = parts[parts.length - 3];
+      } else if (parts.length === 3 && pinMatch) {
+        extractedData.area = parts[0];
+      }
+
+      // Extract street address (first part or combination of first parts)
+      if (parts.length >= 4) {
+        extractedData.address_line1 = parts.slice(0, parts.length - 3).join(", ");
+      } else if (parts.length === 3) {
+        extractedData.address_line1 = parts[0];
+      } else if (parts.length === 2) {
+        extractedData.address_line1 = parts[0];
+      } else {
+        extractedData.address_line1 = fullAddress;
+      }
+    } else {
+      // Fallback: put everything in address_line1
+      extractedData.address_line1 = fullAddress;
+    }
+
+    // Clean up empty strings and trim
+    Object.keys(extractedData).forEach(key => {
+      extractedData[key as keyof typeof extractedData] = extractedData[key as keyof typeof extractedData].trim();
+    });
+
+    console.log("Extracted address data:", extractedData);
+    return extractedData;
   };
 
   const handleSave = async () => {
@@ -132,6 +178,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
   // Auto-populate fields when initialAddress changes
   useEffect(() => {
     if (initialAddress && isOpen) {
+      console.log("Initial address received:", initialAddress);
       const extracted = extractAddressComponents(initialAddress);
       setFormData(prev => ({
         ...prev,
@@ -142,7 +189,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Complete Address Details</DialogTitle>
         </DialogHeader>
