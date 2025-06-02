@@ -365,17 +365,19 @@ const Profile = () => {
   // Show first-time user form if profile is incomplete
   if (!isProfileComplete) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <Card className="max-w-md mx-auto">
-          <CardHeader>
-            <CardTitle>Welcome to MixedWash!</CardTitle>
-            <CardDescription>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md mx-auto shadow-lg border-0">
+          <CardHeader className="text-center pb-6">
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              Welcome to MixedWash!
+            </CardTitle>
+            <CardDescription className="text-gray-600 mt-2">
               Please complete your profile to continue.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleFirstTimeProfileSubmit} className="space-y-4">
-              <div>
+          <CardContent className="px-6">
+            <form onSubmit={handleFirstTimeProfileSubmit} className="space-y-6">
+              <div className="space-y-2">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Name
                 </label>
@@ -385,11 +387,11 @@ const Profile = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="mt-1"
+                  className="h-12 text-base"
                   placeholder="Enter your full name"
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
                   Phone number
                 </label>
@@ -399,11 +401,15 @@ const Profile = () => {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
-                  className="mt-1"
+                  className="h-12 text-base"
                   placeholder="Enter your phone number"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-base rounded-lg"
+                disabled={loading}
+              >
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
