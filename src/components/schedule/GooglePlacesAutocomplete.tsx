@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { MapPin, Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import { MapPin, Loader2, AlertCircle, CheckCircle, ArrowRight, Edit } from "lucide-react";
 import { AddressParser, type ParsedAddress } from "@/utils/addressParser";
 
 interface PlaceDetails {
@@ -31,6 +31,8 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
   const [parsePreview, setParsePreview] = useState<ParsedAddress | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<any>(null);
+  const [showPlacePreview, setShowPlacePreview] = useState(false);
   const autocompleteRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,6 +57,9 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         autocompleteRef.current = null;
       }
       setSearchValue("");
+      setSelectedPlace(null);
+      setShowPlacePreview(false);
+      setParsePreview(null);
     }
   }, [isOpen]);
 
@@ -71,7 +76,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
 
   // Initialize autocomplete when everything is ready - OPTIMIZED
   useEffect(() => {
-    if (isOpen && googleReady && inputRef.current && !autocompleteRef.current) {
+    if (isOpen && googleReady && inputRef.current && !autocompleteRef.current && !showPlacePreview) {
       console.log("Initializing Google Places Autocomplete...");
       // Reduced delay for faster initialization
       const timer = setTimeout(() => {
@@ -80,7 +85,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
       
       return () => clearTimeout(timer);
     }
-  }, [isOpen, googleReady]);
+  }, [isOpen, googleReady, showPlacePreview]);
 
   const loadGoogleMapsScript = () => {
     // Check if script is already in the document
@@ -183,55 +188,57 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
   };
 
   const handlePlaceSelect = (place: any) => {
-    setIsLoading(true);
+    console.log("Processing selected place:", place);
     
-    try {
-      console.log("Processing selected place:", place);
-      
-      // Use the enhanced AddressParser
-      const enhancedResult = AddressParser.enhanceAddressFromPlace(place);
-      console.log("Enhanced parsing result:", enhancedResult);
-      
-      // Format the result for the parent component
-      const enhancedAddress = [
-        enhancedResult.house_building,
-        enhancedResult.address_line1,
-        enhancedResult.area,
-        enhancedResult.city,
-        enhancedResult.state && enhancedResult.postal_code 
-          ? `${enhancedResult.state} ${enhancedResult.postal_code}`
-          : enhancedResult.state || enhancedResult.postal_code,
-        "India"
-      ].filter(Boolean).join(", ");
-      
-      onPlaceSelect({
-        formatted_address: enhancedAddress,
-        address_components: place.address_components || [],
-        place_id: place.place_id || ''
-      });
-      
-      const confidenceMessage = enhancedResult.confidence >= 80 
-        ? "High confidence address detected"
-        : enhancedResult.confidence >= 60 
-        ? "Good address match found"
-        : "Address found - please review details";
-      
-      toast({
-        title: "Address selected",
-        description: `${confidenceMessage} (${enhancedResult.confidence}%)`,
-      });
-      
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Error processing place:", error);
-      toast({
-        title: "Error",
-        description: "Failed to process the selected address",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // Parse the place data
+    const enhancedResult = AddressParser.enhanceAddressFromPlace(place);
+    console.log("Enhanced parsing result:", enhancedResult);
+    
+    setSelectedPlace(place);
+    setParsePreview(enhancedResult);
+    setShowPlacePreview(true);
+  };
+
+  const handleUseThisAddress = () => {
+    if (!selectedPlace || !parsePreview) return;
+    
+    // Format the result for the parent component
+    const enhancedAddress = [
+      parsePreview.house_building,
+      parsePreview.address_line1,
+      parsePreview.area,
+      parsePreview.city,
+      parsePreview.state && parsePreview.postal_code 
+        ? `${parsePreview.state} ${parsePreview.postal_code}`
+        : parsePreview.state || parsePreview.postal_code,
+      "India"
+    ].filter(Boolean).join(", ");
+    
+    onPlaceSelect({
+      formatted_address: enhancedAddress,
+      address_components: selectedPlace.address_components || [],
+      place_id: selectedPlace.place_id || ''
+    });
+    
+    const confidenceMessage = parsePreview.confidence >= 80 
+      ? "High confidence address detected"
+      : parsePreview.confidence >= 60 
+      ? "Good address match found"
+      : "Address found - please review details";
+    
+    toast({
+      title: "Address selected",
+      description: `${confidenceMessage} (${parsePreview.confidence}%)`,
+    });
+    
+    onOpenChange(false);
+  };
+
+  const handleBackToSearch = () => {
+    setShowPlacePreview(false);
+    setSelectedPlace(null);
+    setParsePreview(null);
+    setSearchValue("");
   };
 
   const handleManualSearch = () => {
@@ -254,10 +261,12 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
       const manualPlace = {
         formatted_address: searchValue,
         address_components: [],
-        place_id: ''
+        place_id: '',
+        name: searchValue
       };
       
-      handlePlaceSelect(manualPlace);
+      setSelectedPlace(manualPlace);
+      setShowPlacePreview(true);
     } else {
       toast({
         title: "Address seems incomplete",
@@ -269,13 +278,13 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
 
   // Preview parsing as user types
   useEffect(() => {
-    if (searchValue.trim().length > 10) {
+    if (searchValue.trim().length > 10 && !showPlacePreview) {
       const preview = AddressParser.parseFromFormattedAddress(searchValue);
       setParsePreview(preview);
-    } else {
+    } else if (!showPlacePreview) {
       setParsePreview(null);
     }
-  }, [searchValue]);
+  }, [searchValue, showPlacePreview]);
 
   const getStatusMessage = () => {
     if (!scriptLoaded && !window.google) return "Loading Google Maps...";
@@ -298,103 +307,204 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Search Address in India
+            {showPlacePreview ? "Confirm Address" : "Search Address in India"}
           </DialogTitle>
           <DialogDescription>
-            Type building names, landmarks, or addresses to get suggestions
+            {showPlacePreview 
+              ? "Review the address details below and click 'Use This Address' to continue"
+              : "Type building names, landmarks, or addresses to get suggestions"
+            }
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <label htmlFor="address-search" className="text-sm font-medium">
-              Enter building name, landmark, or full address
-            </label>
-            <Input
-              ref={inputRef}
-              id="address-search"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="e.g., Phoenix Mall Bangalore, Brigade Road, or DLF Cyber City Gurgaon"
-              disabled={isLoading}
-              autoComplete="off"
-            />
-            <p className={`text-sm ${getStatusColor()}`}>
-              {getStatusMessage()}
-            </p>
-          </div>
 
-          {/* Address Preview */}
-          {parsePreview && searchValue.length > 10 && (
-            <div className="bg-gray-50 border rounded-md p-3">
-              <div className="flex items-center gap-2 mb-2">
-                {parsePreview.confidence >= 60 ? (
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                ) : (
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
-                )}
-                <span className="text-sm font-medium">
-                  Address Preview ({parsePreview.confidence}% confidence)
-                </span>
+        {!showPlacePreview ? (
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="address-search" className="text-sm font-medium">
+                Enter building name, landmark, or full address
+              </label>
+              <Input
+                ref={inputRef}
+                id="address-search"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                placeholder="e.g., Phoenix Mall Bangalore, Brigade Road, or DLF Cyber City Gurgaon"
+                disabled={isLoading}
+                autoComplete="off"
+              />
+              <p className={`text-sm ${getStatusColor()}`}>
+                {getStatusMessage()}
+              </p>
+            </div>
+
+            {/* Address Preview */}
+            {parsePreview && searchValue.length > 10 && (
+              <div className="bg-gray-50 border rounded-md p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  {parsePreview.confidence >= 60 ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-yellow-600" />
+                  )}
+                  <span className="text-sm font-medium">
+                    Address Preview ({parsePreview.confidence}% confidence)
+                  </span>
+                </div>
+                <div className="text-xs text-gray-600 space-y-1">
+                  {parsePreview.address_line1 && (
+                    <div>Street: {parsePreview.address_line1}</div>
+                  )}
+                  {parsePreview.area && (
+                    <div>Area: {parsePreview.area}</div>
+                  )}
+                  {parsePreview.city && (
+                    <div>City: {parsePreview.city}</div>
+                  )}
+                  {parsePreview.state && (
+                    <div>State: {parsePreview.state}</div>
+                  )}
+                  {parsePreview.postal_code && (
+                    <div>PIN: {parsePreview.postal_code}</div>
+                  )}
+                </div>
               </div>
-              <div className="text-xs text-gray-600 space-y-1">
-                {parsePreview.address_line1 && (
-                  <div>Street: {parsePreview.address_line1}</div>
-                )}
-                {parsePreview.area && (
-                  <div>Area: {parsePreview.area}</div>
-                )}
-                {parsePreview.city && (
-                  <div>City: {parsePreview.city}</div>
-                )}
-                {parsePreview.state && (
-                  <div>State: {parsePreview.state}</div>
-                )}
-                {parsePreview.postal_code && (
-                  <div>PIN: {parsePreview.postal_code}</div>
-                )}
+            )}
+            
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleManualSearch}
+                disabled={isLoading || !searchValue.trim()}
+                className="flex-1"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : "Use This Address"}
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+            </div>
+            
+            <div className="text-xs text-gray-500 text-center space-y-1">
+              <p>
+                {googleReady 
+                  ? "Building and landmark suggestions will appear as you type" 
+                  : "Loading address suggestions..."
+                }
+              </p>
+              <p className="text-blue-600">
+                Try typing: mall names, office complexes, apartment buildings, or landmarks
+              </p>
+              {!googleReady && (
+                <p className="text-orange-500">
+                  Make sure you have an internet connection
+                </p>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Place Preview Section */
+          <div className="space-y-4 py-4">
+            {/* Selected Place Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-100 p-2 rounded-lg">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-blue-900">
+                    {selectedPlace?.name || "Selected Location"}
+                  </h3>
+                  <p className="text-sm text-blue-700 mt-1">
+                    {selectedPlace?.formatted_address}
+                  </p>
+                </div>
               </div>
             </div>
-          )}
-          
-          <div className="flex gap-2">
-            <Button 
-              onClick={handleManualSearch}
-              disabled={isLoading || !searchValue.trim()}
-              className="flex-1"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : "Use This Address"}
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-          </div>
-          
-          <div className="text-xs text-gray-500 text-center space-y-1">
-            <p>
-              {googleReady 
-                ? "Building and landmark suggestions will appear as you type" 
-                : "Loading address suggestions..."
-              }
-            </p>
-            <p className="text-blue-600">
-              Try typing: mall names, office complexes, apartment buildings, or landmarks
-            </p>
-            {!googleReady && (
-              <p className="text-orange-500">
-                Make sure you have an internet connection
-              </p>
+
+            {/* Parsed Address Details */}
+            {parsePreview && (
+              <div className="bg-gray-50 border rounded-md p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  {parsePreview.confidence >= 60 ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 text-yellow-600" />
+                  )}
+                  <span className="text-sm font-medium">
+                    Parsed Address Details ({parsePreview.confidence}% confidence)
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-2 text-sm">
+                  {parsePreview.house_building && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Building:</span>
+                      <span className="font-medium">{parsePreview.house_building}</span>
+                    </div>
+                  )}
+                  {parsePreview.address_line1 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Street:</span>
+                      <span className="font-medium">{parsePreview.address_line1}</span>
+                    </div>
+                  )}
+                  {parsePreview.area && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Area:</span>
+                      <span className="font-medium">{parsePreview.area}</span>
+                    </div>
+                  )}
+                  {parsePreview.city && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">City:</span>
+                      <span className="font-medium">{parsePreview.city}</span>
+                    </div>
+                  )}
+                  {parsePreview.state && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">State:</span>
+                      <span className="font-medium">{parsePreview.state}</span>
+                    </div>
+                  )}
+                  {parsePreview.postal_code && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">PIN Code:</span>
+                      <span className="font-medium">{parsePreview.postal_code}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-2">
+              <Button 
+                onClick={handleUseThisAddress}
+                className="flex-1 bg-black hover:bg-gray-800"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Use This Address
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleBackToSearch}
+              >
+                Back
+              </Button>
+            </div>
+
+            <div className="text-xs text-gray-500 text-center">
+              Click "Use This Address" to open the address form where you can edit and add more details
+            </div>
           </div>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );
