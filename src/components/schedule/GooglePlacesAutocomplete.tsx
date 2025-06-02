@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -183,14 +182,14 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     try {
       console.log("Processing selected place:", place);
       
-      // Enhanced address processing
       let enhancedAddress = place.formatted_address || place.name;
       
-      if (place.address_components && place.address_components.length > 0) {
+      if (place.formatted_address) {
+        enhancedAddress = place.formatted_address;
+      } else if (place.address_components && place.address_components.length > 0) {
         const components = place.address_components;
         console.log("Processing address components:", components);
         
-        // Extract components for better parsing
         const streetNumber = components.find((c: any) => c.types.includes('street_number'))?.long_name || '';
         const route = components.find((c: any) => c.types.includes('route'))?.long_name || '';
         const sublocality = components.find((c: any) => 
@@ -203,8 +202,8 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
           c.types.includes('administrative_area_level_1')
         )?.long_name || '';
         const postalCode = components.find((c: any) => c.types.includes('postal_code'))?.long_name || '';
+        const country = components.find((c: any) => c.types.includes('country'))?.long_name || '';
         
-        // Build a better formatted address
         const addressParts = [];
         if (streetNumber && route) {
           addressParts.push(`${streetNumber} ${route}`);
@@ -213,8 +212,16 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         }
         if (sublocality) addressParts.push(sublocality);
         if (locality) addressParts.push(locality);
-        if (administrativeArea) addressParts.push(administrativeArea);
-        if (postalCode) addressParts.push(postalCode);
+        if (administrativeArea) {
+          if (postalCode) {
+            addressParts.push(`${administrativeArea} ${postalCode}`);
+          } else {
+            addressParts.push(administrativeArea);
+          }
+        } else if (postalCode) {
+          addressParts.push(postalCode);
+        }
+        if (country) addressParts.push(country);
         
         if (addressParts.length > 0) {
           enhancedAddress = addressParts.join(', ');

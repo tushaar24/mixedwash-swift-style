@@ -38,8 +38,9 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
   const extractAddressComponents = (fullAddress: string) => {
     console.log("Extracting address from:", fullAddress);
     
-    // More sophisticated parsing for Indian addresses
-    const parts = fullAddress.split(',').map(part => part.trim());
+    // Split by comma and clean up each part
+    const parts = fullAddress.split(',').map(part => part.trim()).filter(part => part.length > 0);
+    console.log("Address parts:", parts);
     
     let extractedData = {
       address_line1: "",
@@ -49,55 +50,65 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
       postal_code: ""
     };
 
-    if (parts.length >= 2) {
-      // For Indian addresses, typically:
-      // Format: Street/Road, Area/Locality, City, State PIN
-      
-      // Extract PIN code (usually 6 digits at the end)
-      const lastPart = parts[parts.length - 1];
-      const pinMatch = lastPart.match(/\b\d{6}\b/);
-      if (pinMatch) {
-        extractedData.postal_code = pinMatch[0];
-        // Remove PIN from the last part to get state
-        extractedData.state = lastPart.replace(pinMatch[0], "").trim();
-      } else if (parts.length >= 2) {
-        // If no PIN found, assume last part is state
-        extractedData.state = lastPart;
-      }
-
-      // Extract city (second last part, or last if no PIN)
-      if (parts.length >= 3) {
-        const cityIndex = pinMatch ? parts.length - 2 : parts.length - 1;
-        extractedData.city = parts[cityIndex];
-      } else if (parts.length === 2 && !pinMatch) {
-        extractedData.city = parts[1];
-      }
-
-      // Extract area/locality (usually before city)
-      if (parts.length >= 4) {
-        extractedData.area = parts[parts.length - 3];
-      } else if (parts.length === 3 && pinMatch) {
-        extractedData.area = parts[0];
-      }
-
-      // Extract street address (first part or combination of first parts)
-      if (parts.length >= 4) {
-        extractedData.address_line1 = parts.slice(0, parts.length - 3).join(", ");
-      } else if (parts.length === 3) {
-        extractedData.address_line1 = parts[0];
-      } else if (parts.length === 2) {
-        extractedData.address_line1 = parts[0];
-      } else {
-        extractedData.address_line1 = fullAddress;
-      }
-    } else {
-      // Fallback: put everything in address_line1
+    if (parts.length === 0) {
       extractedData.address_line1 = fullAddress;
+      return extractedData;
     }
 
-    // Clean up empty strings and trim
+    // For Indian addresses from Google Places API, the format is typically:
+    // "Street Address, Area/Locality, City, State PIN, Country"
+    
+    // Extract PIN code (6 digits) from any part
+    let pinFound = false;
+    for (let i = 0; i < parts.length; i++) {
+      const pinMatch = parts[i].match(/\b(\d{6})\b/);
+      if (pinMatch) {
+        extractedData.postal_code = pinMatch[1];
+        // Remove PIN from this part to get state
+        const stateWithoutPin = parts[i].replace(pinMatch[0], "").trim();
+        if (stateWithoutPin) {
+          extractedData.state = stateWithoutPin;
+        }
+        pinFound = true;
+        // Remove this part from further processing
+        parts.splice(i, 1);
+        break;
+      }
+    }
+
+    // Remove "India" if it's the last part
+    if (parts.length > 0 && parts[parts.length - 1].toLowerCase().includes('india')) {
+      parts.pop();
+    }
+
+    // Now process remaining parts
+    if (parts.length >= 3) {
+      // Format: Street, Area, City, (State PIN already processed)
+      extractedData.address_line1 = parts[0];
+      extractedData.area = parts[1];
+      extractedData.city = parts[2];
+      
+      // If we didn't find PIN/state in a combined part, check if there's a separate state part
+      if (!pinFound && parts.length >= 4) {
+        extractedData.state = parts[3];
+      }
+    } else if (parts.length === 2) {
+      // Format: Street/Area, City
+      extractedData.address_line1 = parts[0];
+      extractedData.city = parts[1];
+    } else if (parts.length === 1) {
+      // Only one part left, could be city or full address
+      if (!extractedData.city) {
+        extractedData.city = parts[0];
+      } else {
+        extractedData.address_line1 = parts[0];
+      }
+    }
+
+    // Clean up empty strings and trim all fields
     Object.keys(extractedData).forEach(key => {
-      extractedData[key as keyof typeof extractedData] = extractedData[key as keyof typeof extractedData].trim();
+      const value = extractedData[key as keyof typeof extractedData];
+      extractedData[key as keyof typeof extractedData] = typeof value === 'string' ? value.trim() : value;
     });
 
     console.log("Extracted address data:", extractedData);
