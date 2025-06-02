@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,22 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
   const handleAddressSelect = (address: Address) => {
     setSelectedAddressId(address.id);
     updateOrderData({ addressId: address.id });
+  };
+
+  // Handle Google Places selection
+  const handleGooglePlaceSelect = (place: any) => {
+    setSelectedPlaceAddress(place.formatted_address);
+    setGooglePlacesOpen(false);
+    setAddressDetailsOpen(true);
+  };
+
+  // Handle address saved from details form
+  const handleAddressSaved = (savedAddress: Address) => {
+    setAddresses(prev => [...prev, savedAddress]);
+    setSelectedAddressId(savedAddress.id);
+    updateOrderData({ addressId: savedAddress.id });
+    setAddressDetailsOpen(false);
+    setSelectedPlaceAddress("");
   };
 
   // Handle address form input changes

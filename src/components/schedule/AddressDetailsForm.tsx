@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -124,7 +124,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
   };
 
   // Auto-populate fields when initialAddress changes
-  useState(() => {
+  useEffect(() => {
     if (initialAddress && isOpen) {
       const extracted = extractAddressComponents(initialAddress);
       setFormData(prev => ({

@@ -45,7 +45,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     }
 
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_PLACES_API_KEY}&libraries=places&callback=initGooglePlaces`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDSOihPDFQdD9JampWVU_CD6RpdPM4qbnw&libraries=places&callback=initGooglePlaces`;
     script.async = true;
     script.defer = true;
     
