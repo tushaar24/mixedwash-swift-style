@@ -28,7 +28,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user, isFirstLogin, refreshProfile, profile } = useAuth();
+  const { user, isFirstLogin, isProfileComplete, refreshProfile, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -57,6 +57,12 @@ const Profile = () => {
   useEffect(() => {
     if (!user) {
       navigate("/auth");
+      return;
+    }
+
+    // Only fetch orders and addresses if profile is complete
+    if (!isProfileComplete) {
+      setDataLoading(false);
       return;
     }
 
@@ -140,10 +146,20 @@ const Profile = () => {
     };
 
     fetchOrdersAndAddresses();
-  }, [user, navigate, toast]);
+  }, [user, navigate, toast, isProfileComplete]);
 
   const handleFirstTimeProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!name.trim() || !phone.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in both name and phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -152,8 +168,8 @@ const Profile = () => {
       const { error } = await supabase
         .from("profiles")
         .update({
-          username: name,
-          mobile_number: phone,
+          username: name.trim(),
+          mobile_number: phone.trim(),
         })
         .eq("id", user.id);
 
@@ -162,8 +178,8 @@ const Profile = () => {
       await refreshProfile();
       
       toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated.",
+        title: "Profile completed",
+        description: "Your profile has been successfully completed.",
       });
       
       // Redirect to home page after completing first-time profile
@@ -346,55 +362,60 @@ const Profile = () => {
     return null;
   }
 
-  // Show first-time user form if it's their first login
-  if (isFirstLogin) {
+  // Show first-time user form if profile is incomplete
+  if (!isProfileComplete) {
     return (
-      <div className="min-h-screen bg-white">
-        <Navbar />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <Card className="max-w-md mx-auto">
-            <CardHeader>
-              <CardTitle>Welcome to MixedWash!</CardTitle>
-              <CardDescription>
-                Please complete your profile to continue.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleFirstTimeProfileSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                    Phone number
-                  </label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Saving..." : "Complete Profile"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </main>
-        <Footer />
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle>Welcome to MixedWash!</CardTitle>
+            <CardDescription>
+              Please complete your profile to continue.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleFirstTimeProfileSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="mt-1"
+                  placeholder="Enter your full name"
+                />
+              </div>
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                  Phone number
+                </label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  className="mt-1"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Completing Profile...
+                  </>
+                ) : (
+                  "Complete Profile"
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }

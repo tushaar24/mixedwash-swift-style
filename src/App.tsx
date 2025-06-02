@@ -12,6 +12,7 @@ import Contact from "./pages/Contact";
 import ServiceDetail from "./pages/ServiceDetail";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import React from "react";
 
 const queryClient = new QueryClient();
@@ -26,10 +27,38 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/schedule" element={<Schedule />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/service/:serviceId" element={<ServiceDetail />} />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute requireCompleteProfile={false}>
+                      <Profile />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/schedule" 
+                  element={
+                    <ProtectedRoute>
+                      <Schedule />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/contact" 
+                  element={
+                    <ProtectedRoute>
+                      <Contact />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/service/:serviceId" 
+                  element={
+                    <ProtectedRoute>
+                      <ServiceDetail />
+                    </ProtectedRoute>
+                  } 
+                />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

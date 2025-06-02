@@ -10,6 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   profile: Profile | null;
   isFirstLogin: boolean;
+  isProfileComplete: boolean;
   refreshProfile: () => Promise<void>;
 }
 
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   profile: null,
   isFirstLogin: false,
+  isProfileComplete: false,
   refreshProfile: async () => {},
 });
 
@@ -34,6 +36,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -55,13 +58,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const checkProfileCompleteness = (profileData: Profile | null) => {
+    if (!profileData) return false;
+    return !!(profileData.username && profileData.mobile_number);
+  };
+
   const refreshProfile = async () => {
     if (user) {
       const profileData = await fetchProfile(user.id);
       setProfile(profileData);
       
-      // Check if this is a first login (no username AND no mobile number)
-      if (profileData && (!profileData.username || !profileData.mobile_number)) {
+      const isComplete = checkProfileCompleteness(profileData);
+      setIsProfileComplete(isComplete);
+      
+      // Check if this is a first login (profile exists but is incomplete)
+      if (profileData && !isComplete) {
         setIsFirstLogin(true);
       } else {
         setIsFirstLogin(false);
@@ -83,8 +94,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const profileData = await fetchProfile(newSession.user.id);
             setProfile(profileData);
             
+            const isComplete = checkProfileCompleteness(profileData);
+            setIsProfileComplete(isComplete);
+            
             // User is considered first-time if they don't have BOTH username AND mobile number
-            if (profileData && (!profileData.username || !profileData.mobile_number)) {
+            if (profileData && !isComplete) {
               setIsFirstLogin(true);
             } else {
               setIsFirstLogin(false);
@@ -95,6 +109,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           // Clear profile when signed out
           setProfile(null);
           setIsFirstLogin(false);
+          setIsProfileComplete(false);
           setIsLoading(false);
         }
       }
@@ -111,8 +126,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const profileData = await fetchProfile(session.user.id);
         setProfile(profileData);
         
+        const isComplete = checkProfileCompleteness(profileData);
+        setIsProfileComplete(isComplete);
+        
         // User is considered first-time if they don't have BOTH username AND mobile number
-        if (profileData && (!profileData.username || !profileData.mobile_number)) {
+        if (profileData && !isComplete) {
           setIsFirstLogin(true);
         } else {
           setIsFirstLogin(false);
@@ -131,6 +149,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isLoading,
     profile,
     isFirstLogin,
+    isProfileComplete,
     refreshProfile,
   };
 
