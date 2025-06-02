@@ -14,7 +14,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { user, isFirstLogin, isLoading } = useAuth();
+  const { user, isLoading, isProfileComplete } = useAuth();
 
   useEffect(() => {
     // Don't redirect while auth context is still loading
@@ -22,15 +22,15 @@ const Auth = () => {
     
     // Check if user is already logged in
     if (user) {
-      if (isFirstLogin) {
-        // Redirect to profile page for first-time users or users missing profile info
+      if (!isProfileComplete) {
+        // Redirect to profile page for incomplete profiles
         navigate("/profile");
       } else {
         // Redirect to home for users with complete profiles
         navigate("/");
       }
     }
-  }, [user, isFirstLogin, isLoading, navigate]);
+  }, [user, isProfileComplete, isLoading, navigate]);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

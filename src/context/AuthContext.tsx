@@ -60,7 +60,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const checkProfileCompleteness = (profileData: Profile | null) => {
     if (!profileData) return false;
-    return !!(profileData.username && profileData.mobile_number);
+    // Profile is complete if both username and mobile_number are present and not empty
+    return !!(profileData.username?.trim() && profileData.mobile_number?.trim());
   };
 
   const refreshProfile = async () => {
@@ -81,21 +82,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST with setTimeout approach to avoid deadlocks
+    console.log("Setting up auth state listener...");
+    
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log("Auth state changed:", event, newSession);
+      (event, newSession) => {
+        console.log("Auth state changed:", event, newSession?.user?.id);
         setSession(newSession);
         setUser(newSession?.user ?? null);
         
-        // Check if this is a first login when the session changes
         if (newSession?.user) {
+          // Use setTimeout to avoid blocking the auth state change
           setTimeout(async () => {
             const profileData = await fetchProfile(newSession.user.id);
             setProfile(profileData);
             
             const isComplete = checkProfileCompleteness(profileData);
             setIsProfileComplete(isComplete);
+            
+            console.log("Profile completeness check:", {
+              hasProfile: !!profileData,
+              username: profileData?.username,
+              mobile_number: profileData?.mobile_number,
+              isComplete
+            });
             
             // User is considered first-time if they don't have BOTH username AND mobile number
             if (profileData && !isComplete) {
@@ -117,17 +127,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log("Got existing session:", session);
+      console.log("Got existing session:", session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
-      // Check if this is a first login when retrieving the existing session
       if (session?.user) {
         const profileData = await fetchProfile(session.user.id);
         setProfile(profileData);
         
         const isComplete = checkProfileCompleteness(profileData);
         setIsProfileComplete(isComplete);
+        
+        console.log("Initial profile completeness check:", {
+          hasProfile: !!profileData,
+          username: profileData?.username,
+          mobile_number: profileData?.mobile_number,
+          isComplete
+        });
         
         // User is considered first-time if they don't have BOTH username AND mobile number
         if (profileData && !isComplete) {
