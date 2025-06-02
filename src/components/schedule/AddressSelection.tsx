@@ -12,8 +12,10 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight, Home, Loader2, MapPin, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Home, Loader2, MapPin, Plus, Search } from "lucide-react";
 import { OrderData } from "@/pages/Schedule";
+import { GooglePlacesAutocomplete } from "./GooglePlacesAutocomplete";
+import { AddressDetailsForm } from "./AddressDetailsForm";
 
 interface Address {
   id: string;
@@ -37,6 +39,9 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
   const [loading, setLoading] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(orderData.addressId);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [googlePlacesOpen, setGooglePlacesOpen] = useState(false);
+  const [addressDetailsOpen, setAddressDetailsOpen] = useState(false);
+  const [selectedPlaceAddress, setSelectedPlaceAddress] = useState("");
   
   // New address form state
   const [newAddress, setNewAddress] = useState({
@@ -271,129 +276,157 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         </div>
       )}
       
-      {/* Add new address button */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger asChild>
-          <Button 
-            variant="outline" 
-            className="w-full mt-4 border-dashed border-gray-300 py-6 h-auto flex items-center justify-center gap-2"
-          >
-            <Plus className="h-5 w-5" />
-            Add a New Address
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add a New Address</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label htmlFor="address_line1" className="text-sm font-medium">
-                Address Line 1 *
-              </label>
-              <Input 
-                id="address_line1"
-                name="address_line1"
-                value={newAddress.address_line1}
-                onChange={handleAddressChange}
-                placeholder="House/Flat No., Building Name, Street"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="address_line2" className="text-sm font-medium">
-                Address Line 2 (Optional)
-              </label>
-              <Input 
-                id="address_line2"
-                name="address_line2"
-                value={newAddress.address_line2}
-                onChange={handleAddressChange}
-                placeholder="Landmark, Area"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="city" className="text-sm font-medium">
-                  City *
-                </label>
-                <Input 
-                  id="city"
-                  name="city"
-                  value={newAddress.city}
-                  onChange={handleAddressChange}
-                  placeholder="City"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="state" className="text-sm font-medium">
-                  State *
-                </label>
-                <Input 
-                  id="state"
-                  name="state"
-                  value={newAddress.state}
-                  onChange={handleAddressChange}
-                  placeholder="State"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="postal_code" className="text-sm font-medium">
-                Postal Code *
-              </label>
-              <Input 
-                id="postal_code"
-                name="postal_code"
-                value={newAddress.postal_code}
-                onChange={handleAddressChange}
-                placeholder="Postal Code"
-                required
-              />
-            </div>
-            
-            <div className="flex items-center space-x-2 pt-2">
-              <input
-                type="checkbox"
-                id="is_default"
-                name="is_default"
-                checked={newAddress.is_default}
-                onChange={handleAddressChange}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor="is_default" className="text-sm">
-                Set as default address
-              </label>
-            </div>
-          </div>
-          <DialogFooter>
+      {/* Add new address options */}
+      <div className="space-y-3">
+        {/* Google Places search button */}
+        <Button 
+          onClick={() => setGooglePlacesOpen(true)}
+          variant="outline" 
+          className="w-full border-dashed border-gray-300 py-6 h-auto flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200"
+        >
+          <Search className="h-5 w-5 text-blue-600" />
+          <span className="text-blue-700 font-medium">Search Address with Google Places</span>
+        </Button>
+
+        {/* Manual address entry */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
             <Button 
-              type="button" 
               variant="outline" 
-              onClick={() => setDialogOpen(false)}
+              className="w-full border-dashed border-gray-300 py-6 h-auto flex items-center justify-center gap-2"
             >
-              Cancel
+              <Plus className="h-5 w-5" />
+              Add Address Manually
             </Button>
-            <Button 
-              onClick={handleSaveAddress} 
-              disabled={savingAddress}
-              className="bg-black hover:bg-gray-800"
-            >
-              {savingAddress ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : "Save Address"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add a New Address</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label htmlFor="address_line1" className="text-sm font-medium">
+                  Address Line 1 *
+                </label>
+                <Input 
+                  id="address_line1"
+                  name="address_line1"
+                  value={newAddress.address_line1}
+                  onChange={handleAddressChange}
+                  placeholder="House/Flat No., Building Name, Street"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="address_line2" className="text-sm font-medium">
+                  Address Line 2 (Optional)
+                </label>
+                <Input 
+                  id="address_line2"
+                  name="address_line2"
+                  value={newAddress.address_line2}
+                  onChange={handleAddressChange}
+                  placeholder="Landmark, Area"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="city" className="text-sm font-medium">
+                    City *
+                  </label>
+                  <Input 
+                    id="city"
+                    name="city"
+                    value={newAddress.city}
+                    onChange={handleAddressChange}
+                    placeholder="City"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="state" className="text-sm font-medium">
+                    State *
+                  </label>
+                  <Input 
+                    id="state"
+                    name="state"
+                    value={newAddress.state}
+                    onChange={handleAddressChange}
+                    placeholder="State"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="postal_code" className="text-sm font-medium">
+                  Postal Code *
+                </label>
+                <Input 
+                  id="postal_code"
+                  name="postal_code"
+                  value={newAddress.postal_code}
+                  onChange={handleAddressChange}
+                  placeholder="Postal Code"
+                  required
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="is_default"
+                  name="is_default"
+                  checked={newAddress.is_default}
+                  onChange={handleAddressChange}
+                  className="rounded border-gray-300"
+                />
+                <label htmlFor="is_default" className="text-sm">
+                  Set as default address
+                </label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveAddress} 
+                disabled={savingAddress}
+                className="bg-black hover:bg-gray-800"
+              >
+                {savingAddress ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : "Save Address"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Google Places Autocomplete Dialog */}
+      <GooglePlacesAutocomplete 
+        isOpen={googlePlacesOpen}
+        onOpenChange={setGooglePlacesOpen}
+        onPlaceSelect={handleGooglePlaceSelect}
+      />
+
+      {/* Address Details Form Dialog */}
+      <AddressDetailsForm 
+        isOpen={addressDetailsOpen}
+        onOpenChange={setAddressDetailsOpen}
+        initialAddress={selectedPlaceAddress}
+        onAddressSaved={handleAddressSaved}
+      />
       
       {/* Back button (not sticky) */}
       <div className="pt-8">
