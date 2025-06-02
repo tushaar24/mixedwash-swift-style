@@ -1,568 +1,450 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight, Home, Loader2, MapPin, Plus, Search, Locate } from "lucide-react";
-import { OrderData } from "@/pages/Schedule";
-import { GooglePlacesAutocomplete } from "./GooglePlacesAutocomplete";
-import { AddressDetailsForm } from "./AddressDetailsForm";
+import { Label } from "@/components/ui/label";
+import { MapPin, Search, Plus, Edit3, Trash2, Navigation } from "lucide-react";
+import { GooglePlacesAutocomplete } from './GooglePlacesAutocomplete';
 
 interface Address {
   id: string;
-  address_line1: string;
-  address_line2?: string;
+  label: string;
+  street: string;
   city: string;
   state: string;
-  postal_code: string;
-  is_default: boolean;
+  zipCode: string;
+  isDefault: boolean;
 }
 
+const mockAddresses: Address[] = [
+  {
+    id: '1',
+    label: 'Home',
+    street: '123 Main St',
+    city: 'Anytown',
+    state: 'CA',
+    zipCode: '91234',
+    isDefault: true,
+  },
+  {
+    id: '2',
+    label: 'Work',
+    street: '456 Office Rd',
+    city: 'Techville',
+    state: 'WA',
+    zipCode: '98765',
+    isDefault: false,
+  },
+];
+
 interface AddressSelectionProps {
-  orderData: OrderData;
-  updateOrderData: (data: Partial<OrderData>) => void;
-  onNext: () => void;
+  onNext: (address: Address) => void;
   onBack: () => void;
 }
 
-export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }: AddressSelectionProps) => {
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(orderData.addressId);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [googlePlacesOpen, setGooglePlacesOpen] = useState(false);
-  const [addressDetailsOpen, setAddressDetailsOpen] = useState(false);
-  const [selectedPlaceAddress, setSelectedPlaceAddress] = useState("");
-  const [locatingUser, setLocatingUser] = useState(false);
-  
-  // New address form state
-  const [newAddress, setNewAddress] = useState({
-    address_line1: "",
-    address_line2: "",
-    city: "",
-    state: "",
-    postal_code: "",
-    is_default: false
-  });
-  const [savingAddress, setSavingAddress] = useState(false);
-
-  // Fetch addresses from Supabase
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("addresses")
-          .select("*")
-          .order("is_default", { ascending: false });
-          
-        if (error) {
-          throw error;
-        }
-        
-        setAddresses(data || []);
-        
-        // If there's only one address, select it automatically
-        if (data && data.length === 1 && !selectedAddressId) {
-          setSelectedAddressId(data[0].id);
-          updateOrderData({ addressId: data[0].id });
-        }
-        
-        // If there's a default address and no selection, select it
-        if (data && data.length > 0 && !selectedAddressId) {
-          const defaultAddress = data.find(addr => addr.is_default);
-          if (defaultAddress) {
-            setSelectedAddressId(defaultAddress.id);
-            updateOrderData({ addressId: defaultAddress.id });
-          }
-        }
-      } catch (error: any) {
-        toast({
-          title: "Error fetching addresses",
-          description: error.message,
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
+interface GooglePlaceResult {
+  formatted_address: string;
+  geometry: {
+    location: {
+      lat: () => number;
+      lng: () => number;
     };
-    
-    fetchAddresses();
-  }, [selectedAddressId, updateOrderData]);
+  };
+  address_components: Array<{
+    long_name: string;
+    short_name: string;
+    types: string[];
+  }>;
+}
 
-  // Get user's current location
-  const handleUseCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast({
-        title: "Geolocation not supported",
-        description: "Your browser doesn't support location services",
-        variant: "destructive",
-      });
-      return;
-    }
+export const AddressSelection: React.FC<AddressSelectionProps> = ({ onNext, onBack }) => {
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>(mockAddresses);
+  const [mode, setMode] = useState<'selection' | 'edit' | 'add' | 'edit-detected'>('selection');
+  const [addressToEdit, setAddressToEdit] = useState<Address | null>(null);
+  const [newAddress, setNewAddress] = useState<Address>({
+    id: '',
+    label: '',
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    isDefault: false,
+  });
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [detectedAddress, setDetectedAddress] = useState<Address | null>(null);
 
-    setLocatingUser(true);
-    
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        
-        try {
-          // Use Google Geocoding API to get address from coordinates
-          const geocoder = new window.google.maps.Geocoder();
-          const result = await new Promise((resolve, reject) => {
-            geocoder.geocode(
-              { location: { lat: latitude, lng: longitude } },
-              (results, status) => {
-                if (status === 'OK' && results[0]) {
-                  resolve(results[0]);
-                } else {
-                  reject(new Error('Geocoding failed'));
-                }
+  const handleCurrentLocation = () => {
+    if (navigator.geolocation) {
+      setIsGettingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          // Use reverse geocoding to get address details
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode(
+            { location: { lat: latitude, lng: longitude } },
+            (results, status) => {
+              setIsGettingLocation(false);
+              
+              if (status === 'OK' && results && results[0]) {
+                const result = results[0] as GooglePlaceResult;
+                const addressComponents = result.address_components;
+                
+                // Parse address components
+                let street = '';
+                let city = '';
+                let state = '';
+                let zipCode = '';
+                
+                addressComponents.forEach(component => {
+                  const types = component.types;
+                  if (types.includes('street_number') || types.includes('route')) {
+                    street += component.long_name + ' ';
+                  } else if (types.includes('locality')) {
+                    city = component.long_name;
+                  } else if (types.includes('administrative_area_level_1')) {
+                    state = component.long_name;
+                  } else if (types.includes('postal_code')) {
+                    zipCode = component.long_name;
+                  }
+                });
+
+                const detectedAddress: Address = {
+                  id: 'current-location',
+                  label: 'Current Location',
+                  street: street.trim(),
+                  city,
+                  state,
+                  zipCode,
+                  isDefault: false
+                };
+
+                setDetectedAddress(detectedAddress);
+                setMode('edit-detected');
+              } else {
+                console.error('Geocoding failed:', status);
               }
-            );
-          });
-          
-          setSelectedPlaceAddress(result.formatted_address);
-          setAddressDetailsOpen(true);
-          
-          toast({
-            title: "Location found",
-            description: "Please review and edit your address details",
-          });
-        } catch (error) {
-          toast({
-            title: "Error getting address",
-            description: "Could not get address from your location",
-            variant: "destructive",
-          });
-        } finally {
-          setLocatingUser(false);
+            }
+          );
+        },
+        (error) => {
+          setIsGettingLocation(false);
+          console.error('Error getting location:', error);
         }
-      },
-      (error) => {
-        setLocatingUser(false);
-        let errorMessage = "Could not access your location";
-        
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = "Location access denied. Please enable location services and try again.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location information unavailable";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "Location request timed out";
-            break;
-        }
-        
-        toast({
-          title: "Location Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
-      }
-    );
-  };
-
-  // Select an address
-  const handleAddressSelect = (address: Address) => {
-    setSelectedAddressId(address.id);
-    updateOrderData({ addressId: address.id });
-  };
-
-  // Handle Google Places selection
-  const handleGooglePlaceSelect = (place: any) => {
-    setSelectedPlaceAddress(place.formatted_address);
-    setGooglePlacesOpen(false);
-    setAddressDetailsOpen(true);
-  };
-
-  // Handle address saved from details form
-  const handleAddressSaved = (savedAddress: Address) => {
-    setAddresses(prev => [...prev, savedAddress]);
-    setSelectedAddressId(savedAddress.id);
-    updateOrderData({ addressId: savedAddress.id });
-    setAddressDetailsOpen(false);
-    setSelectedPlaceAddress("");
-  };
-
-  // Handle address form input changes
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setNewAddress(prev => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value
-    }));
-  };
-
-  // Save new address
-  const handleSaveAddress = async () => {
-    // Basic validation
-    if (!newAddress.address_line1 || !newAddress.city || !newAddress.state || !newAddress.postal_code) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setSavingAddress(true);
-    
-    try {
-      // Get the current authenticated user
-      const { data: authData } = await supabase.auth.getUser();
-      if (!authData || !authData.user) {
-        throw new Error("You must be logged in to add an address");
-      }
-
-      // Check if this is the first address, make it default if so
-      if (addresses.length === 0) {
-        newAddress.is_default = true;
-      }
-      
-      const { data, error } = await supabase
-        .from("addresses")
-        .insert([{
-          ...newAddress,
-          user_id: authData.user.id // Add the user_id here
-        }])
-        .select();
-        
-      if (error) {
-        throw error;
-      }
-      
-      if (data && data.length > 0) {
-        // If setting this as default, update other addresses
-        if (newAddress.is_default) {
-          await supabase
-            .from("addresses")
-            .update({ is_default: false })
-            .neq("id", data[0].id);
-        }
-        
-        toast({
-          title: "Address saved",
-          description: "Your address has been saved successfully",
-        });
-        
-        // Add the new address to the list and select it
-        setAddresses([...addresses, data[0]]);
-        setSelectedAddressId(data[0].id);
-        updateOrderData({ addressId: data[0].id });
-        
-        // Close the dialog
-        setDialogOpen(false);
-        
-        // Reset form
-        setNewAddress({
-          address_line1: "",
-          address_line2: "",
-          city: "",
-          state: "",
-          postal_code: "",
-          is_default: false
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error saving address",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setSavingAddress(false);
+      );
     }
   };
 
-  // Continue to next step
-  const handleContinue = () => {
-    if (!selectedAddressId) {
-      toast({
-        title: "Please select an address",
-        description: "You need to select an address or add a new one to continue",
-      });
-      return;
-    }
+  const handlePlaceSelect = (place: any) => {
+    const addressComponents = place.address_components;
     
-    onNext();
+    let street = '';
+    let city = '';
+    let state = '';
+    let zipCode = '';
+    
+    addressComponents.forEach((component: any) => {
+      const types = component.types;
+      if (types.includes('street_number') || types.includes('route')) {
+        street += component.long_name + ' ';
+      } else if (types.includes('locality')) {
+        city = component.long_name;
+      } else if (types.includes('administrative_area_level_1')) {
+        state = component.long_name;
+      } else if (types.includes('postal_code')) {
+        zipCode = component.long_name;
+      }
+    });
+
+    const searchedAddress: Address = {
+      id: 'searched-location',
+      label: 'Searched Location',
+      street: street.trim(),
+      city,
+      state,
+      zipCode,
+      isDefault: false
+    };
+
+    setDetectedAddress(searchedAddress);
+    setMode('edit-detected');
   };
 
-  // Loading state
-  if (loading) {
+  const handleSaveAddress = () => {
+    if (newAddress.label && newAddress.street && newAddress.city && newAddress.state && newAddress.zipCode) {
+      const newId = String(Date.now());
+      const addressToAdd = { ...newAddress, id: newId };
+      setSavedAddresses([...savedAddresses, addressToAdd]);
+      setNewAddress({ id: '', label: '', street: '', city: '', state: '', zipCode: '', isDefault: false });
+      setMode('selection');
+    } else {
+      alert('Please fill in all fields.');
+    }
+  };
+
+  const handleEditAddress = (address: Address) => {
+    setAddressToEdit(address);
+    setNewAddress(address);
+    setMode('edit');
+  };
+
+  const handleDeleteAddress = (id: string) => {
+    setSavedAddresses(savedAddresses.filter(address => address.id !== id));
+  };
+
+  const handleSelectAddress = (address: Address) => {
+    onNext(address);
+  };
+
+  const handleManualEntry = () => {
+    setMode('add');
+  };
+
+  const renderEditForm = (address: Address, onChange: (address: Address) => void, onSave: () => void) => (
+    <div className="space-y-4">
+      <div>
+        <Label htmlFor="label" className="text-black">Label</Label>
+        <Input
+          id="label"
+          value={address.label}
+          onChange={(e) => onChange({ ...address, label: e.target.value })}
+          className="border-gray-300 text-black"
+        />
+      </div>
+      <div>
+        <Label htmlFor="street" className="text-black">Street</Label>
+        <Input
+          id="street"
+          value={address.street}
+          onChange={(e) => onChange({ ...address, street: e.target.value })}
+          className="border-gray-300 text-black"
+        />
+      </div>
+      <div>
+        <Label htmlFor="city" className="text-black">City</Label>
+        <Input
+          id="city"
+          value={address.city}
+          onChange={(e) => onChange({ ...address, city: e.target.value })}
+          className="border-gray-300 text-black"
+        />
+      </div>
+      <div>
+        <Label htmlFor="state" className="text-black">State</Label>
+        <Input
+          id="state"
+          value={address.state}
+          onChange={(e) => onChange({ ...address, state: e.target.value })}
+          className="border-gray-300 text-black"
+        />
+      </div>
+      <div>
+        <Label htmlFor="zipCode" className="text-black">Zip Code</Label>
+        <Input
+          id="zipCode"
+          value={address.zipCode}
+          onChange={(e) => onChange({ ...address, zipCode: e.target.value })}
+          className="border-gray-300 text-black"
+        />
+      </div>
+      <Button onClick={onSave} className="w-full bg-black text-white hover:bg-gray-800">
+        Save Address
+      </Button>
+    </div>
+  );
+
+  if (mode === 'edit-detected') {
     return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-black mb-2">Confirm Your Address</h2>
+          <p className="text-gray-600">Please review and edit your address details if needed.</p>
+        </div>
+
+        {renderEditForm(detectedAddress!, (address) => {
+          setDetectedAddress(address);
+        }, () => {
+          onNext(detectedAddress!);
+        })}
+
+        <Button 
+          variant="outline" 
+          onClick={() => setMode('selection')}
+          className="w-full border-gray-300 text-black hover:bg-gray-50"
+        >
+          Back to Address Options
+        </Button>
+      </div>
+    );
+  }
+
+  if (mode === 'edit') {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-black mb-2">Edit Address</h2>
+          <p className="text-gray-600">Edit your saved address details.</p>
+        </div>
+
+        {renderEditForm(newAddress, (address) => {
+          setNewAddress(address);
+        }, () => {
+          if (newAddress.label && newAddress.street && newAddress.city && newAddress.state && newAddress.zipCode) {
+            const updatedAddresses = savedAddresses.map(address =>
+              address.id === newAddress.id ? newAddress : address
+            );
+            setSavedAddresses(updatedAddresses);
+            setMode('selection');
+          } else {
+            alert('Please fill in all fields.');
+          }
+        })}
+
+        <Button 
+          variant="outline" 
+          onClick={() => setMode('selection')}
+          className="w-full border-gray-300 text-black hover:bg-gray-50"
+        >
+          Cancel
+        </Button>
+      </div>
+    );
+  }
+
+  if (mode === 'add') {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-black mb-2">Add New Address</h2>
+          <p className="text-gray-600">Enter the address details below.</p>
+        </div>
+
+        {renderEditForm(newAddress, (address) => {
+          setNewAddress(address);
+        }, handleSaveAddress)}
+
+        <Button 
+          variant="outline" 
+          onClick={() => setMode('selection')}
+          className="w-full border-gray-300 text-black hover:bg-gray-50"
+        >
+          Cancel
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 pb-24">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold">Select Pickup Address</h1>
-        <p className="text-gray-600 mt-2">Choose where we should pick up your laundry</p>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-black mb-2">Where should we pick up your laundry?</h2>
+        <p className="text-gray-600">Choose your pickup address</p>
       </div>
-      
-      {/* Primary Address Options */}
-      <div className="space-y-4">
-        {/* Use Current Location */}
-        <Button 
-          onClick={handleUseCurrentLocation}
-          disabled={locatingUser}
-          className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-3 text-lg font-medium"
-        >
-          {locatingUser ? (
-            <Loader2 className="h-6 w-6 animate-spin" />
-          ) : (
-            <Locate className="h-6 w-6" />
-          )}
-          {locatingUser ? "Getting your location..." : "Use Current Location"}
-        </Button>
 
-        {/* Search with Google Places */}
-        <Button 
-          onClick={() => setGooglePlacesOpen(true)}
-          variant="outline"
-          className="w-full h-16 border-2 border-gray-300 hover:border-gray-400 flex items-center justify-center gap-3 text-lg font-medium"
-        >
-          <Search className="h-6 w-6 text-gray-600" />
-          Search for Address
-        </Button>
+      {/* Primary Options */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="border-gray-200 hover:border-gray-300 transition-colors cursor-pointer" onClick={handleCurrentLocation}>
+          <CardContent className="p-6 text-center">
+            <div className="flex flex-col items-center space-y-3">
+              <div className="p-3 bg-gray-100 rounded-full">
+                <Navigation className="h-6 w-6 text-black" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-black">Use Current Location</h3>
+                <p className="text-sm text-gray-600 mt-1">We'll detect your location automatically</p>
+              </div>
+              {isGettingLocation && (
+                <p className="text-sm text-gray-500">Getting your location...</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-gray-200 hover:border-gray-300 transition-colors">
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center space-y-3">
+              <div className="p-3 bg-gray-100 rounded-full">
+                <Search className="h-6 w-6 text-black" />
+              </div>
+              <div className="text-center">
+                <h3 className="font-semibold text-black mb-2">Search for Address</h3>
+                <GooglePlacesAutocomplete
+                  onPlaceSelect={handlePlaceSelect}
+                  placeholder="Enter your address"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Saved Addresses */}
-      {addresses.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mt-8 mb-4">
-            <div className="flex-1 h-px bg-gray-200"></div>
-            <span>OR CHOOSE FROM SAVED ADDRESSES</span>
-            <div className="flex-1 h-px bg-gray-200"></div>
+      {savedAddresses.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold text-black mb-3">Saved Addresses</h3>
+          <div className="space-y-2">
+            {savedAddresses.map((address) => (
+              <Card key={address.id} className="border-gray-200 hover:border-gray-300 transition-colors">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3 flex-1" onClick={() => handleSelectAddress(address)}>
+                      <MapPin className="h-5 w-5 text-gray-400" />
+                      <div className="cursor-pointer flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-black">{address.label}</span>
+                          {address.isDefault && (
+                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Default</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {address.street}, {address.city}, {address.state} {address.zipCode}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditAddress(address)}
+                        className="text-gray-400 hover:text-black"
+                      >
+                        <Edit3 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteAddress(address.id)}
+                        className="text-gray-400 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          
-          {addresses.map((address) => (
-            <Card 
-              key={address.id}
-              className={`transition-all cursor-pointer hover:shadow-md ${
-                selectedAddressId === address.id 
-                  ? "ring-2 ring-black shadow-md" 
-                  : "hover:scale-[1.01] border-gray-200"
-              }`}
-              onClick={() => handleAddressSelect(address)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start">
-                  <div className="bg-gray-100 p-2 rounded-lg mr-4">
-                    <Home className="h-6 w-6 text-gray-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center">
-                      <h3 className="font-bold">{address.address_line1}</h3>
-                      {address.is_default && (
-                        <span className="ml-2 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
-                          Default
-                        </span>
-                      )}
-                    </div>
-                    {address.address_line2 && (
-                      <p className="text-sm text-gray-600">{address.address_line2}</p>
-                    )}
-                    <p className="text-sm text-gray-600">
-                      {address.city}, {address.state} {address.postal_code}
-                    </p>
-                  </div>
-                  
-                  {selectedAddressId === address.id && (
-                    <div className="h-6 w-6 bg-black rounded-full flex items-center justify-center">
-                      <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
         </div>
       )}
-      
+
       {/* Manual Entry Option */}
-      <div className="pt-4">
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              variant="ghost" 
-              className="w-full text-gray-600 hover:text-gray-800 flex items-center justify-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Enter Address Manually
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add a New Address</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <label htmlFor="address_line1" className="text-sm font-medium">
-                  Address Line 1 *
-                </label>
-                <Input 
-                  id="address_line1"
-                  name="address_line1"
-                  value={newAddress.address_line1}
-                  onChange={handleAddressChange}
-                  placeholder="House/Flat No., Building Name, Street"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="address_line2" className="text-sm font-medium">
-                  Address Line 2 (Optional)
-                </label>
-                <Input 
-                  id="address_line2"
-                  name="address_line2"
-                  value={newAddress.address_line2}
-                  onChange={handleAddressChange}
-                  placeholder="Landmark, Area"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="city" className="text-sm font-medium">
-                    City *
-                  </label>
-                  <Input 
-                    id="city"
-                    name="city"
-                    value={newAddress.city}
-                    onChange={handleAddressChange}
-                    placeholder="City"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="state" className="text-sm font-medium">
-                    State *
-                  </label>
-                  <Input 
-                    id="state"
-                    name="state"
-                    value={newAddress.state}
-                    onChange={handleAddressChange}
-                    placeholder="State"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="postal_code" className="text-sm font-medium">
-                  Postal Code *
-                </label>
-                <Input 
-                  id="postal_code"
-                  name="postal_code"
-                  value={newAddress.postal_code}
-                  onChange={handleAddressChange}
-                  placeholder="Postal Code"
-                  required
-                />
-              </div>
-              
-              <div className="flex items-center space-x-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="is_default"
-                  name="is_default"
-                  checked={newAddress.is_default}
-                  onChange={handleAddressChange}
-                  className="rounded border-gray-300"
-                />
-                <label htmlFor="is_default" className="text-sm">
-                  Set as default address
-                </label>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSaveAddress} 
-                disabled={savingAddress}
-                className="bg-black hover:bg-gray-800"
-              >
-                {savingAddress ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : "Save Address"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <Card className="border-gray-200 hover:border-gray-300 transition-colors cursor-pointer" onClick={handleManualEntry}>
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-3">
+            <Plus className="h-5 w-5 text-gray-400" />
+            <span className="text-black font-medium">Add address manually</span>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Google Places Autocomplete Dialog */}
-      <GooglePlacesAutocomplete 
-        isOpen={googlePlacesOpen}
-        onOpenChange={setGooglePlacesOpen}
-        onPlaceSelect={handleGooglePlaceSelect}
-      />
-
-      {/* Address Details Form Dialog */}
-      <AddressDetailsForm 
-        isOpen={addressDetailsOpen}
-        onOpenChange={setAddressDetailsOpen}
-        initialAddress={selectedPlaceAddress}
-        onAddressSaved={handleAddressSaved}
-      />
-      
-      {/* Back button */}
-      <div className="pt-8">
+      <div className="flex space-x-4">
         <Button 
+          variant="outline" 
           onClick={onBack}
-          variant="outline"
-          className="px-6 py-6 h-auto text-base group"
+          className="flex-1 border-gray-300 text-black hover:bg-gray-50"
         >
-          <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-          Back to Services
-        </Button>
-      </div>
-      
-      {/* Sticky Continue button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center z-10">
-        <Button 
-          onClick={handleContinue}
-          className="bg-black hover:bg-gray-800 text-white px-8 py-6 h-auto text-base group min-w-48"
-          disabled={!selectedAddressId}
-        >
-          Continue to Schedule
-          <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          Back
         </Button>
       </div>
     </div>
