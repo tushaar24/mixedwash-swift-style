@@ -12,12 +12,12 @@ export const ConvenienceSection = () => {
         <div className="flex flex-col items-center">
           {/* Content Column - Centered */}
           <div className="space-y-8 max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-black border border-gray-300 mx-auto">
+            <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-gray-800 border border-gray-300 mx-auto">
               <Clock className="h-4 w-4" />
               <span className="text-sm font-semibold">Your convenience is our priority</span>
             </div>
             
-            <h2 className="text-3xl md:text-4xl font-bold text-black">Laundry Service That Works Around <span className="text-gray-600">Your Schedule</span></h2>
+            <h2 className="text-3xl md:text-4xl font-bold">Laundry Service That Works Around <span className="text-gray-600">Your Schedule</span></h2>
             
             <p className="text-lg text-gray-600">
               We understand your time is valuable. That's why we've designed our service to fit perfectly into your busy life. Schedule pickups and deliveries when it works for you - morning, afternoon, or evening.
@@ -32,11 +32,11 @@ export const ConvenienceSection = () => {
               ].map((item, index) => (
                 <div key={index} className="flex items-center bg-gray-50 p-4 rounded-lg shadow-sm">
                   <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center mr-4">
-                    <svg className="h-4 w-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-4 w-4 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <span className="text-black font-medium">{item}</span>
+                  <span className="text-gray-800 font-medium">{item}</span>
                 </div>
               ))}
             </div>
