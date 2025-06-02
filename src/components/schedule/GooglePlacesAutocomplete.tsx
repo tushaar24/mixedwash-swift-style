@@ -62,8 +62,9 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     if (!inputRef.current || !window.google) return;
 
     autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['address'],
-      fields: ['formatted_address', 'address_components', 'place_id']
+      types: ['geocode'], // Changed from 'address' to 'geocode' for better coverage
+      componentRestrictions: { country: 'in' }, // Restrict to India
+      fields: ['formatted_address', 'address_components', 'place_id', 'geometry']
     });
 
     autocompleteRef.current.addListener('place_changed', () => {
@@ -127,20 +128,20 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
-            Search Address
+            Search Address in India
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <label htmlFor="address-search" className="text-sm font-medium">
-              Start typing your address
+              Start typing your Indian address
             </label>
             <Input
               ref={inputRef}
               id="address-search"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="e.g., 123 Main Street, City, State"
+              placeholder="e.g., Connaught Place, New Delhi, India"
               disabled={isLoading}
             />
           </div>
@@ -168,7 +169,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
           </div>
           
           <p className="text-xs text-gray-500 text-center">
-            Address suggestions will appear as you type
+            Indian address suggestions will appear as you type
           </p>
         </div>
       </DialogContent>
