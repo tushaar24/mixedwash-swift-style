@@ -3,7 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, AlertCircle, CheckCircle } from "lucide-react";
+import { AddressParser, type ParsedAddress } from "@/utils/addressParser";
 
 interface PlaceDetails {
   formatted_address: string;
@@ -29,6 +30,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
   const [searchValue, setSearchValue] = useState("");
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
+  const [parsePreview, setParsePreview] = useState<ParsedAddress | null>(null);
   const autocompleteRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -182,51 +184,21 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     try {
       console.log("Processing selected place:", place);
       
-      let enhancedAddress = place.formatted_address || place.name;
+      // Use the enhanced AddressParser
+      const enhancedResult = AddressParser.enhanceAddressFromPlace(place);
+      console.log("Enhanced parsing result:", enhancedResult);
       
-      if (place.formatted_address) {
-        enhancedAddress = place.formatted_address;
-      } else if (place.address_components && place.address_components.length > 0) {
-        const components = place.address_components;
-        console.log("Processing address components:", components);
-        
-        const streetNumber = components.find((c: any) => c.types.includes('street_number'))?.long_name || '';
-        const route = components.find((c: any) => c.types.includes('route'))?.long_name || '';
-        const sublocality = components.find((c: any) => 
-          c.types.includes('sublocality_level_1') || 
-          c.types.includes('sublocality_level_2') ||
-          c.types.includes('sublocality')
-        )?.long_name || '';
-        const locality = components.find((c: any) => c.types.includes('locality'))?.long_name || '';
-        const administrativeArea = components.find((c: any) => 
-          c.types.includes('administrative_area_level_1')
-        )?.long_name || '';
-        const postalCode = components.find((c: any) => c.types.includes('postal_code'))?.long_name || '';
-        const country = components.find((c: any) => c.types.includes('country'))?.long_name || '';
-        
-        const addressParts = [];
-        if (streetNumber && route) {
-          addressParts.push(`${streetNumber} ${route}`);
-        } else if (route) {
-          addressParts.push(route);
-        }
-        if (sublocality) addressParts.push(sublocality);
-        if (locality) addressParts.push(locality);
-        if (administrativeArea) {
-          if (postalCode) {
-            addressParts.push(`${administrativeArea} ${postalCode}`);
-          } else {
-            addressParts.push(administrativeArea);
-          }
-        } else if (postalCode) {
-          addressParts.push(postalCode);
-        }
-        if (country) addressParts.push(country);
-        
-        if (addressParts.length > 0) {
-          enhancedAddress = addressParts.join(', ');
-        }
-      }
+      // Format the result for the parent component
+      const enhancedAddress = [
+        enhancedResult.house_building,
+        enhancedResult.address_line1,
+        enhancedResult.area,
+        enhancedResult.city,
+        enhancedResult.state && enhancedResult.postal_code 
+          ? `${enhancedResult.state} ${enhancedResult.postal_code}`
+          : enhancedResult.state || enhancedResult.postal_code,
+        "India"
+      ].filter(Boolean).join(", ");
       
       onPlaceSelect({
         formatted_address: enhancedAddress,
@@ -234,9 +206,15 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         place_id: place.place_id || ''
       });
       
+      const confidenceMessage = enhancedResult.confidence >= 80 
+        ? "High confidence address detected"
+        : enhancedResult.confidence >= 60 
+        ? "Good address match found"
+        : "Address found - please review details";
+      
       toast({
         title: "Address selected",
-        description: "Please fill in additional details",
+        description: `${confidenceMessage} (${enhancedResult.confidence}%)`,
       });
       
       onOpenChange(false);
@@ -262,14 +240,38 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
       return;
     }
 
-    const manualPlace = {
-      formatted_address: searchValue,
-      address_components: [],
-      place_id: ''
-    };
+    // Preview parse the manual input
+    const previewResult = AddressParser.parseFromFormattedAddress(searchValue);
+    setParsePreview(previewResult);
     
-    handlePlaceSelect(manualPlace);
+    const validation = AddressParser.validate(previewResult);
+    
+    if (validation.isValid || previewResult.confidence >= 40) {
+      const manualPlace = {
+        formatted_address: searchValue,
+        address_components: [],
+        place_id: ''
+      };
+      
+      handlePlaceSelect(manualPlace);
+    } else {
+      toast({
+        title: "Address seems incomplete",
+        description: "Please add more details or try a different format",
+        variant: "destructive",
+      });
+    }
   };
+
+  // Preview parsing as user types
+  useEffect(() => {
+    if (searchValue.trim().length > 10) {
+      const preview = AddressParser.parseFromFormattedAddress(searchValue);
+      setParsePreview(preview);
+    } else {
+      setParsePreview(null);
+    }
+  }, [searchValue]);
 
   const getStatusMessage = () => {
     if (!scriptLoaded && !window.google) return "Loading Google Maps...";
@@ -316,6 +318,39 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
               {getStatusMessage()}
             </p>
           </div>
+
+          {/* Address Preview */}
+          {parsePreview && searchValue.length > 10 && (
+            <div className="bg-gray-50 border rounded-md p-3">
+              <div className="flex items-center gap-2 mb-2">
+                {parsePreview.confidence >= 60 ? (
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-yellow-600" />
+                )}
+                <span className="text-sm font-medium">
+                  Address Preview ({parsePreview.confidence}% confidence)
+                </span>
+              </div>
+              <div className="text-xs text-gray-600 space-y-1">
+                {parsePreview.address_line1 && (
+                  <div>Street: {parsePreview.address_line1}</div>
+                )}
+                {parsePreview.area && (
+                  <div>Area: {parsePreview.area}</div>
+                )}
+                {parsePreview.city && (
+                  <div>City: {parsePreview.city}</div>
+                )}
+                {parsePreview.state && (
+                  <div>State: {parsePreview.state}</div>
+                )}
+                {parsePreview.postal_code && (
+                  <div>PIN: {parsePreview.postal_code}</div>
+                )}
+              </div>
+            </div>
+          )}
           
           <div className="flex gap-2">
             <Button 

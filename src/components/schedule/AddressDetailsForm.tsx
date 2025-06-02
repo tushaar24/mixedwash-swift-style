@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AddressParser, type ParsedAddress, type ValidationResult } from "@/utils/addressParser";
 
 interface AddressDetailsFormProps {
   isOpen: boolean;
@@ -26,101 +27,43 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
     is_default: false
   });
   const [saving, setSaving] = useState(false);
+  const [validation, setValidation] = useState<ValidationResult | null>(null);
+  const [confidence, setConfidence] = useState(0);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
+    const newData = {
+      ...formData,
       [name]: type === "checkbox" ? checked : value
-    }));
-  };
-
-  const extractAddressComponents = (fullAddress: string) => {
-    console.log("Extracting address from:", fullAddress);
-    
-    // Split by comma and clean up each part
-    const parts = fullAddress.split(',').map(part => part.trim()).filter(part => part.length > 0);
-    console.log("Address parts:", parts);
-    
-    let extractedData = {
-      address_line1: "",
-      area: "",
-      city: "",
-      state: "",
-      postal_code: ""
     };
-
-    if (parts.length === 0) {
-      extractedData.address_line1 = fullAddress;
-      return extractedData;
-    }
-
-    // For Indian addresses from Google Places API, the format is typically:
-    // "Street Address, Area/Locality, City, State PIN, Country"
+    setFormData(newData);
     
-    // Extract PIN code (6 digits) from any part
-    let pinFound = false;
-    for (let i = 0; i < parts.length; i++) {
-      const pinMatch = parts[i].match(/\b(\d{6})\b/);
-      if (pinMatch) {
-        extractedData.postal_code = pinMatch[1];
-        // Remove PIN from this part to get state
-        const stateWithoutPin = parts[i].replace(pinMatch[0], "").trim();
-        if (stateWithoutPin) {
-          extractedData.state = stateWithoutPin;
-        }
-        pinFound = true;
-        // Remove this part from further processing
-        parts.splice(i, 1);
-        break;
-      }
-    }
-
-    // Remove "India" if it's the last part
-    if (parts.length > 0 && parts[parts.length - 1].toLowerCase().includes('india')) {
-      parts.pop();
-    }
-
-    // Now process remaining parts
-    if (parts.length >= 3) {
-      // Format: Street, Area, City, (State PIN already processed)
-      extractedData.address_line1 = parts[0];
-      extractedData.area = parts[1];
-      extractedData.city = parts[2];
-      
-      // If we didn't find PIN/state in a combined part, check if there's a separate state part
-      if (!pinFound && parts.length >= 4) {
-        extractedData.state = parts[3];
-      }
-    } else if (parts.length === 2) {
-      // Format: Street/Area, City
-      extractedData.address_line1 = parts[0];
-      extractedData.city = parts[1];
-    } else if (parts.length === 1) {
-      // Only one part left, could be city or full address
-      if (!extractedData.city) {
-        extractedData.city = parts[0];
-      } else {
-        extractedData.address_line1 = parts[0];
-      }
-    }
-
-    // Clean up empty strings and trim all fields
-    Object.keys(extractedData).forEach(key => {
-      const value = extractedData[key as keyof typeof extractedData];
-      extractedData[key as keyof typeof extractedData] = typeof value === 'string' ? value.trim() : value;
-    });
-
-    console.log("Extracted address data:", extractedData);
-    return extractedData;
+    // Validate on every change
+    const parsedData: ParsedAddress = {
+      ...newData,
+      quality: 'approximate' as const,
+      confidence: 0
+    };
+    parsedData.confidence = AddressParser['calculateConfidence'](parsedData);
+    const validationResult = AddressParser.validate(parsedData);
+    
+    setValidation(validationResult);
+    setConfidence(parsedData.confidence);
   };
 
   const handleSave = async () => {
-    // Basic validation
-    if (!formData.address_line1 || !formData.city || !formData.state || !formData.postal_code) {
+    // Validate before saving
+    const parsedData: ParsedAddress = {
+      ...formData,
+      quality: 'approximate' as const,
+      confidence: 0
+    };
+    const validationResult = AddressParser.validate(parsedData);
+    
+    if (!validationResult.isValid) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all required fields",
+        title: "Invalid address information",
+        description: validationResult.errors.join(", "),
         variant: "destructive",
       });
       return;
@@ -157,7 +100,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
 
         toast({
           title: "Address saved",
-          description: "Your address has been saved successfully",
+          description: `Address saved with ${confidence}% confidence`,
         });
 
         onAddressSaved(data[0]);
@@ -174,6 +117,8 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
           postal_code: "",
           is_default: false
         });
+        setValidation(null);
+        setConfidence(0);
       }
     } catch (error: any) {
       toast({
@@ -190,19 +135,49 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
   useEffect(() => {
     if (initialAddress && isOpen) {
       console.log("Initial address received:", initialAddress);
-      const extracted = extractAddressComponents(initialAddress);
+      const parsed = AddressParser.parseFromFormattedAddress(initialAddress);
+      
       setFormData(prev => ({
         ...prev,
-        ...extracted
+        house_building: parsed.house_building,
+        address_line1: parsed.address_line1,
+        address_line2: parsed.address_line2,
+        area: parsed.area,
+        city: parsed.city,
+        state: parsed.state,
+        postal_code: parsed.postal_code
       }));
+      
+      const validationResult = AddressParser.validate(parsed);
+      setValidation(validationResult);
+      setConfidence(parsed.confidence);
     }
   }, [initialAddress, isOpen]);
+
+  const getConfidenceColor = (conf: number) => {
+    if (conf >= 80) return "text-green-600";
+    if (conf >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  const getConfidenceIcon = (conf: number) => {
+    if (conf >= 80) return <CheckCircle className="h-4 w-4 text-green-600" />;
+    return <AlertCircle className="h-4 w-4 text-yellow-600" />;
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Complete Address Details</DialogTitle>
+          {confidence > 0 && (
+            <div className="flex items-center gap-2 text-sm">
+              {getConfidenceIcon(confidence)}
+              <span className={getConfidenceColor(confidence)}>
+                Address confidence: {confidence}%
+              </span>
+            </div>
+          )}
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
@@ -229,6 +204,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
               onChange={handleInputChange}
               placeholder="Street Name, Road"
               required
+              className={validation && !validation.hasRequiredFields && !formData.address_line1 ? "border-red-300" : ""}
             />
           </div>
 
@@ -270,6 +246,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
                 onChange={handleInputChange}
                 placeholder="City"
                 required
+                className={validation && !validation.isCityValid && formData.city ? "border-red-300" : ""}
               />
             </div>
             <div className="space-y-2">
@@ -283,6 +260,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
                 onChange={handleInputChange}
                 placeholder="State"
                 required
+                className={validation && !validation.isStateValid && formData.state ? "border-red-300" : ""}
               />
             </div>
           </div>
@@ -298,8 +276,23 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
               onChange={handleInputChange}
               placeholder="Postal Code"
               required
+              className={validation && !validation.isPinValid && formData.postal_code ? "border-red-300" : ""}
             />
           </div>
+
+          {validation && validation.errors.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <div className="flex items-center gap-2 text-red-700 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span>Please fix the following issues:</span>
+              </div>
+              <ul className="mt-2 text-sm text-red-600">
+                {validation.errors.map((error, index) => (
+                  <li key={index} className="ml-4">• {error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="flex items-center space-x-2 pt-2">
             <input
@@ -325,7 +318,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
           </Button>
           <Button
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || (validation && !validation.isValid)}
             className="bg-black hover:bg-gray-800"
           >
             {saving ? (
