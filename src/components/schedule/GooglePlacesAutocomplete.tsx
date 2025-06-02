@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -70,14 +69,14 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     }
   }, [isOpen]);
 
-  // Initialize autocomplete when everything is ready
+  // Initialize autocomplete when everything is ready - OPTIMIZED
   useEffect(() => {
     if (isOpen && googleReady && inputRef.current && !autocompleteRef.current) {
       console.log("Initializing Google Places Autocomplete...");
-      // Small delay to ensure DOM is ready
+      // Reduced delay for faster initialization
       const timer = setTimeout(() => {
         initializeAutocomplete();
-      }, 500);
+      }, 100);
       
       return () => clearTimeout(timer);
     }
@@ -139,21 +138,17 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
 
-      // Create new autocomplete instance with optimized settings for buildings
+      // Create new autocomplete instance with optimized settings
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
         componentRestrictions: { country: 'IN' },
         fields: [
           'formatted_address', 
           'address_components', 
           'place_id', 
-          'geometry', 
           'name', 
-          'types',
-          'business_status',
-          'vicinity'
+          'types'
         ],
-        // Remove types restriction to get better building suggestions
-        // types: ['establishment', 'geocode'] would be more inclusive than just 'address'
+        // Remove types restriction for better building/landmark suggestions
       });
 
       console.log("Autocomplete instance created successfully");
@@ -171,13 +166,11 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         }
       });
       
-      // Focus the input after a short delay
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-          console.log("Input focused");
-        }
-      }, 100);
+      // Focus the input immediately without delay
+      if (inputRef.current) {
+        inputRef.current.focus();
+        console.log("Input focused");
+      }
       
     } catch (error) {
       console.error("Error initializing autocomplete:", error);
@@ -286,8 +279,8 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
 
   const getStatusMessage = () => {
     if (!scriptLoaded && !window.google) return "Loading Google Maps...";
-    if (scriptLoaded && !googleReady) return "Initializing Google Places...";
-    if (googleReady && !autocompleteRef.current) return "Setting up address suggestions...";
+    if (scriptLoaded && !googleReady) return "Initializing...";
+    if (googleReady && !autocompleteRef.current) return "Setting up suggestions...";
     if (autocompleteRef.current) return "✓ Ready - Start typing for suggestions";
     return "Getting ready...";
   };
