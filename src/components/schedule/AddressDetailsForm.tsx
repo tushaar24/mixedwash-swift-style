@@ -16,8 +16,10 @@ interface AddressDetailsFormProps {
 
 export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAddressSaved }: AddressDetailsFormProps) => {
   const [formData, setFormData] = useState({
+    house_building: "",
     address_line1: initialAddress || "",
     address_line2: "",
+    area: "",
     city: "",
     state: "",
     postal_code: "",
@@ -40,6 +42,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
     if (parts.length >= 3) {
       return {
         address_line1: parts[0] || "",
+        area: parts[1] || "",
         city: parts[parts.length - 3] || "",
         state: parts[parts.length - 2] || "",
         postal_code: parts[parts.length - 1] || ""
@@ -48,6 +51,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
     
     return {
       address_line1: fullAddress,
+      area: "",
       city: "",
       state: "",
       postal_code: ""
@@ -104,8 +108,10 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
         
         // Reset form
         setFormData({
+          house_building: "",
           address_line1: "",
           address_line2: "",
+          area: "",
           city: "",
           state: "",
           postal_code: "",
@@ -142,29 +148,55 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
+            <label htmlFor="house_building" className="text-sm font-medium">
+              House/Flat No., Building Name
+            </label>
+            <Input
+              id="house_building"
+              name="house_building"
+              value={formData.house_building}
+              onChange={handleInputChange}
+              placeholder="e.g., 123, ABC Apartments"
+            />
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="address_line1" className="text-sm font-medium">
-              Address Line 1 *
+              Street Address *
             </label>
             <Input
               id="address_line1"
               name="address_line1"
               value={formData.address_line1}
               onChange={handleInputChange}
-              placeholder="House/Flat No., Building Name, Street"
+              placeholder="Street Name, Road"
               required
             />
           </div>
 
           <div className="space-y-2">
+            <label htmlFor="area" className="text-sm font-medium">
+              Area/Locality
+            </label>
+            <Input
+              id="area"
+              name="area"
+              value={formData.area}
+              onChange={handleInputChange}
+              placeholder="e.g., HSR Sector 6, Koramangala"
+            />
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="address_line2" className="text-sm font-medium">
-              Address Line 2 (Optional)
+              Landmark (Optional)
             </label>
             <Input
               id="address_line2"
               name="address_line2"
               value={formData.address_line2}
               onChange={handleInputChange}
-              placeholder="Landmark, Area"
+              placeholder="Near Metro Station, Opposite Mall"
             />
           </div>
 

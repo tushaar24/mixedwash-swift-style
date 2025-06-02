@@ -13,8 +13,10 @@ export type Database = {
         Row: {
           address_line1: string
           address_line2: string | null
+          area: string | null
           city: string
           created_at: string
+          house_building: string | null
           id: string
           is_default: boolean | null
           postal_code: string
@@ -25,8 +27,10 @@ export type Database = {
         Insert: {
           address_line1: string
           address_line2?: string | null
+          area?: string | null
           city: string
           created_at?: string
+          house_building?: string | null
           id?: string
           is_default?: boolean | null
           postal_code: string
@@ -37,8 +41,10 @@ export type Database = {
         Update: {
           address_line1?: string
           address_line2?: string | null
+          area?: string | null
           city?: string
           created_at?: string
+          house_building?: string | null
           id?: string
           is_default?: boolean | null
           postal_code?: string

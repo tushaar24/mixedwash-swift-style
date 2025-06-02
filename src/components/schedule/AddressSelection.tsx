@@ -19,8 +19,10 @@ import { AddressDetailsForm } from "./AddressDetailsForm";
 
 interface Address {
   id: string;
+  house_building?: string;
   address_line1: string;
   address_line2?: string;
+  area?: string;
   city: string;
   state: string;
   postal_code: string;
@@ -61,8 +63,10 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
   
   // New address form state
   const [newAddress, setNewAddress] = useState({
+    house_building: "",
     address_line1: "",
     address_line2: "",
+    area: "",
     city: "",
     state: "",
     postal_code: "",
@@ -286,8 +290,10 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         
         // Reset form
         setNewAddress({
+          house_building: "",
           address_line1: "",
           address_line2: "",
+          area: "",
           city: "",
           state: "",
           postal_code: "",
@@ -387,7 +393,10 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center">
-                      <h3 className="font-bold">{address.address_line1}</h3>
+                      <h3 className="font-bold">
+                        {address.house_building && `${address.house_building}, `}
+                        {address.address_line1}
+                      </h3>
                       {address.is_default && (
                         <span className="ml-2 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
                           Default
@@ -396,6 +405,9 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
                     </div>
                     {address.address_line2 && (
                       <p className="text-sm text-gray-600">{address.address_line2}</p>
+                    )}
+                    {address.area && (
+                      <p className="text-sm text-gray-600">{address.area}</p>
                     )}
                     <p className="text-sm text-gray-600">
                       {address.city}, {address.state} {address.postal_code}
@@ -434,29 +446,55 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
+                <label htmlFor="house_building" className="text-sm font-medium">
+                  House/Flat No., Building Name
+                </label>
+                <Input 
+                  id="house_building"
+                  name="house_building"
+                  value={newAddress.house_building}
+                  onChange={handleAddressChange}
+                  placeholder="e.g., 123, ABC Apartments"
+                />
+              </div>
+              
+              <div className="space-y-2">
                 <label htmlFor="address_line1" className="text-sm font-medium">
-                  Address Line 1 *
+                  Street Address *
                 </label>
                 <Input 
                   id="address_line1"
                   name="address_line1"
                   value={newAddress.address_line1}
                   onChange={handleAddressChange}
-                  placeholder="House/Flat No., Building Name, Street"
+                  placeholder="Street Name, Road"
                   required
                 />
               </div>
               
               <div className="space-y-2">
+                <label htmlFor="area" className="text-sm font-medium">
+                  Area/Locality
+                </label>
+                <Input 
+                  id="area"
+                  name="area"
+                  value={newAddress.area}
+                  onChange={handleAddressChange}
+                  placeholder="e.g., HSR Sector 6, Koramangala"
+                />
+              </div>
+              
+              <div className="space-y-2">
                 <label htmlFor="address_line2" className="text-sm font-medium">
-                  Address Line 2 (Optional)
+                  Landmark (Optional)
                 </label>
                 <Input 
                   id="address_line2"
                   name="address_line2"
                   value={newAddress.address_line2}
                   onChange={handleAddressChange}
-                  placeholder="Landmark, Area"
+                  placeholder="Near Metro Station, Opposite Mall"
                 />
               </div>
               

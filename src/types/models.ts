@@ -10,8 +10,10 @@ export interface Profile {
 export interface Address {
   id: string;
   user_id: string;
+  house_building?: string;
   address_line1: string;
   address_line2?: string;
+  area?: string;
   city: string;
   state: string;
   postal_code: string;
