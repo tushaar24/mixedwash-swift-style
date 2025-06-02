@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowRight, BadgePercent, Loader2 } from "lucide-react";
 import { OrderData, SelectedService, DryCleaningItem } from "@/pages/Schedule";
 import { DryCleaningItemsDialog } from "./DryCleaningItemsDialog";
+import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 
 interface Service {
   id: string;
@@ -29,6 +31,7 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
   const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(
     new Set(orderData.services.map(service => service.id))
   );
+  const { isEligibleForDiscount, loading: discountLoading } = useDiscountEligibility();
 
   // Fetch services from Supabase
   useEffect(() => {
@@ -94,7 +97,7 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
       .map(s => ({
         id: s.id,
         name: s.name,
-        price: s.discount_price !== null ? s.discount_price : s.price,
+        price: (!discountLoading && isEligibleForDiscount && s.discount_price !== null) ? s.discount_price : s.price,
       }));
     
     // Calculate total amount based on all selected services
@@ -182,7 +185,7 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
                   <p className="text-sm text-gray-600">{service.description}</p>
                   
                   <div className="mt-2">
-                    {service.discount_price !== null ? (
+                    {!discountLoading && service.discount_price !== null && isEligibleForDiscount ? (
                       <div className="space-y-1">
                         <div className="flex items-center">
                           <span className="font-bold text-green-700">₹{service.discount_price}/kg</span>
@@ -197,7 +200,14 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
                         </div>
                       </div>
                     ) : (
-                      <div className="font-bold">From ₹{service.price}</div>
+                      <div className="font-bold">
+                        {service.discount_price !== null && !isEligibleForDiscount 
+                          ? `₹${service.price}/kg` 
+                          : service.name.toLowerCase().includes('dry cleaning')
+                            ? `From ₹${service.price}`
+                            : `₹${service.price}/kg`
+                        }
+                      </div>
                     )}
                   </div>
                   
@@ -225,7 +235,7 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
             {orderData.services.map((service) => (
               <li key={service.id} className="flex justify-between items-center">
                 <span>{service.name}</span>
-                <span className="font-medium">₹{service.price}/kg</span>
+                <span className="font-medium">₹{service.price}{!service.name.toLowerCase().includes('dry cleaning') ? '/kg' : ''}</span>
               </li>
             ))}
           </ul>

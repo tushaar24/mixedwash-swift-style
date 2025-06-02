@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Info, Truck } from "lucide-react";
 import { ServiceWeightEstimateDialog } from "@/components/ServiceWeightEstimateDialog";
 import { useState } from "react";
+import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 
 interface PricingSectionProps {
   service: any;
@@ -15,6 +16,7 @@ interface PricingSectionProps {
 
 export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
   const [activeTab, setActiveTab] = useState("men");
+  const { isEligibleForDiscount, loading } = useDiscountEligibility();
   
   return (
     <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">
@@ -110,7 +112,7 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
                     )}
                   </div>
                   <div className="sm:text-right">
-                    {service.discount > 0 ? (
+                    {!loading && service.discount > 0 && isEligibleForDiscount ? (
                       <div className="space-y-1 sm:space-y-2">
                         <div className="flex items-center sm:justify-end gap-2">
                           <span className="font-bold text-xl sm:text-2xl text-green-700">{price.amount}</span>
@@ -131,7 +133,9 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
                         </div>
                       </div>
                     ) : (
-                      <div className="font-semibold text-xl sm:text-2xl text-gray-800">{price.amount}</div>
+                      <div className="font-semibold text-xl sm:text-2xl text-gray-800">
+                        {service.discount > 0 && !isEligibleForDiscount ? price.oldPrice : price.amount}
+                      </div>
                     )}
                   </div>
                 </div>

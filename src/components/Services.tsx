@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 
 export const Services = () => {
   const navigate = useNavigate();
+  const { isEligibleForDiscount, loading } = useDiscountEligibility();
   
   const services = [
     {
@@ -16,6 +18,7 @@ export const Services = () => {
       icon: "👕",
       newPrice: "₹72/kg",
       oldPrice: "₹95/kg",
+      regularPrice: "₹95/kg",
       discount: 20,
       route: "wash-fold",
       minimumOrder: 4,
@@ -27,6 +30,7 @@ export const Services = () => {
       icon: "👔",
       newPrice: "₹120/kg",
       oldPrice: "₹150/kg",
+      regularPrice: "₹150/kg",
       discount: 20,
       route: "wash-iron",
       minimumOrder: 3,
@@ -38,6 +42,7 @@ export const Services = () => {
       icon: "🧺",
       newPrice: "₹112/kg",
       oldPrice: "₹140/kg",
+      regularPrice: "₹140/kg",
       discount: 20,
       route: "heavy-wash",
       minimumOrder: null,
@@ -49,6 +54,7 @@ export const Services = () => {
       icon: <img src="/lovable-uploads/c458f6b0-88cf-4b84-8d9a-10526e393e2d.png" alt="Blazer" className="h-10 w-10" />,
       newPrice: "starts at ₹100",
       oldPrice: "",
+      regularPrice: "starts at ₹100",
       discount: 0,
       route: "dry-cleaning",
       minimumOrder: null,
@@ -70,10 +76,12 @@ export const Services = () => {
             We offer a variety of services to meet all your laundry needs, with next-day delivery standard.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
-            <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300">
-              <BadgePercent className="h-4 w-4" />
-              <span className="text-sm font-semibold">20% OFF on your first order!</span>
-            </div>
+            {!loading && isEligibleForDiscount && (
+              <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300">
+                <BadgePercent className="h-4 w-4" />
+                <span className="text-sm font-semibold">20% OFF on your first order!</span>
+              </div>
+            )}
             <div className="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full text-blue-800 border border-blue-300">
               <Truck className="h-4 w-4" />
               <span className="text-sm font-semibold">Free pickup & delivery on all orders!</span>
@@ -106,7 +114,7 @@ export const Services = () => {
               <CardContent className="flex flex-col h-full">
                 <p className="text-gray-600 mb-4">{service.description}</p>
                 
-                {service.discount > 0 ? (
+                {!loading && service.discount > 0 && isEligibleForDiscount ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-lg text-green-700">{service.newPrice}</span>
@@ -127,7 +135,9 @@ export const Services = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="font-semibold text-gray-800">{service.newPrice}</div>
+                  <div className="font-semibold text-gray-800">
+                    {service.discount > 0 && !isEligibleForDiscount ? service.regularPrice : service.newPrice}
+                  </div>
                 )}
                 
                 <div className="mt-3 text-xs text-blue-700 flex items-center gap-1">
