@@ -19,11 +19,12 @@ export const useDiscountEligibility = () => {
       setLoading(true);
       
       try {
-        // Check if the user's phone number is in the excluded list
-        // Using raw SQL query to avoid TypeScript issues with new table
-        const { data, error } = await supabase.rpc('check_phone_exclusion', {
-          phone_to_check: profile.mobile_number
-        });
+        // Check if the user's phone number is in the phone_numbers table
+        const { data, error } = await supabase
+          .from("phone_numbers")
+          .select("phone")
+          .eq("phone", profile.mobile_number)
+          .maybeSingle();
 
         if (error) {
           console.error("Error checking discount eligibility:", error);
@@ -32,7 +33,7 @@ export const useDiscountEligibility = () => {
           return;
         }
 
-        // If phone number found in excluded list, user is NOT eligible for discounts
+        // If phone number found in the table, user is NOT eligible for discounts
         setIsEligibleForDiscount(!data);
       } catch (error) {
         console.error("Error in discount eligibility check:", error);

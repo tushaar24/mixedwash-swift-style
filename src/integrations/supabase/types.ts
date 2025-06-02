@@ -332,6 +332,21 @@ export type Database = {
           },
         ]
       }
+      phone_numbers: {
+        Row: {
+          id: number
+          phone: string
+        }
+        Insert: {
+          id?: number
+          phone: string
+        }
+        Update: {
+          id?: number
+          phone?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
