@@ -116,12 +116,23 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
     }, 0);
   };
   
-  // Continue to next step
+  // Continue to next step with dry cleaning validation
   const handleContinue = () => {
     if (selectedServiceIds.size === 0) {
       toast({
         title: "Please select at least one service",
         description: "You need to select one or more services to continue",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if dry cleaning is selected without any items
+    if (isDryCleaningSelected() && orderData.dryCleaningItems.length === 0) {
+      toast({
+        title: "Dry cleaning items required",
+        description: "Please add at least one item for dry cleaning service",
+        variant: "destructive"
       });
       return;
     }
