@@ -14,20 +14,23 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { user, isFirstLogin } = useAuth();
+  const { user, isFirstLogin, isLoading } = useAuth();
 
   useEffect(() => {
+    // Don't redirect while auth context is still loading
+    if (isLoading) return;
+    
     // Check if user is already logged in
     if (user) {
       if (isFirstLogin) {
-        // Redirect to profile page for first-time users to complete their profile
+        // Redirect to profile page for first-time users or users missing profile info
         navigate("/profile");
       } else {
-        // Redirect to home for returning users
+        // Redirect to home for users with complete profiles
         navigate("/");
       }
     }
-  }, [user, isFirstLogin, navigate]);
+  }, [user, isFirstLogin, isLoading, navigate]);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +103,18 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  // Show loading while auth context is loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // If already logged in and checked, don't render the auth form
   if (user) {

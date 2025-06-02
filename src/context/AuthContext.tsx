@@ -60,11 +60,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const profileData = await fetchProfile(user.id);
       setProfile(profileData);
       
-      // Check if this is a first login (no username or mobile number)
-      if (profileData && (profileData.username || profileData.mobile_number)) {
-        setIsFirstLogin(false);
-      } else {
+      // Check if this is a first login (no username AND no mobile number)
+      if (profileData && (!profileData.username || !profileData.mobile_number)) {
         setIsFirstLogin(true);
+      } else {
+        setIsFirstLogin(false);
       }
     }
   };
@@ -83,10 +83,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const profileData = await fetchProfile(newSession.user.id);
             setProfile(profileData);
             
-            if (profileData && (profileData.username || profileData.mobile_number)) {
-              setIsFirstLogin(false);
-            } else {
+            // User is considered first-time if they don't have BOTH username AND mobile number
+            if (profileData && (!profileData.username || !profileData.mobile_number)) {
               setIsFirstLogin(true);
+            } else {
+              setIsFirstLogin(false);
             }
             setIsLoading(false);
           }, 0);
@@ -110,10 +111,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const profileData = await fetchProfile(session.user.id);
         setProfile(profileData);
         
-        if (profileData && (profileData.username || profileData.mobile_number)) {
-          setIsFirstLogin(false);
-        } else {
+        // User is considered first-time if they don't have BOTH username AND mobile number
+        if (profileData && (!profileData.username || !profileData.mobile_number)) {
           setIsFirstLogin(true);
+        } else {
+          setIsFirstLogin(false);
         }
       }
       
