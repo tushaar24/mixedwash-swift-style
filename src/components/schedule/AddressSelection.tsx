@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight, Home, Loader2, MapPin, Plus, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Home, Loader2, MapPin, Plus, Search, Locate } from "lucide-react";
 import { OrderData } from "@/pages/Schedule";
 import { GooglePlacesAutocomplete } from "./GooglePlacesAutocomplete";
 import { AddressDetailsForm } from "./AddressDetailsForm";
@@ -43,6 +42,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
   const [googlePlacesOpen, setGooglePlacesOpen] = useState(false);
   const [addressDetailsOpen, setAddressDetailsOpen] = useState(false);
   const [selectedPlaceAddress, setSelectedPlaceAddress] = useState("");
+  const [locatingUser, setLocatingUser] = useState(false);
   
   // New address form state
   const [newAddress, setNewAddress] = useState({
@@ -97,6 +97,86 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     
     fetchAddresses();
   }, [selectedAddressId, updateOrderData]);
+
+  // Get user's current location
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation not supported",
+        description: "Your browser doesn't support location services",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLocatingUser(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        try {
+          // Use Google Geocoding API to get address from coordinates
+          const geocoder = new window.google.maps.Geocoder();
+          const result = await new Promise((resolve, reject) => {
+            geocoder.geocode(
+              { location: { lat: latitude, lng: longitude } },
+              (results, status) => {
+                if (status === 'OK' && results[0]) {
+                  resolve(results[0]);
+                } else {
+                  reject(new Error('Geocoding failed'));
+                }
+              }
+            );
+          });
+          
+          setSelectedPlaceAddress(result.formatted_address);
+          setAddressDetailsOpen(true);
+          
+          toast({
+            title: "Location found",
+            description: "Please review and edit your address details",
+          });
+        } catch (error) {
+          toast({
+            title: "Error getting address",
+            description: "Could not get address from your location",
+            variant: "destructive",
+          });
+        } finally {
+          setLocatingUser(false);
+        }
+      },
+      (error) => {
+        setLocatingUser(false);
+        let errorMessage = "Could not access your location";
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied. Please enable location services and try again.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information unavailable";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out";
+            break;
+        }
+        
+        toast({
+          title: "Location Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  };
 
   // Select an address
   const handleAddressSelect = (address: Address) => {
@@ -235,12 +315,46 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
   return (
     <div className="space-y-6 pb-24">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold">Select a Pickup Address</h1>
+        <h1 className="text-2xl font-bold">Select Pickup Address</h1>
         <p className="text-gray-600 mt-2">Choose where we should pick up your laundry</p>
       </div>
       
-      {addresses.length > 0 ? (
+      {/* Primary Address Options */}
+      <div className="space-y-4">
+        {/* Use Current Location */}
+        <Button 
+          onClick={handleUseCurrentLocation}
+          disabled={locatingUser}
+          className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-3 text-lg font-medium"
+        >
+          {locatingUser ? (
+            <Loader2 className="h-6 w-6 animate-spin" />
+          ) : (
+            <Locate className="h-6 w-6" />
+          )}
+          {locatingUser ? "Getting your location..." : "Use Current Location"}
+        </Button>
+
+        {/* Search with Google Places */}
+        <Button 
+          onClick={() => setGooglePlacesOpen(true)}
+          variant="outline"
+          className="w-full h-16 border-2 border-gray-300 hover:border-gray-400 flex items-center justify-center gap-3 text-lg font-medium"
+        >
+          <Search className="h-6 w-6 text-gray-600" />
+          Search for Address
+        </Button>
+      </div>
+
+      {/* Saved Addresses */}
+      {addresses.length > 0 && (
         <div className="space-y-4">
+          <div className="flex items-center gap-2 text-sm text-gray-500 mt-8 mb-4">
+            <div className="flex-1 h-px bg-gray-200"></div>
+            <span>OR CHOOSE FROM SAVED ADDRESSES</span>
+            <div className="flex-1 h-px bg-gray-200"></div>
+          </div>
+          
           {addresses.map((address) => (
             <Card 
               key={address.id}
@@ -285,35 +399,18 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
             </Card>
           ))}
         </div>
-      ) : (
-        <div className="text-center py-8 bg-gray-50 rounded-lg">
-          <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium">No addresses found</h3>
-          <p className="text-gray-500 mb-4">You haven't added any addresses yet</p>
-        </div>
       )}
       
-      {/* Add new address options */}
-      <div className="space-y-3">
-        {/* Google Places search button */}
-        <Button 
-          onClick={() => setGooglePlacesOpen(true)}
-          variant="outline" 
-          className="w-full border-dashed border-gray-300 py-6 h-auto flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 border-blue-200"
-        >
-          <Search className="h-5 w-5 text-blue-600" />
-          <span className="text-blue-700 font-medium">Search Address with Google Places</span>
-        </Button>
-
-        {/* Manual address entry */}
+      {/* Manual Entry Option */}
+      <div className="pt-4">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button 
-              variant="outline" 
-              className="w-full border-dashed border-gray-300 py-6 h-auto flex items-center justify-center gap-2"
+              variant="ghost" 
+              className="w-full text-gray-600 hover:text-gray-800 flex items-center justify-center gap-2"
             >
-              <Plus className="h-5 w-5" />
-              Add Address Manually
+              <Plus className="h-4 w-4" />
+              Enter Address Manually
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
@@ -445,7 +542,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         onAddressSaved={handleAddressSaved}
       />
       
-      {/* Back button (not sticky) */}
+      {/* Back button */}
       <div className="pt-8">
         <Button 
           onClick={onBack}
@@ -457,7 +554,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         </Button>
       </div>
       
-      {/* Sticky Continue button at bottom center */}
+      {/* Sticky Continue button */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center z-10">
         <Button 
           onClick={handleContinue}
