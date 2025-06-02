@@ -116,7 +116,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     fetchAddresses();
   }, [selectedAddressId, updateOrderData]);
 
-  // Get user's current location with improved error handling
+  // Get user's current location without Google Maps API
   const handleUseCurrentLocation = () => {
     console.log("Starting geolocation request...");
     
@@ -129,16 +129,6 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
       return;
     }
 
-    // Check if Google Maps API is loaded
-    if (typeof (window as any).google === 'undefined' || typeof (window as any).google.maps === 'undefined') {
-      toast({
-        title: "Maps service unavailable",
-        description: "Google Maps service is not loaded. Please try searching for an address instead.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLocatingUser(true);
     
     navigator.geolocation.getCurrentPosition(
@@ -146,44 +136,15 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         console.log("Location obtained:", position.coords);
         const { latitude, longitude } = position.coords;
         
-        try {
-          // Use Google Geocoding API to get address from coordinates
-          const geocoder = new (window as any).google.maps.Geocoder();
-          
-          const result = await new Promise((resolve, reject) => {
-            geocoder.geocode(
-              { location: { lat: latitude, lng: longitude } },
-              (results: any, status: any) => {
-                console.log("Geocoding status:", status);
-                console.log("Geocoding results:", results);
-                
-                if (status === 'OK' && results && results[0]) {
-                  resolve(results[0]);
-                } else {
-                  reject(new Error(`Geocoding failed with status: ${status}`));
-                }
-              }
-            );
-          });
-          
-          console.log("Geocoded address:", result);
-          setSelectedPlaceAddress((result as any).formatted_address);
-          setAddressDetailsOpen(true);
-          
-          toast({
-            title: "Location found",
-            description: "Please review and edit your address details",
-          });
-        } catch (error) {
-          console.error("Geocoding error:", error);
-          toast({
-            title: "Error getting address",
-            description: "Could not convert your location to an address. Please try searching manually.",
-            variant: "destructive",
-          });
-        } finally {
-          setLocatingUser(false);
-        }
+        // Show success message with coordinates and prompt for manual address entry
+        toast({
+          title: "Location found",
+          description: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}. Please enter your address manually.`,
+        });
+        
+        // Open the manual address entry dialog
+        setDialogOpen(true);
+        setLocatingUser(false);
       },
       (error) => {
         console.error("Geolocation error:", error);
@@ -213,7 +174,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
       },
       {
         enableHighAccuracy: true,
-        timeout: 15000, // Increased timeout to 15 seconds
+        timeout: 15000,
         maximumAge: 60000
       }
     );
