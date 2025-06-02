@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -117,8 +116,10 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     fetchAddresses();
   }, [selectedAddressId, updateOrderData]);
 
-  // Get user's current location
+  // Get user's current location with improved error handling
   const handleUseCurrentLocation = () => {
+    console.log("Starting geolocation request...");
+    
     if (!navigator.geolocation) {
       toast({
         title: "Geolocation not supported",
@@ -128,28 +129,44 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
       return;
     }
 
+    // Check if Google Maps API is loaded
+    if (typeof (window as any).google === 'undefined' || typeof (window as any).google.maps === 'undefined') {
+      toast({
+        title: "Maps service unavailable",
+        description: "Google Maps service is not loaded. Please try searching for an address instead.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLocatingUser(true);
     
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        console.log("Location obtained:", position.coords);
         const { latitude, longitude } = position.coords;
         
         try {
           // Use Google Geocoding API to get address from coordinates
           const geocoder = new (window as any).google.maps.Geocoder();
+          
           const result = await new Promise((resolve, reject) => {
             geocoder.geocode(
               { location: { lat: latitude, lng: longitude } },
               (results: any, status: any) => {
-                if (status === 'OK' && results[0]) {
+                console.log("Geocoding status:", status);
+                console.log("Geocoding results:", results);
+                
+                if (status === 'OK' && results && results[0]) {
                   resolve(results[0]);
                 } else {
-                  reject(new Error('Geocoding failed'));
+                  reject(new Error(`Geocoding failed with status: ${status}`));
                 }
               }
             );
           });
           
+          console.log("Geocoded address:", result);
           setSelectedPlaceAddress((result as any).formatted_address);
           setAddressDetailsOpen(true);
           
@@ -158,9 +175,10 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
             description: "Please review and edit your address details",
           });
         } catch (error) {
+          console.error("Geocoding error:", error);
           toast({
             title: "Error getting address",
-            description: "Could not get address from your location",
+            description: "Could not convert your location to an address. Please try searching manually.",
             variant: "destructive",
           });
         } finally {
@@ -168,7 +186,9 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         }
       },
       (error) => {
+        console.error("Geolocation error:", error);
         setLocatingUser(false);
+        
         let errorMessage = "Could not access your location";
         
         switch (error.code) {
@@ -176,11 +196,13 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
             errorMessage = "Location access denied. Please enable location services and try again.";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location information unavailable";
+            errorMessage = "Location information unavailable. Please try searching for an address instead.";
             break;
           case error.TIMEOUT:
-            errorMessage = "Location request timed out";
+            errorMessage = "Location request timed out. Please try again or search manually.";
             break;
+          default:
+            errorMessage = "An unexpected error occurred while getting your location.";
         }
         
         toast({
@@ -191,7 +213,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000, // Increased timeout to 15 seconds
         maximumAge: 60000
       }
     );
