@@ -28,19 +28,24 @@ declare global {
 export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }: GooglePlacesAutocompleteProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [scriptLoaded, setScriptLoaded] = useState(false);
   const autocompleteRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    console.log("Dialog opened:", isOpen);
     if (isOpen && !window.google) {
+      console.log("Loading Google Maps script...");
       loadGoogleMapsScript();
-    } else if (isOpen && window.google) {
+    } else if (isOpen && window.google && !autocompleteRef.current) {
+      console.log("Google Maps already loaded, initializing autocomplete...");
       initializeAutocomplete();
     }
   }, [isOpen]);
 
   const loadGoogleMapsScript = () => {
     if (document.querySelector('script[src*="maps.googleapis.com"]')) {
+      console.log("Google Maps script already exists");
       return;
     }
 
@@ -49,30 +54,71 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     script.async = true;
     script.defer = true;
     
+    script.onerror = () => {
+      console.error("Failed to load Google Maps script");
+      toast({
+        title: "Error loading Google Maps",
+        description: "Please check your internet connection and try again",
+        variant: "destructive",
+      });
+    };
+    
     window.initGooglePlaces = () => {
+      console.log("Google Maps callback executed");
+      setScriptLoaded(true);
       if (isOpen) {
         initializeAutocomplete();
       }
     };
     
     document.head.appendChild(script);
+    console.log("Google Maps script added to head");
   };
 
   const initializeAutocomplete = () => {
-    if (!inputRef.current || !window.google) return;
+    if (!inputRef.current) {
+      console.log("Input ref not available");
+      return;
+    }
+    
+    if (!window.google) {
+      console.log("Google Maps not loaded yet");
+      return;
+    }
+    
+    if (!window.google.maps || !window.google.maps.places) {
+      console.log("Google Places library not available");
+      return;
+    }
 
-    autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['geocode'], // Changed from 'address' to 'geocode' for better coverage
-      componentRestrictions: { country: 'in' }, // Restrict to India
-      fields: ['formatted_address', 'address_components', 'place_id', 'geometry']
-    });
+    try {
+      console.log("Initializing autocomplete...");
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ['geocode'],
+        componentRestrictions: { country: 'IN' }, // Use 'IN' instead of 'in'
+        fields: ['formatted_address', 'address_components', 'place_id', 'geometry']
+      });
 
-    autocompleteRef.current.addListener('place_changed', () => {
-      const place = autocompleteRef.current.getPlace();
-      if (place && place.formatted_address) {
-        handlePlaceSelect(place);
-      }
-    });
+      autocompleteRef.current.addListener('place_changed', () => {
+        console.log("Place changed event triggered");
+        const place = autocompleteRef.current.getPlace();
+        console.log("Selected place:", place);
+        if (place && place.formatted_address) {
+          handlePlaceSelect(place);
+        } else {
+          console.log("No place details received");
+        }
+      });
+      
+      console.log("Autocomplete initialized successfully");
+    } catch (error) {
+      console.error("Error initializing autocomplete:", error);
+      toast({
+        title: "Error initializing address search",
+        description: "Please try refreshing the page",
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePlaceSelect = (place: any) => {
@@ -92,6 +138,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
       
       onOpenChange(false);
     } catch (error) {
+      console.error("Error processing place selection:", error);
       toast({
         title: "Error",
         description: "Failed to process the selected address",
@@ -144,6 +191,11 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
               placeholder="e.g., Connaught Place, New Delhi, India"
               disabled={isLoading}
             />
+            {!window.google && (
+              <p className="text-xs text-orange-600">
+                Loading Google Maps...
+              </p>
+            )}
           </div>
           
           <div className="flex gap-2">
@@ -169,7 +221,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
           </div>
           
           <p className="text-xs text-gray-500 text-center">
-            Indian address suggestions will appear as you type
+            {window.google ? "Indian address suggestions will appear as you type" : "Loading address suggestions..."}
           </p>
         </div>
       </DialogContent>
