@@ -32,20 +32,29 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
   const autocompleteRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Use a separate effect to initialize autocomplete after the dialog is fully open
+  useEffect(() => {
+    if (isOpen && window.google && inputRef.current && !autocompleteRef.current) {
+      // Small delay to ensure input is fully rendered
+      const timer = setTimeout(() => {
+        initializeAutocomplete();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, scriptLoaded]);
+
   useEffect(() => {
     console.log("Dialog opened:", isOpen);
     if (isOpen && !window.google) {
       console.log("Loading Google Maps script...");
       loadGoogleMapsScript();
-    } else if (isOpen && window.google && !autocompleteRef.current) {
-      console.log("Google Maps already loaded, initializing autocomplete...");
-      initializeAutocomplete();
     }
   }, [isOpen]);
 
   const loadGoogleMapsScript = () => {
     if (document.querySelector('script[src*="maps.googleapis.com"]')) {
       console.log("Google Maps script already exists");
+      setScriptLoaded(true);
       return;
     }
 
@@ -66,9 +75,6 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     window.initGooglePlaces = () => {
       console.log("Google Maps callback executed");
       setScriptLoaded(true);
-      if (isOpen) {
-        initializeAutocomplete();
-      }
     };
     
     document.head.appendChild(script);
@@ -94,16 +100,16 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     try {
       console.log("Initializing autocomplete...");
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-        types: ['geocode'],
-        componentRestrictions: { country: 'IN' }, // Use 'IN' instead of 'in'
-        fields: ['formatted_address', 'address_components', 'place_id', 'geometry']
+        types: ['establishment', 'geocode'], // Include both establishments and geocoded addresses
+        componentRestrictions: { country: 'IN' },
+        fields: ['formatted_address', 'address_components', 'place_id', 'geometry', 'name']
       });
 
       autocompleteRef.current.addListener('place_changed', () => {
         console.log("Place changed event triggered");
         const place = autocompleteRef.current.getPlace();
         console.log("Selected place:", place);
-        if (place && place.formatted_address) {
+        if (place && (place.formatted_address || place.name)) {
           handlePlaceSelect(place);
         } else {
           console.log("No place details received");
@@ -126,7 +132,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     
     try {
       onPlaceSelect({
-        formatted_address: place.formatted_address,
+        formatted_address: place.formatted_address || place.name,
         address_components: place.address_components || [],
         place_id: place.place_id
       });
@@ -188,7 +194,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
               id="address-search"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="e.g., Connaught Place, New Delhi, India"
+              placeholder="e.g., Connaught Place, New Delhi or Mumbai Central"
               disabled={isLoading}
             />
             {!window.google && (
