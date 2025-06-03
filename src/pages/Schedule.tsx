@@ -33,8 +33,8 @@ export interface DryCleaningItem {
   quantity: number;
 }
 
-// Order data interface for the scheduling flow
-export interface OrderData {
+// Schedule order data interface - renamed to avoid conflicts
+export interface ScheduleOrderData {
   services: SelectedService[];
   addressId: string | null;
   pickupDate: Date | null;
@@ -54,7 +54,7 @@ const Schedule = () => {
   
   // Initialize with today's date as default pickup date
   const today = startOfToday();
-  const [orderData, setOrderData] = useState<OrderData>({
+  const [orderData, setOrderData] = useState<ScheduleOrderData>({
     services: [],
     addressId: null,
     pickupDate: today,
@@ -128,7 +128,7 @@ const Schedule = () => {
   };
 
   // Update order data
-  const updateOrderData = (data: Partial<OrderData>) => {
+  const updateOrderData = (data: Partial<ScheduleOrderData>) => {
     setOrderData((prev) => {
       const updated = { ...prev, ...data };
       console.log("Updated order data:", updated);

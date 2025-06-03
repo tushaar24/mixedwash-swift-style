@@ -15,6 +15,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight, Home, Loader2, Plus, Locate } from "lucide-react";
 import { AddressParser } from "@/utils/addressParser";
+import { ScheduleOrderData } from "@/pages/Schedule";
 
 interface Address {
   id: string;
@@ -30,24 +31,9 @@ interface Address {
   longitude?: number;
 }
 
-export interface OrderData {
-  services: any[];
-  addressId: string | null;
-  pickupDate: Date | null;
-  pickupSlotId: string | null;
-  pickupSlotLabel: string | null;
-  deliveryDate: Date | null;
-  deliverySlotId: string | null;
-  deliverySlotLabel: string | null;
-  specialInstructions: string;
-  estimatedWeight: number | null;
-  totalAmount: number | null;
-  dryCleaningItems: any[];
-}
-
 interface AddressSelectionProps {
-  orderData: OrderData;
-  updateOrderData: (data: Partial<OrderData>) => void;
+  orderData: ScheduleOrderData;
+  updateOrderData: (data: Partial<ScheduleOrderData>) => void;
   onNext: () => void;
   onBack: () => void;
 }

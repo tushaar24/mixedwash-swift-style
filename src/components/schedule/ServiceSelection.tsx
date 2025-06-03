@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { ArrowRight, BadgePercent, Loader2 } from "lucide-react";
-import { OrderData, SelectedService, DryCleaningItem } from "@/pages/Schedule";
+import { ScheduleOrderData, SelectedService, DryCleaningItem } from "@/pages/Schedule";
 import { DryCleaningItemsDialog } from "./DryCleaningItemsDialog";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 
@@ -20,8 +20,8 @@ interface Service {
 }
 
 interface ServiceSelectionProps {
-  orderData: OrderData;
-  updateOrderData: (data: Partial<OrderData>) => void;
+  orderData: ScheduleOrderData;
+  updateOrderData: (data: Partial<ScheduleOrderData>) => void;
   onNext: () => void;
 }
 

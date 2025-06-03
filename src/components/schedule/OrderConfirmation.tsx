@@ -4,11 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, Clock, Home, Loader2, Truck, ShoppingBag } from "lucide-react";
-import { OrderData, SelectedService } from "@/pages/Schedule";
+import { ScheduleOrderData, SelectedService } from "@/pages/Schedule";
 import { format } from "date-fns";
 
 interface OrderConfirmationProps {
-  orderData: OrderData;
+  orderData: ScheduleOrderData;
   onBack: () => void;
   onComplete: () => void;
 }

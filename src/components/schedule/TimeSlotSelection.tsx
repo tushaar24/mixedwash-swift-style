@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, Clock, Loader2 } from "lucide-react";
-import { OrderData } from "@/pages/Schedule";
+import { ScheduleOrderData } from "@/pages/Schedule";
 import { addDays, format, isBefore, startOfToday } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,8 +17,8 @@ interface TimeSlot {
 }
 
 interface TimeSlotSelectionProps {
-  orderData: OrderData;
-  updateOrderData: (data: Partial<OrderData>) => void;
+  orderData: ScheduleOrderData;
+  updateOrderData: (data: Partial<ScheduleOrderData>) => void;
   onNext: () => void;
   onBack: () => void;
 }
