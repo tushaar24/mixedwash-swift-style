@@ -12,12 +12,12 @@ export const Services = () => {
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showDiscountAlert, setShowDiscountAlert] = useState(true);
   
-  // Auto-hide discount alert after 200ms
+  // Auto-hide discount alert after 50ms
   useEffect(() => {
     if (!loading && isEligibleForDiscount && showDiscountAlert) {
       const timer = setTimeout(() => {
         setShowDiscountAlert(false);
-      }, 200);
+      }, 50);
       
       return () => clearTimeout(timer);
     }
