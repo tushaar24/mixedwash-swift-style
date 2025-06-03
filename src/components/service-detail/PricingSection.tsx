@@ -18,7 +18,7 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showServiceChargeAlert, setShowServiceChargeAlert] = useState(true);
 
-  // Auto-hide service charge alert after 3 seconds (3000ms)
+  // Auto-hide service charge alert after 3 seconds - only if service has a charge and alert is showing
   useEffect(() => {
     console.log('PricingSection useEffect triggered:', { serviceCharge: service.serviceCharge, showServiceChargeAlert });
     

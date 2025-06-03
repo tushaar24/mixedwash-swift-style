@@ -12,7 +12,7 @@ export const Services = () => {
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showDiscountAlert, setShowDiscountAlert] = useState(true);
   
-  // Auto-hide discount alert after 3 seconds (3000ms)
+  // Auto-hide discount alert after 3 seconds - only if user is eligible and alert is showing
   useEffect(() => {
     console.log('Services useEffect triggered:', { loading, isEligibleForDiscount, showDiscountAlert });
     
