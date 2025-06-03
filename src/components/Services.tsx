@@ -94,7 +94,7 @@ export const Services = () => {
                 <span className="text-sm font-semibold">20% OFF on your first order!</span>
                 <button
                   onClick={() => setShowDiscountAlert(false)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-amber-200 rounded-full p-1.5 transition-colors"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-amber-200 rounded-full p-1.5 transition-colors hover:bg-amber-300"
                   aria-label="Dismiss discount alert"
                 >
                   <X className="h-4 w-4" />

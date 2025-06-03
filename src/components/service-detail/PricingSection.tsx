@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -40,7 +41,7 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
           <p className="flex-1 pr-2">{service.serviceCharge}</p>
           <button
             onClick={() => setShowServiceChargeAlert(false)}
-            className="absolute right-2 top-2 hover:bg-red-100 rounded-full p-1.5 transition-colors"
+            className="absolute right-2 top-2 bg-red-100 rounded-full p-1.5 transition-colors hover:bg-red-200"
             aria-label="Dismiss service charge alert"
           >
             <X className="h-4 w-4" />
