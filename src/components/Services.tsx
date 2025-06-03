@@ -1,15 +1,16 @@
-
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BadgePercent, Clock, Truck, Info } from "lucide-react";
+import { ArrowRight, BadgePercent, Clock, Truck, Info, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
+import { useState } from "react";
 
 export const Services = () => {
   const navigate = useNavigate();
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
+  const [showDiscountAlert, setShowDiscountAlert] = useState(true);
   
   const services = [
     {
@@ -76,10 +77,17 @@ export const Services = () => {
             We offer a variety of services to meet all your laundry needs, with next-day delivery standard.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
-            {!loading && isEligibleForDiscount && (
-              <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300">
+            {!loading && isEligibleForDiscount && showDiscountAlert && (
+              <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300 relative">
                 <BadgePercent className="h-4 w-4" />
                 <span className="text-sm font-semibold">20% OFF on your first order!</span>
+                <button
+                  onClick={() => setShowDiscountAlert(false)}
+                  className="ml-2 hover:bg-amber-200 rounded-full p-1 transition-colors"
+                  aria-label="Dismiss discount alert"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </div>
             )}
             <div className="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full text-blue-800 border border-blue-300">

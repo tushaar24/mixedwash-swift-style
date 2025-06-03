@@ -1,10 +1,9 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Info, Truck } from "lucide-react";
+import { Info, Truck, X } from "lucide-react";
 import { ServiceWeightEstimateDialog } from "@/components/ServiceWeightEstimateDialog";
 import { useState } from "react";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
@@ -17,16 +16,24 @@ interface PricingSectionProps {
 export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
   const [activeTab, setActiveTab] = useState("men");
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
+  const [showServiceChargeAlert, setShowServiceChargeAlert] = useState(true);
   
   return (
     <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Pricing</h2>
       
       {/* Add service charge note for dry cleaning */}
-      {service.serviceCharge && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm flex items-start gap-2">
+      {service.serviceCharge && showServiceChargeAlert && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm flex items-start gap-2 relative">
           <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-          <p>{service.serviceCharge}</p>
+          <p className="flex-1">{service.serviceCharge}</p>
+          <button
+            onClick={() => setShowServiceChargeAlert(false)}
+            className="ml-2 hover:bg-red-100 rounded-full p-1 transition-colors flex-shrink-0"
+            aria-label="Dismiss service charge alert"
+          >
+            <X className="h-3 w-3" />
+          </button>
         </div>
       )}
       
