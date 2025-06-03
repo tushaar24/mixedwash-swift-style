@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,7 @@ interface AddressSelectionProps {
 }
 
 export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }: AddressSelectionProps) => {
+  const { user } = useAuth();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(orderData.addressId);
@@ -73,13 +75,19 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
   });
   const [savingAddress, setSavingAddress] = useState(false);
 
-  // Fetch addresses from Supabase
+  // Fetch addresses from Supabase for the current user only
   useEffect(() => {
     const fetchAddresses = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data, error } = await supabase
           .from("addresses")
           .select("*")
+          .eq("user_id", user.id)
           .order("is_default", { ascending: false });
           
         if (error) {
@@ -114,7 +122,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     };
     
     fetchAddresses();
-  }, [selectedAddressId, updateOrderData]);
+  }, [selectedAddressId, updateOrderData, user]);
 
   // Reverse geocode coordinates to get address using Google Geocoding API
   const reverseGeocode = async (latitude: number, longitude: number) => {
@@ -260,6 +268,15 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
 
   // Save new address
   const handleSaveAddress = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to add an address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Basic validation
     if (!newAddress.address_line1 || !newAddress.city || !newAddress.state || !newAddress.postal_code) {
       toast({
@@ -273,12 +290,6 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     setSavingAddress(true);
     
     try {
-      // Get the current authenticated user
-      const { data: authData } = await supabase.auth.getUser();
-      if (!authData || !authData.user) {
-        throw new Error("You must be logged in to add an address");
-      }
-
       // Check if this is the first address, make it default if so
       if (addresses.length === 0) {
         newAddress.is_default = true;
@@ -287,7 +298,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
       // Prepare the data for insertion, including coordinates if available
       const addressDataToInsert = {
         ...newAddress,
-        user_id: authData.user.id,
+        user_id: user.id,
         latitude: newAddress.latitude,
         longitude: newAddress.longitude,
       };
@@ -307,6 +318,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
           await supabase
             .from("addresses")
             .update({ is_default: false })
+            .eq("user_id", user.id)
             .neq("id", data[0].id);
         }
         
@@ -604,158 +616,6 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
           ))}
         </div>
       )}
-      
-      {/* Manual Entry Option */}
-      {/* <div className="pt-4">
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button 
-              variant="ghost" 
-              className="w-full text-gray-600 hover:text-gray-800 flex items-center justify-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Enter Address Manually
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add a New Address</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <label htmlFor="house_building" className="text-sm font-medium">
-                  House/Flat No., Building Name
-                </label>
-                <Input 
-                  id="house_building"
-                  name="house_building"
-                  value={newAddress.house_building}
-                  onChange={handleAddressChange}
-                  placeholder="e.g., 123, ABC Apartments"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="address_line1" className="text-sm font-medium">
-                  Street Address *
-                </label>
-                <Input 
-                  id="address_line1"
-                  name="address_line1"
-                  value={newAddress.address_line1}
-                  onChange={handleAddressChange}
-                  placeholder="Street Name, Road"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="area" className="text-sm font-medium">
-                  Area/Locality
-                </label>
-                <Input 
-                  id="area"
-                  name="area"
-                  value={newAddress.area}
-                  onChange={handleAddressChange}
-                  placeholder="e.g., HSR Sector 6, Koramangala"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="address_line2" className="text-sm font-medium">
-                  Landmark (Optional)
-                </label>
-                <Input 
-                  id="address_line2"
-                  name="address_line2"
-                  value={newAddress.address_line2}
-                  onChange={handleAddressChange}
-                  placeholder="Near Metro Station, Opposite Mall"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="city" className="text-sm font-medium">
-                    City *
-                  </label>
-                  <Input 
-                    id="city"
-                    name="city"
-                    value={newAddress.city}
-                    onChange={handleAddressChange}
-                    placeholder="City"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="state" className="text-sm font-medium">
-                    State *
-                  </label>
-                  <Input 
-                    id="state"
-                    name="state"
-                    value={newAddress.state}
-                    onChange={handleAddressChange}
-                    placeholder="State"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="postal_code" className="text-sm font-medium">
-                  Postal Code *
-                </label>
-                <Input 
-                  id="postal_code"
-                  name="postal_code"
-                  value={newAddress.postal_code}
-                  onChange={handleAddressChange}
-                  placeholder="Postal Code"
-                  required
-                />
-              </div>
-              
-              <div className="flex items-center space-x-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="is_default"
-                  name="is_default"
-                  checked={newAddress.is_default}
-                  onChange={handleAddressChange}
-                  className="rounded border-gray-300"
-                />
-                <label htmlFor="is_default" className="text-sm">
-                  Set as default address
-                </label>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSaveAddress} 
-                disabled={savingAddress}
-                className="bg-black hover:bg-gray-800"
-              >
-                {savingAddress ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : "Save Address"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div> */}
       
       {/* Back button */}
       <div className="pt-8">
