@@ -201,11 +201,9 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
                       </div>
                     ) : (
                       <div className="font-bold">
-                        {service.discount_price !== null && !isEligibleForDiscount 
-                          ? `₹${service.price}/kg` 
-                          : service.name.toLowerCase().includes('dry cleaning')
-                            ? `From ₹${service.price}`
-                            : `₹${service.price}/kg`
+                        {service.name.toLowerCase().includes('dry cleaning')
+                          ? `From ₹${service.price}`
+                          : `₹${service.price}/kg`
                         }
                       </div>
                     )}

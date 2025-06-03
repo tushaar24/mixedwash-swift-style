@@ -134,7 +134,7 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
                       </div>
                     ) : (
                       <div className="font-semibold text-xl sm:text-2xl text-gray-800">
-                        {service.discount > 0 && !isEligibleForDiscount ? price.oldPrice : price.amount}
+                        {price.oldPrice}
                       </div>
                     )}
                   </div>

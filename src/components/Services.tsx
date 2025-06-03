@@ -136,7 +136,7 @@ export const Services = () => {
                   </div>
                 ) : (
                   <div className="font-semibold text-gray-800">
-                    {service.discount > 0 && !isEligibleForDiscount ? service.regularPrice : service.newPrice}
+                    {service.regularPrice}
                   </div>
                 )}
                 
