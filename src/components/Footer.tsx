@@ -1,4 +1,3 @@
-
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
   
@@ -10,9 +9,6 @@ export const Footer = () => {
             <span className="text-xl font-bold">MixedWash</span>
             <p className="mt-2 text-sm text-gray-600">
               Laundry Made Fun, Fast & Friendly.
-            </p>
-            <p className="mt-2 text-sm text-gray-600">
-              Currently serving HSR, Koramangala, and BTM Layout in Bangalore.
             </p>
           </div>
           
