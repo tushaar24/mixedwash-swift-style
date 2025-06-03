@@ -19,6 +19,8 @@ export type Database = {
           house_building: string | null
           id: string
           is_default: boolean | null
+          latitude: number | null
+          longitude: number | null
           postal_code: string
           state: string
           updated_at: string
@@ -33,6 +35,8 @@ export type Database = {
           house_building?: string | null
           id?: string
           is_default?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           postal_code: string
           state: string
           updated_at?: string
@@ -47,6 +51,8 @@ export type Database = {
           house_building?: string | null
           id?: string
           is_default?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           postal_code?: string
           state?: string
           updated_at?: string

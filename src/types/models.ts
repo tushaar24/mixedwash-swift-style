@@ -1,4 +1,3 @@
-
 export interface Profile {
   id: string;
   username?: string;
@@ -18,6 +17,8 @@ export interface Address {
   state: string;
   postal_code: string;
   is_default?: boolean;
+  latitude?: number;
+  longitude?: number;
   created_at: string;
   updated_at: string;
 }

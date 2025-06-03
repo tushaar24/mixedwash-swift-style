@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,8 @@ interface Address {
   state: string;
   postal_code: string;
   is_default: boolean;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface OrderData {
@@ -70,7 +73,9 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     city: "",
     state: "",
     postal_code: "",
-    is_default: false
+    is_default: false,
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
   const [savingAddress, setSavingAddress] = useState(false);
 
@@ -139,7 +144,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         // Use the AddressParser to parse the address properly
         const parsedAddress = AddressParser.parseFromGoogleComponents(result.address_components);
         
-        // Convert to the format expected by the form
+        // Convert to the format expected by the form, including coordinates
         return {
           house_building: parsedAddress.house_building,
           address_line1: parsedAddress.address_line1,
@@ -148,7 +153,9 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
           city: parsedAddress.city,
           state: parsedAddress.state,
           postal_code: parsedAddress.postal_code,
-          is_default: addresses.length === 0 // Make it default if it's the first address
+          is_default: addresses.length === 0, // Make it default if it's the first address
+          latitude: latitude, // Save the actual coordinates
+          longitude: longitude,
         };
       } else {
         throw new Error(data.error_message || 'No address found for these coordinates');
@@ -183,7 +190,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
           // Reverse geocode the coordinates
           const addressData = await reverseGeocode(latitude, longitude);
           
-          // Populate the form with the geocoded address
+          // Populate the form with the geocoded address (including coordinates)
           setNewAddress(addressData);
           
           // Open the address dialog for editing
@@ -299,12 +306,17 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         newAddress.is_default = true;
       }
       
+      // Prepare the data for insertion, including coordinates if available
+      const addressDataToInsert = {
+        ...newAddress,
+        user_id: authData.user.id,
+        latitude: newAddress.latitude,
+        longitude: newAddress.longitude,
+      };
+      
       const { data, error } = await supabase
         .from("addresses")
-        .insert([{
-          ...newAddress,
-          user_id: authData.user.id // Add the user_id here
-        }])
+        .insert([addressDataToInsert])
         .select();
         
       if (error) {
@@ -342,7 +354,9 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
           city: "",
           state: "",
           postal_code: "",
-          is_default: false
+          is_default: false,
+          latitude: null,
+          longitude: null,
         });
       }
     } catch (error: any) {
