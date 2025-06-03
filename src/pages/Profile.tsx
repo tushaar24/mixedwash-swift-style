@@ -34,6 +34,7 @@ const Profile = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editProfileDialogOpen, setEditProfileDialogOpen] = useState(false);
   const [profileUpdateLoading, setProfileUpdateLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
   
   // New address form state
   const [newAddress, setNewAddress] = useState({
@@ -148,6 +149,24 @@ const Profile = () => {
     fetchOrdersAndAddresses();
   }, [user, navigate, toast, isProfileComplete]);
 
+  // Handle phone number input with validation
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow digits
+    const digitsOnly = value.replace(/\D/g, '');
+    
+    setPhone(digitsOnly);
+    
+    // Validate length
+    if (digitsOnly.length === 0) {
+      setPhoneError("");
+    } else if (digitsOnly.length !== 10) {
+      setPhoneError("Phone number must be exactly 10 digits");
+    } else {
+      setPhoneError("");
+    }
+  };
+
   const handleFirstTimeProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -155,6 +174,15 @@ const Profile = () => {
       toast({
         title: "Missing information",
         description: "Please fill in both name and phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (phone.length !== 10) {
+      toast({
+        title: "Invalid phone number",
+        description: "Phone number must be exactly 10 digits.",
         variant: "destructive",
       });
       return;
@@ -198,6 +226,24 @@ const Profile = () => {
   // Handle profile update
   const handleProfileUpdate = async () => {
     if (!user) return;
+    
+    if (!name.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please enter your name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (phone.length !== 10) {
+      toast({
+        title: "Invalid phone number",
+        description: "Phone number must be exactly 10 digits.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setProfileUpdateLoading(true);
     
@@ -399,7 +445,7 @@ const Profile = () => {
                   id="phone"
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={handlePhoneChange}
                   required
                   className="h-12 text-base"
                   placeholder="Enter your phone number"
@@ -822,23 +868,30 @@ const Profile = () => {
                               <Input 
                                 id="edit-phone"
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                placeholder="Your phone number"
-                                type="tel"
+                                onChange={handlePhoneChange}
+                                placeholder="Enter 10 digit phone number"
+                                maxLength={10}
+                                className={phoneError ? "border-red-500" : ""}
                               />
+                              {phoneError && (
+                                <p className="text-sm text-red-500">{phoneError}</p>
+                              )}
                             </div>
                           </div>
                           <DialogFooter>
                             <Button 
                               type="button" 
                               variant="outline" 
-                              onClick={() => setEditProfileDialogOpen(false)}
+                              onClick={() => {
+                                setEditProfileDialogOpen(false);
+                                setPhoneError("");
+                              }}
                             >
                               Cancel
                             </Button>
                             <Button 
                               onClick={handleProfileUpdate} 
-                              disabled={profileUpdateLoading}
+                              disabled={profileUpdateLoading || !!phoneError || phone.length !== 10}
                             >
                               {profileUpdateLoading ? (
                                 <>
