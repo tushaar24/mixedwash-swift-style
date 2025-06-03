@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -116,7 +117,75 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     fetchAddresses();
   }, [selectedAddressId, updateOrderData]);
 
-  // Get user's current location without Google Maps API
+  // Reverse geocode coordinates to get address using Google Geocoding API
+  const reverseGeocode = async (latitude: number, longitude: number) => {
+    const GOOGLE_API_KEY = "AIzaSyBqK8ZGZEHvkTpCz0RWY1UvKGqJ8FGNZ04"; // You should move this to environment variables
+    
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch address from coordinates');
+      }
+      
+      const data = await response.json();
+      
+      if (data.status === 'OK' && data.results.length > 0) {
+        const result = data.results[0];
+        console.log("Geocoding result:", result);
+        
+        // Parse the address components
+        const addressComponents = result.address_components;
+        let streetNumber = '';
+        let route = '';
+        let area = '';
+        let city = '';
+        let state = '';
+        let postalCode = '';
+        
+        addressComponents.forEach((component: any) => {
+          const types = component.types;
+          
+          if (types.includes('street_number')) {
+            streetNumber = component.long_name;
+          } else if (types.includes('route')) {
+            route = component.long_name;
+          } else if (types.includes('sublocality_level_1') || types.includes('neighborhood')) {
+            area = component.long_name;
+          } else if (types.includes('locality')) {
+            city = component.long_name;
+          } else if (types.includes('administrative_area_level_1')) {
+            state = component.long_name;
+          } else if (types.includes('postal_code')) {
+            postalCode = component.long_name;
+          }
+        });
+        
+        // Construct the address
+        const addressLine1 = streetNumber && route ? `${streetNumber} ${route}` : route || result.formatted_address;
+        
+        return {
+          house_building: "",
+          address_line1: addressLine1,
+          address_line2: "",
+          area: area,
+          city: city,
+          state: state,
+          postal_code: postalCode,
+          is_default: addresses.length === 0 // Make it default if it's the first address
+        };
+      } else {
+        throw new Error(data.error_message || 'No address found for these coordinates');
+      }
+    } catch (error) {
+      console.error("Reverse geocoding error:", error);
+      throw error;
+    }
+  };
+
+  // Get user's current location and reverse geocode it
   const handleUseCurrentLocation = () => {
     console.log("Starting geolocation request...");
     
@@ -133,18 +202,37 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        console.log("Location obtained:", position.coords);
-        const { latitude, longitude } = position.coords;
-        
-        // Show success message with coordinates and prompt for manual address entry
-        toast({
-          title: "Location found",
-          description: `Location: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}. Please enter your address manually.`,
-        });
-        
-        // Open the manual address entry dialog
-        setDialogOpen(true);
-        setLocatingUser(false);
+        try {
+          console.log("Location obtained:", position.coords);
+          const { latitude, longitude } = position.coords;
+          
+          // Reverse geocode the coordinates
+          const addressData = await reverseGeocode(latitude, longitude);
+          
+          // Populate the form with the geocoded address
+          setNewAddress(addressData);
+          
+          // Open the address dialog for editing
+          setDialogOpen(true);
+          
+          toast({
+            title: "Location found",
+            description: "Address has been populated. Please review and edit if needed.",
+          });
+          
+        } catch (error) {
+          console.error("Reverse geocoding failed:", error);
+          toast({
+            title: "Address lookup failed",
+            description: "Could not determine address from your location. Please enter it manually.",
+            variant: "destructive",
+          });
+          
+          // Still open the dialog for manual entry
+          setDialogOpen(true);
+        } finally {
+          setLocatingUser(false);
+        }
       },
       (error) => {
         console.error("Geolocation error:", error);
