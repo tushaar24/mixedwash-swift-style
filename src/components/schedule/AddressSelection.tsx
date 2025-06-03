@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight, Home, Loader2, MapPin, Plus, Search, Locate } from "lucide-react";
 import { GooglePlacesAutocomplete } from "./GooglePlacesAutocomplete";
 import { AddressDetailsForm } from "./AddressDetailsForm";
+import { AddressParser } from "@/utils/addressParser";
 
 interface Address {
   id: string;
@@ -136,44 +136,18 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
         const result = data.results[0];
         console.log("Geocoding result:", result);
         
-        // Parse the address components
-        const addressComponents = result.address_components;
-        let streetNumber = '';
-        let route = '';
-        let area = '';
-        let city = '';
-        let state = '';
-        let postalCode = '';
+        // Use the AddressParser to parse the address properly
+        const parsedAddress = AddressParser.parseFromGoogleComponents(result.address_components);
         
-        addressComponents.forEach((component: any) => {
-          const types = component.types;
-          
-          if (types.includes('street_number')) {
-            streetNumber = component.long_name;
-          } else if (types.includes('route')) {
-            route = component.long_name;
-          } else if (types.includes('sublocality_level_1') || types.includes('neighborhood')) {
-            area = component.long_name;
-          } else if (types.includes('locality')) {
-            city = component.long_name;
-          } else if (types.includes('administrative_area_level_1')) {
-            state = component.long_name;
-          } else if (types.includes('postal_code')) {
-            postalCode = component.long_name;
-          }
-        });
-        
-        // Construct the address
-        const addressLine1 = streetNumber && route ? `${streetNumber} ${route}` : route || result.formatted_address;
-        
+        // Convert to the format expected by the form
         return {
-          house_building: "",
-          address_line1: addressLine1,
-          address_line2: "",
-          area: area,
-          city: city,
-          state: state,
-          postal_code: postalCode,
+          house_building: parsedAddress.house_building,
+          address_line1: parsedAddress.address_line1,
+          address_line2: parsedAddress.address_line2,
+          area: parsedAddress.area,
+          city: parsedAddress.city,
+          state: parsedAddress.state,
+          postal_code: parsedAddress.postal_code,
           is_default: addresses.length === 0 // Make it default if it's the first address
         };
       } else {
