@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -13,9 +12,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight, Home, Loader2, MapPin, Plus, Search, Locate } from "lucide-react";
-import { GooglePlacesAutocomplete } from "./GooglePlacesAutocomplete";
-import { AddressDetailsForm } from "./AddressDetailsForm";
+import { ArrowLeft, ArrowRight, Home, Loader2, Plus, Locate } from "lucide-react";
 import { AddressParser } from "@/utils/addressParser";
 
 interface Address {
@@ -59,9 +56,6 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
   const [loading, setLoading] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(orderData.addressId);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [googlePlacesOpen, setGooglePlacesOpen] = useState(false);
-  const [addressDetailsOpen, setAddressDetailsOpen] = useState(false);
-  const [selectedPlaceAddress, setSelectedPlaceAddress] = useState("");
   const [locatingUser, setLocatingUser] = useState(false);
   
   // New address form state
@@ -255,22 +249,6 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
     updateOrderData({ addressId: address.id });
   };
 
-  // Handle Google Places selection
-  const handleGooglePlaceSelect = (place: any) => {
-    setSelectedPlaceAddress(place.formatted_address);
-    setGooglePlacesOpen(false);
-    setAddressDetailsOpen(true);
-  };
-
-  // Handle address saved from details form
-  const handleAddressSaved = (savedAddress: Address) => {
-    setAddresses(prev => [...prev, savedAddress]);
-    setSelectedAddressId(savedAddress.id);
-    updateOrderData({ addressId: savedAddress.id });
-    setAddressDetailsOpen(false);
-    setSelectedPlaceAddress("");
-  };
-
   // Handle address form input changes
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -413,16 +391,6 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
             <Locate className="h-6 w-6" />
           )}
           {locatingUser ? "Getting your location..." : "Use Current Location"}
-        </Button>
-
-        {/* Search with Google Places */}
-        <Button 
-          onClick={() => setGooglePlacesOpen(true)}
-          variant="outline"
-          className="w-full h-16 border-2 border-gray-300 hover:border-gray-400 flex items-center justify-center gap-3 text-lg font-medium"
-        >
-          <Search className="h-6 w-6 text-gray-600" />
-          Search for Address
         </Button>
       </div>
 
@@ -638,21 +606,6 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
           </DialogContent>
         </Dialog>
       </div>
-
-      {/* Google Places Autocomplete Dialog */}
-      <GooglePlacesAutocomplete 
-        isOpen={googlePlacesOpen}
-        onOpenChange={setGooglePlacesOpen}
-        onPlaceSelect={handleGooglePlaceSelect}
-      />
-
-      {/* Address Details Form Dialog */}
-      <AddressDetailsForm 
-        isOpen={addressDetailsOpen}
-        onOpenChange={setAddressDetailsOpen}
-        initialAddress={selectedPlaceAddress}
-        onAddressSaved={handleAddressSaved}
-      />
       
       {/* Back button */}
       <div className="pt-8">
