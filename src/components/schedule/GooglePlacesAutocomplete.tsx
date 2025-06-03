@@ -78,11 +78,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
   useEffect(() => {
     if (isOpen && googleReady && inputRef.current && !autocompleteRef.current && !showPlacePreview) {
       console.log("Initializing Google Places Autocomplete...");
-      const timer = setTimeout(() => {
-        initializeAutocomplete();
-      }, 200);
-      
-      return () => clearTimeout(timer);
+      initializeAutocomplete();
     }
   }, [isOpen, googleReady, showPlacePreview]);
 
