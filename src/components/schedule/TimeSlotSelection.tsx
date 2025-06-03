@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,7 +34,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   // Next day delivery date
   const deliveryDate = pickupDate ? addDays(pickupDate, 1) : null;
 
-  // Fetch time slots from database
+  // Fetch time slots from database - only enabled ones
   useEffect(() => {
     const fetchTimeSlots = async () => {
       try {
@@ -43,6 +42,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
         const { data, error } = await supabase
           .from("time_slots")
           .select("*")
+          .eq("enabled", true) // Only fetch enabled time slots
           .order("start_time");
 
         if (error) {
@@ -53,7 +53,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
             variant: "destructive",
           });
         } else {
-          console.log("Fetched time slots:", data);
+          console.log("Fetched enabled time slots:", data);
           setTimeSlots(data || []);
         }
       } catch (error) {
@@ -72,7 +72,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   }, []);
 
   // Select a date and reset time slot if needed
-  const handleDateSelect = (date: Date | null) => {
+  function handleDateSelect(date: Date | null) {
     setPickupDate(date);
     
     // Reset time slot when changing date
@@ -85,10 +85,10 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       deliverySlotId: null,
       deliverySlotLabel: null
     });
-  };
+  }
 
   // Select a time slot
-  const handleTimeSlotSelect = (timeSlot: TimeSlot) => {
+  function handleTimeSlotSelect(timeSlot: TimeSlot) {
     console.log("Selecting time slot:", timeSlot);
     setSelectedTimeSlotId(timeSlot.id);
     
@@ -100,10 +100,10 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       deliverySlotId: timeSlot.id,
       deliverySlotLabel: timeSlot.label,
     });
-  };
+  }
 
   // Continue to next step - using orderData for validation instead of local state
-  const handleContinue = () => {
+  function handleContinue() {
     if (!orderData.pickupDate) {
       toast({
         title: "Please select a date",
@@ -148,7 +148,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     
     // Continue to next step
     onNext();
-  };
+  }
 
   if (loadingSlots) {
     return (
@@ -209,33 +209,39 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
           
           {pickupDate ? (
             <div className="space-y-3">
-              {timeSlots.map((slot) => (
-                <Card 
-                  key={slot.id}
-                  className={`transition-all cursor-pointer hover:shadow-md ${
-                    selectedTimeSlotId === slot.id 
-                      ? "ring-2 ring-black shadow-md" 
-                      : "hover:scale-[1.01] border-gray-200"
-                  }`}
-                  onClick={() => handleTimeSlotSelect(slot)}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{slot.label}</p>
-                      </div>
-                      
-                      {selectedTimeSlotId === slot.id && (
-                        <div className="h-6 w-6 bg-black rounded-full flex items-center justify-center">
-                          <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
+              {timeSlots.length > 0 ? (
+                timeSlots.map((slot) => (
+                  <Card 
+                    key={slot.id}
+                    className={`transition-all cursor-pointer hover:shadow-md ${
+                      selectedTimeSlotId === slot.id 
+                        ? "ring-2 ring-black shadow-md" 
+                        : "hover:scale-[1.01] border-gray-200"
+                    }`}
+                    onClick={() => handleTimeSlotSelect(slot)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{slot.label}</p>
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                        
+                        {selectedTimeSlotId === slot.id && (
+                          <div className="h-6 w-6 bg-black rounded-full flex items-center justify-center">
+                            <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="p-8 bg-gray-50 rounded-lg text-center">
+                  <p className="text-gray-600">No time slots are currently available</p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="p-8 bg-gray-50 rounded-lg text-center">
