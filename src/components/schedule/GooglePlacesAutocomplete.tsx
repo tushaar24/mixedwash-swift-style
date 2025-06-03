@@ -75,11 +75,10 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     }
   }, [isOpen]);
 
-  // Initialize autocomplete when everything is ready - OPTIMIZED
+  // Initialize autocomplete when everything is ready
   useEffect(() => {
     if (isOpen && googleReady && inputRef.current && !autocompleteRef.current && !showPlacePreview) {
       console.log("Initializing Google Places Autocomplete...");
-      // Reduced delay for faster initialization
       const timer = setTimeout(() => {
         initializeAutocomplete();
       }, 100);
@@ -154,25 +153,31 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
           'name', 
           'types'
         ],
-        // Remove types restriction for better building/landmark suggestions
       });
 
       console.log("Autocomplete instance created successfully");
 
-      // Add place changed listener
+      // Add place changed listener - this is the key fix
       autocompleteRef.current.addListener('place_changed', () => {
         console.log("Place changed event triggered");
         const place = autocompleteRef.current.getPlace();
-        console.log("Selected place:", place);
+        console.log("Selected place from autocomplete:", place);
         
         if (place && (place.formatted_address || place.name)) {
+          // Clear the input to show we've captured the selection
+          setSearchValue("");
           handlePlaceSelect(place);
         } else {
-          console.warn("No valid place selected");
+          console.warn("No valid place selected or incomplete place data");
+          toast({
+            title: "Invalid selection",
+            description: "Please select a valid address from the suggestions",
+            variant: "destructive",
+          });
         }
       });
       
-      // Focus the input immediately without delay
+      // Focus the input
       if (inputRef.current) {
         inputRef.current.focus();
         console.log("Input focused");
@@ -240,6 +245,13 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     setSelectedPlace(null);
     setParsePreview(null);
     setSearchValue("");
+    
+    // Reinitialize autocomplete after going back
+    setTimeout(() => {
+      if (inputRef.current && googleReady) {
+        initializeAutocomplete();
+      }
+    }, 100);
   };
 
   const handleManualSearch = () => {
@@ -277,15 +289,19 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     }
   };
 
-  // Preview parsing as user types
-  useEffect(() => {
-    if (searchValue.trim().length > 10 && !showPlacePreview) {
-      const preview = AddressParser.parseFromFormattedAddress(searchValue);
+  // Handle input changes - prevent clearing when autocomplete is active
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    
+    // Only do preview parsing if we're not in autocomplete mode and value is substantial
+    if (value.trim().length > 10 && !showPlacePreview && !autocompleteRef.current) {
+      const preview = AddressParser.parseFromFormattedAddress(value);
       setParsePreview(preview);
-    } else if (!showPlacePreview) {
+    } else if (!showPlacePreview && value.trim().length <= 10) {
       setParsePreview(null);
     }
-  }, [searchValue, showPlacePreview]);
+  };
 
   const getStatusMessage = () => {
     if (!scriptLoaded && !window.google) return "Loading Google Maps...";
@@ -328,7 +344,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
                 ref={inputRef}
                 id="address-search"
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                onChange={handleInputChange}
                 placeholder="e.g., Phoenix Mall Bangalore, Brigade Road, or DLF Cyber City Gurgaon"
                 disabled={isLoading}
                 autoComplete="off"
@@ -339,7 +355,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
             </div>
 
             {/* Address Preview */}
-            {parsePreview && searchValue.length > 10 && (
+            {parsePreview && searchValue.length > 10 && !autocompleteRef.current && (
               <div className="bg-gray-50 border rounded-md p-3">
                 <div className="flex items-center gap-2 mb-2">
                   {parsePreview.confidence >= 60 ? (
