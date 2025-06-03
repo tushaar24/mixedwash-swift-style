@@ -30,6 +30,19 @@ export const AboutService = ({ service }: AboutServiceProps) => {
     ];
   };
 
+  // Define process description based on service type
+  const getProcessDescription = () => {
+    const serviceName = service.name.toLowerCase();
+    
+    // For wash & fold and wash & iron, exclude sorting mention
+    if (serviceName.includes('wash & fold') || serviceName.includes('wash & iron')) {
+      return "When your laundry arrives at our facility, our experienced team carefully processes each load using our professional-grade machines with the appropriate temperature and detergent for the specific fabric type.";
+    }
+    
+    // For other services (heavy wash, dry cleaning), include sorting
+    return "When your laundry arrives at our facility, our experienced team sorts it according to color and fabric type. Each load is then carefully processed using our professional-grade machines with the appropriate temperature and detergent for the specific fabric type.";
+  };
+
   return (
     <div className="mt-12 sm:mt-16">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">About {service.name}</h2>
@@ -67,7 +80,7 @@ export const AboutService = ({ service }: AboutServiceProps) => {
             <CardTitle className="text-lg sm:text-xl">Process</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base">
-            <p>When your laundry arrives at our facility, our experienced team sorts it according to color and fabric type. Each load is then carefully processed using our professional-grade machines with the appropriate temperature and detergent for the specific fabric type.</p>
+            <p>{getProcessDescription()}</p>
           </CardContent>
         </Card>
         
