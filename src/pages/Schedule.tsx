@@ -33,7 +33,7 @@ export interface DryCleaningItem {
   quantity: number;
 }
 
-// Order data interface - updated to remove estimatedWeight and totalAmount
+// Order data interface for the scheduling flow
 export interface OrderData {
   services: SelectedService[];
   addressId: string | null;
