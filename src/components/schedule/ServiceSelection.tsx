@@ -29,7 +29,7 @@ const getMinimumKg = (serviceName: string): number | null => {
   const name = serviceName.toLowerCase();
   if (name.includes('wash & fold') || name.includes('wash fold')) return 4;
   if (name.includes('wash & iron') || name.includes('wash iron')) return 3;
-  if (name.includes('heavy wash')) return 5;
+  if (name.includes('heavy wash')) return 4;
   return null; // For dry cleaning or other services
 };
 
