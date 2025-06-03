@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -81,7 +80,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
       console.log("Initializing Google Places Autocomplete...");
       const timer = setTimeout(() => {
         initializeAutocomplete();
-      }, 100);
+      }, 200);
       
       return () => clearTimeout(timer);
     }
@@ -143,7 +142,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
 
-      // Create new autocomplete instance with optimized settings
+      // Create new autocomplete instance with proper container
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
         componentRestrictions: { country: 'IN' },
         fields: [
@@ -153,29 +152,43 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
           'name', 
           'types'
         ],
+        // Ensure suggestions appear properly
+        strictBounds: false,
       });
 
       console.log("Autocomplete instance created successfully");
 
-      // Add place changed listener - this is the key fix
-      autocompleteRef.current.addListener('place_changed', () => {
+      // Set container to ensure proper z-index
+      const pacContainer = document.querySelector('.pac-container');
+      if (pacContainer) {
+        (pacContainer as HTMLElement).style.zIndex = '9999';
+      }
+
+      // Add place changed listener with proper error handling
+      const placeChangedListener = () => {
         console.log("Place changed event triggered");
-        const place = autocompleteRef.current.getPlace();
-        console.log("Selected place from autocomplete:", place);
-        
-        if (place && (place.formatted_address || place.name)) {
-          // Clear the input to show we've captured the selection
-          setSearchValue("");
-          handlePlaceSelect(place);
-        } else {
-          console.warn("No valid place selected or incomplete place data");
-          toast({
-            title: "Invalid selection",
-            description: "Please select a valid address from the suggestions",
-            variant: "destructive",
-          });
+        try {
+          const place = autocompleteRef.current.getPlace();
+          console.log("Selected place from autocomplete:", place);
+          
+          if (place && (place.formatted_address || place.name)) {
+            // Clear the input and handle the selection
+            setSearchValue("");
+            handlePlaceSelect(place);
+          } else {
+            console.warn("No valid place selected or incomplete place data");
+            toast({
+              title: "Invalid selection",
+              description: "Please select a valid address from the suggestions",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error in place_changed listener:", error);
         }
-      });
+      };
+
+      autocompleteRef.current.addListener('place_changed', placeChangedListener);
       
       // Focus the input
       if (inputRef.current) {
@@ -251,7 +264,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
       if (inputRef.current && googleReady) {
         initializeAutocomplete();
       }
-    }, 100);
+    }, 200);
   };
 
   const handleManualSearch = () => {
@@ -289,13 +302,16 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     }
   };
 
-  // Handle input changes - prevent clearing when autocomplete is active
+  // Handle input changes - don't interfere with autocomplete
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchValue(value);
     
-    // Only do preview parsing if we're not in autocomplete mode and value is substantial
-    if (value.trim().length > 10 && !showPlacePreview && !autocompleteRef.current) {
+    // Only do preview parsing if we're typing manually (no autocomplete active)
+    if (value.trim().length > 10 && !showPlacePreview && autocompleteRef.current) {
+      // Don't show preview when autocomplete is active to avoid conflicts
+      setParsePreview(null);
+    } else if (value.trim().length > 10 && !showPlacePreview && !autocompleteRef.current) {
       const preview = AddressParser.parseFromFormattedAddress(value);
       setParsePreview(preview);
     } else if (!showPlacePreview && value.trim().length <= 10) {
@@ -320,7 +336,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" style={{ zIndex: 50 }}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
@@ -340,21 +356,24 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
               <label htmlFor="address-search" className="text-sm font-medium">
                 Enter building name, landmark, or full address
               </label>
-              <Input
-                ref={inputRef}
-                id="address-search"
-                value={searchValue}
-                onChange={handleInputChange}
-                placeholder="e.g., Phoenix Mall Bangalore, Brigade Road, or DLF Cyber City Gurgaon"
-                disabled={isLoading}
-                autoComplete="off"
-              />
+              <div className="relative">
+                <Input
+                  ref={inputRef}
+                  id="address-search"
+                  value={searchValue}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Phoenix Mall Bangalore, Brigade Road, or DLF Cyber City Gurgaon"
+                  disabled={isLoading}
+                  autoComplete="off"
+                  className="relative z-10"
+                />
+              </div>
               <p className={`text-sm ${getStatusColor()}`}>
                 {getStatusMessage()}
               </p>
             </div>
 
-            {/* Address Preview */}
+            {/* Address Preview - only show when not using autocomplete */}
             {parsePreview && searchValue.length > 10 && !autocompleteRef.current && (
               <div className="bg-gray-50 border rounded-md p-3">
                 <div className="flex items-center gap-2 mb-2">
