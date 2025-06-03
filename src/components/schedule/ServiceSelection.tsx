@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -108,23 +109,9 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
         price: (!discountLoading && isEligibleForDiscount && s.discount_price !== null) ? s.discount_price : s.price,
       }));
     
-    // Calculate total amount based on all selected services
-    const totalAmount = calculateTotalAmount(selectedServices, orderData.estimatedWeight);
-    
     updateOrderData({
-      services: selectedServices,
-      totalAmount: totalAmount
+      services: selectedServices
     });
-  };
-
-  // Calculate total amount
-  const calculateTotalAmount = (selectedServices: SelectedService[], weight: number | null): number | null => {
-    if (!weight || selectedServices.length === 0) return null;
-    
-    // Calculate total based on all selected services
-    return selectedServices.reduce((total, service) => {
-      return total + (service.price * weight);
-    }, 0);
   };
   
   // Continue to next step with dry cleaning validation
@@ -258,45 +245,6 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
           </ul>
         </div>
       )}
-      
-      {/* Weight estimate input */}
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-medium mb-2">Estimated Weight (Optional)</h3>
-        <p className="text-sm text-gray-600 mb-3">
-          If you know approximately how many kilograms of laundry you have, enter it below for a price estimate.
-        </p>
-        <div className="flex items-center">
-          <input
-            type="number"
-            min="1"
-            step="0.5"
-            placeholder="e.g. 5"
-            className="border border-gray-300 rounded-md px-3 py-2 mr-2 w-24"
-            value={orderData.estimatedWeight || ""}
-            onChange={(e) => {
-              const weight = parseFloat(e.target.value) || null;
-              const totalAmount = weight && orderData.services.length > 0 
-                ? calculateTotalAmount(orderData.services, weight)
-                : null;
-                
-              updateOrderData({ 
-                estimatedWeight: weight,
-                totalAmount: totalAmount
-              });
-            }}
-          />
-          <span className="text-gray-600">kg</span>
-          
-          {orderData.estimatedWeight && orderData.services.length > 0 && orderData.totalAmount && (
-            <div className="ml-4 bg-white px-3 py-1 border border-gray-200 rounded-md">
-              <span className="font-medium">Estimated Total: </span>
-              <span className="text-green-700 font-bold">
-                ₹{orderData.totalAmount.toFixed(2)}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
       
       {/* Sticky Continue button at bottom center */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center z-10">

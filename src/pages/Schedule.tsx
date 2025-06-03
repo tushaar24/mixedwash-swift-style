@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -43,8 +44,6 @@ export interface OrderData {
   deliverySlotId: string | null;
   deliverySlotLabel: string | null;
   specialInstructions: string;
-  estimatedWeight: number | null;
-  totalAmount: number | null;
   dryCleaningItems: DryCleaningItem[];
 }
 
@@ -65,8 +64,6 @@ const Schedule = () => {
     deliverySlotId: null,
     deliverySlotLabel: null,
     specialInstructions: "",
-    estimatedWeight: null,
-    totalAmount: null,
     dryCleaningItems: [],
   });
 

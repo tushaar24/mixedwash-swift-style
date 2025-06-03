@@ -103,8 +103,6 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
           delivery_date: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
           delivery_slot_id: orderData.deliverySlotId,
           special_instructions: orderData.specialInstructions || null,
-          estimated_weight: orderData.estimatedWeight || null,
-          total_amount: orderData.estimatedWeight ? (service.price * orderData.estimatedWeight) : null,
           user_id: authData.user.id
         };
         
@@ -246,16 +244,9 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
                   </div>
                   <div className="ml-4">
                     <h4 className="font-bold">{service.name}</h4>
-                    {orderData.estimatedWeight && (
-                      <div className="mt-1">
-                        <p className="text-sm">
-                          <span className="font-medium">Price:</span> ₹{service.price}/kg
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-medium">Estimated Total:</span> ₹{(service.price * orderData.estimatedWeight).toFixed(2)}
-                        </p>
-                      </div>
-                    )}
+                    <p className="text-sm">
+                      <span className="font-medium">Price:</span> ₹{service.price}{!service.name.toLowerCase().includes('dry cleaning') ? '/kg' : ''}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -345,13 +336,6 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
             <span className="font-bold">Payment</span>
             <span className="text-gray-600">Cash on delivery</span>
           </div>
-          
-          {orderData.totalAmount !== null && orderData.estimatedWeight && (
-            <div className="flex items-center justify-between font-bold text-lg">
-              <span>Total</span>
-              <span>₹{orderData.totalAmount.toFixed(2)}</span>
-            </div>
-          )}
         </div>
       </div>
       
