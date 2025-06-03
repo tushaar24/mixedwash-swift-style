@@ -392,6 +392,156 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
           )}
           {locatingUser ? "Getting your location..." : "Use Current Location"}
         </Button>
+
+        {/* Manual Entry Option */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="w-full h-16 border-2 border-gray-300 hover:border-gray-400 flex items-center justify-center gap-3 text-lg font-medium"
+            >
+              <Plus className="h-6 w-6" />
+              Enter Address Manually
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add a New Address</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label htmlFor="house_building" className="text-sm font-medium">
+                  House/Flat No., Building Name
+                </label>
+                <Input 
+                  id="house_building"
+                  name="house_building"
+                  value={newAddress.house_building}
+                  onChange={handleAddressChange}
+                  placeholder="e.g., 123, ABC Apartments"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="address_line1" className="text-sm font-medium">
+                  Street Address *
+                </label>
+                <Input 
+                  id="address_line1"
+                  name="address_line1"
+                  value={newAddress.address_line1}
+                  onChange={handleAddressChange}
+                  placeholder="Street Name, Road"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="area" className="text-sm font-medium">
+                  Area/Locality
+                </label>
+                <Input 
+                  id="area"
+                  name="area"
+                  value={newAddress.area}
+                  onChange={handleAddressChange}
+                  placeholder="e.g., HSR Sector 6, Koramangala"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="address_line2" className="text-sm font-medium">
+                  Landmark (Optional)
+                </label>
+                <Input 
+                  id="address_line2"
+                  name="address_line2"
+                  value={newAddress.address_line2}
+                  onChange={handleAddressChange}
+                  placeholder="Near Metro Station, Opposite Mall"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="city" className="text-sm font-medium">
+                    City *
+                  </label>
+                  <Input 
+                    id="city"
+                    name="city"
+                    value={newAddress.city}
+                    onChange={handleAddressChange}
+                    placeholder="City"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="state" className="text-sm font-medium">
+                    State *
+                  </label>
+                  <Input 
+                    id="state"
+                    name="state"
+                    value={newAddress.state}
+                    onChange={handleAddressChange}
+                    placeholder="State"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="postal_code" className="text-sm font-medium">
+                  Postal Code *
+                </label>
+                <Input 
+                  id="postal_code"
+                  name="postal_code"
+                  value={newAddress.postal_code}
+                  onChange={handleAddressChange}
+                  placeholder="Postal Code"
+                  required
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="is_default"
+                  name="is_default"
+                  checked={newAddress.is_default}
+                  onChange={handleAddressChange}
+                  className="rounded border-gray-300"
+                />
+                <label htmlFor="is_default" className="text-sm">
+                  Set as default address
+                </label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSaveAddress} 
+                disabled={savingAddress}
+                className="bg-black hover:bg-gray-800"
+              >
+                {savingAddress ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : "Save Address"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Saved Addresses */}
@@ -456,7 +606,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
       )}
       
       {/* Manual Entry Option */}
-      <div className="pt-4">
+      {/* <div className="pt-4">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button 
@@ -605,7 +755,7 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </div> */}
       
       {/* Back button */}
       <div className="pt-8">
