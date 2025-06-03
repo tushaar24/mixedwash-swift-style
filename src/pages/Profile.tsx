@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { Order, Address, TimeSlot } from "@/types/models";
-import { Loader2, MapPin, Plus, Home, Check, Phone, User, Edit } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -19,6 +18,20 @@ import {
   DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, addDays, isSameDay, isAfter } from "date-fns";
 
 const Profile = () => {
   const [name, setName] = useState("");
@@ -46,6 +59,16 @@ const Profile = () => {
     is_default: false
   });
   const [savingAddress, setSavingAddress] = useState(false);
+
+  // Reschedule order state
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [reschedulePickupDate, setReschedulePickupDate] = useState<Date | null>(null);
+  const [reschedulePickupSlot, setReschedulePickupSlot] = useState<string>("");
+  const [rescheduleDeliveryDate, setRescheduleDeliveryDate] = useState<Date | null>(null);
+  const [rescheduleDeliverySlot, setRescheduleDeliverySlot] = useState<string>("");
+  const [rescheduling, setRescheduling] = useState(false);
 
   // Set initial name and phone values from the profile
   useEffect(() => {
@@ -83,6 +106,9 @@ const Profile = () => {
           console.error("Error fetching time slots:", timeSlotsError);
           throw timeSlotsError;
         }
+        
+        // Store time slots for reschedule feature
+        setTimeSlots(timeSlots || []);
         
         // Create a map for easy slot lookup
         const slotsMap = new Map();
@@ -404,6 +430,150 @@ const Profile = () => {
     }
   };
 
+  // Reschedule order functions
+  const openRescheduleDialog = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      setSelectedOrderId(orderId);
+      setReschedulePickupDate(new Date(order.pickup_date));
+      setReschedulePickupSlot(order.pickup_slot_id);
+      setRescheduleDeliveryDate(new Date(order.delivery_date));
+      setRescheduleDeliverySlot(order.delivery_slot_id);
+      setRescheduleDialogOpen(true);
+    }
+  };
+
+  const getAvailableTimeSlots = (selectedDate: Date | null, isPickup: boolean = true) => {
+    if (!selectedDate) return [];
+    const today = new Date();
+    
+    // For pickup slots
+    if (isPickup) {
+      // If selected date is today, only show enabled slots
+      if (isSameDay(selectedDate, today)) {
+        return timeSlots.filter(slot => slot.enabled);
+      }
+      // For future dates, show all slots
+      return timeSlots;
+    }
+    
+    // For delivery slots
+    if (!isPickup && reschedulePickupDate && reschedulePickupSlot) {
+      const pickupSlot = timeSlots.find(slot => slot.id === reschedulePickupSlot);
+      
+      // If delivery is next day after pickup, filter by pickup slot time or later
+      if (pickupSlot && isSameDay(selectedDate, addDays(reschedulePickupDate, 1))) {
+        return timeSlots.filter(slot => slot.start_time >= pickupSlot.start_time);
+      }
+      
+      // For delivery dates more than 1 day after pickup, show all slots
+      if (isAfter(selectedDate, addDays(reschedulePickupDate, 1))) {
+        return timeSlots;
+      }
+    }
+    
+    // Default: show all slots
+    return timeSlots;
+  };
+
+  const handleRescheduleOrder = async () => {
+    if (!selectedOrderId || !reschedulePickupDate || !reschedulePickupSlot || !rescheduleDeliveryDate || !rescheduleDeliverySlot) {
+      toast({
+        title: "Missing information",
+        description: "Please select both pickup and delivery dates and slots",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setRescheduling(true);
+
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          pickup_date: reschedulePickupDate.toISOString().split('T')[0],
+          pickup_slot_id: reschedulePickupSlot,
+          delivery_date: rescheduleDeliveryDate.toISOString().split('T')[0],
+          delivery_slot_id: rescheduleDeliverySlot,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", selectedOrderId);
+
+      if (error) throw error;
+
+      // Update local orders state
+      setOrders(prevOrders => 
+        prevOrders.map(order => {
+          if (order.id === selectedOrderId) {
+            const pickupSlot = timeSlots.find(slot => slot.id === reschedulePickupSlot);
+            const deliverySlot = timeSlots.find(slot => slot.id === rescheduleDeliverySlot);
+            return {
+              ...order,
+              pickup_date: reschedulePickupDate.toISOString().split('T')[0],
+              pickup_slot_id: reschedulePickupSlot,
+              pickup_slot: pickupSlot || null,
+              delivery_date: rescheduleDeliveryDate.toISOString().split('T')[0],
+              delivery_slot_id: rescheduleDeliverySlot,
+              delivery_slot: deliverySlot || null,
+            };
+          }
+          return order;
+        })
+      );
+
+      toast({
+        title: "Order rescheduled",
+        description: "Your order has been successfully rescheduled",
+      });
+
+      setRescheduleDialogOpen(false);
+      setSelectedOrderId(null);
+    } catch (error: any) {
+      toast({
+        title: "Error rescheduling order",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setRescheduling(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", orderId);
+
+      if (error) throw error;
+
+      // Update local orders state
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === orderId 
+            ? { ...order, status: 'cancelled' }
+            : order
+        )
+      );
+
+      toast({
+        title: "Order cancelled",
+        description: "Your order has been successfully cancelled",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error cancelling order",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!user) {
     return null;
   }
@@ -560,10 +730,44 @@ const Profile = () => {
                               Order #{order.id.substring(0, 8)}
                             </p>
                           </div>
-                          <div className="mt-2 md:mt-0">
+                          <div className="mt-2 md:mt-0 flex flex-col md:flex-row gap-2 items-start md:items-center">
                             <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                               {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                             </span>
+                            {order.status === 'pending' && (
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openRescheduleDialog(order.id)}
+                                >
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  Reschedule
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-800">
+                                      <X className="h-4 w-4 mr-1" />
+                                      Cancel
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Cancel Order</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Are you sure you want to cancel this order? This action cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Keep Order</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleCancelOrder(order.id)}>
+                                        Cancel Order
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="p-4 bg-gray-50">
@@ -922,6 +1126,133 @@ const Profile = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Reschedule Order Dialog */}
+        <Dialog open={rescheduleDialogOpen} onOpenChange={setRescheduleDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Reschedule Order</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6 py-4">
+              {/* Pickup Section */}
+              <div>
+                <h3 className="font-medium mb-3">Pickup Date & Time</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Pickup Date</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {reschedulePickupDate ? format(reschedulePickupDate, "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <CalendarComponent
+                          mode="single"
+                          selected={reschedulePickupDate}
+                          onSelect={setReschedulePickupDate}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Pickup Time</label>
+                    <select
+                      value={reschedulePickupSlot}
+                      onChange={(e) => setReschedulePickupSlot(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select time</option>
+                      {getAvailableTimeSlots(reschedulePickupDate, true).map((slot) => (
+                        <option key={slot.id} value={slot.id}>
+                          {slot.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Delivery Section */}
+              <div>
+                <h3 className="font-medium mb-3">Delivery Date & Time</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Delivery Date</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {rescheduleDeliveryDate ? format(rescheduleDeliveryDate, "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <CalendarComponent
+                          mode="single"
+                          selected={rescheduleDeliveryDate}
+                          onSelect={setRescheduleDeliveryDate}
+                          disabled={(date) => 
+                            !reschedulePickupDate || date <= reschedulePickupDate
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Delivery Time</label>
+                    <select
+                      value={rescheduleDeliverySlot}
+                      onChange={(e) => setRescheduleDeliverySlot(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select time</option>
+                      {getAvailableTimeSlots(rescheduleDeliveryDate, false).map((slot) => (
+                        <option key={slot.id} value={slot.id}>
+                          {slot.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                {rescheduleDeliveryDate && reschedulePickupDate && isSameDay(rescheduleDeliveryDate, addDays(reschedulePickupDate, 1)) && reschedulePickupSlot && (
+                  <p className="text-xs text-blue-600 mt-2">
+                    Only slots equal or later than pickup time ({timeSlots.find(slot => slot.id === reschedulePickupSlot)?.label}) are shown for next day delivery
+                  </p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setRescheduleDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleRescheduleOrder} 
+                disabled={rescheduling}
+              >
+                {rescheduling ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Rescheduling...
+                  </>
+                ) : "Reschedule Order"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
       <Footer />
     </div>
