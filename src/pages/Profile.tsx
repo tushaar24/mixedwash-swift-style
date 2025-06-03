@@ -32,6 +32,18 @@ import {
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, addDays, isSameDay, isAfter } from "date-fns";
+import { 
+  Loader2, 
+  Calendar, 
+  X, 
+  Plus, 
+  Home, 
+  Check, 
+  User, 
+  Phone, 
+  MapPin, 
+  Edit 
+} from "lucide-react";
 
 const Profile = () => {
   const [name, setName] = useState("");
@@ -449,9 +461,9 @@ const Profile = () => {
     
     // For pickup slots
     if (isPickup) {
-      // If selected date is today, only show enabled slots
+      // If selected date is today, only show all slots (removed enabled filter since property doesn't exist)
       if (isSameDay(selectedDate, today)) {
-        return timeSlots.filter(slot => slot.enabled);
+        return timeSlots;
       }
       // For future dates, show all slots
       return timeSlots;
