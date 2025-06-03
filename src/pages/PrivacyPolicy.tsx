@@ -65,7 +65,7 @@ const PrivacyPolicy = () => {
           <section>
             <h2 className="text-xl font-semibold mb-4">Refund</h2>
             <p className="text-gray-700 leading-relaxed">
-              The refunds are only processed if in case the garment is damaged/lost by our driver, in transit or while processing. The refunds shall be directly made to the source account and the amount of refund shall be not more than 2.5 times if the billing amount is below <Rs.2000 and 2 times if the billing amount is >Rs.2000. Refunds might take upto 5-7 working days to reflect in your account depending on your bank.
+              The refunds are only processed if in case the garment is damaged/lost by our driver, in transit or while processing. The refunds shall be directly made to the source account and the amount of refund shall be not more than 2.5 times if the billing amount is below Rs.2000 and 2 times if the billing amount is greater than Rs.2000. Refunds might take upto 5-7 working days to reflect in your account depending on your bank.
             </p>
           </section>
 
