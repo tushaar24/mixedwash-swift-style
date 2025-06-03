@@ -36,7 +36,7 @@ export const Services = () => {
       title: "Wash & Fold",
       description: "Fresh and folded clothes, ready tomorrow.",
       icon: "👕",
-      newPrice: "₹72/kg",
+      newPrice: "₹76/kg",
       oldPrice: "₹95/kg",
       regularPrice: "₹95/kg",
       discount: 20,

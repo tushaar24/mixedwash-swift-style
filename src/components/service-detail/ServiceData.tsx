@@ -16,7 +16,7 @@ export const servicesData = {
     prices: [
       {
         title: "Regular Wash",
-        amount: "₹72/kg",
+        amount: "₹76/kg",
         oldPrice: "₹95/kg",
         details: "Light and dark clothes washed together at 90°F. You can request 110°F instead.",
         minimumOrder: 4
