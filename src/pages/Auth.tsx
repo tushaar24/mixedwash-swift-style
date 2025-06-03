@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,10 +66,7 @@ const Auth = () => {
       
       if (error) throw error;
       
-      toast({
-        title: "Success!",
-        description: "Check your email for the confirmation link.",
-      });
+      // Removed the email confirmation toast message
     } catch (error: any) {
       toast({
         title: "Error signing up",
