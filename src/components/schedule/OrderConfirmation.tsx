@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,9 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
   
   // Submit order to Supabase
   const handleSubmitOrder = async () => {
+    console.log("=== ORDER SUBMISSION DEBUG ===");
+    console.log("Starting order submission with data:", orderData);
+    
     // Validate that we have all the required information
     if (
       orderData.services.length === 0 || 
@@ -26,8 +30,10 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
       !orderData.deliveryDate ||
       !orderData.deliverySlotId
     ) {
+      console.log("=== VALIDATION FAILED ===");
       console.log("Missing data:", {
         services: orderData.services,
+        servicesLength: orderData.services.length,
         addressId: orderData.addressId,
         pickupDate: orderData.pickupDate,
         pickupSlotId: orderData.pickupSlotId,
@@ -42,6 +48,8 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
       if (!orderData.pickupDate || !orderData.pickupSlotId) missingFields.push("Pickup schedule");
       if (!orderData.deliveryDate || !orderData.deliverySlotId) missingFields.push("Delivery schedule");
       
+      console.log("Missing fields:", missingFields);
+      
       toast({
         title: "Missing information",
         description: `Please complete these steps: ${missingFields.join(", ")}`,
@@ -50,56 +58,90 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
       return;
     }
     
+    console.log("=== VALIDATION PASSED ===");
+    console.log("All required fields are present");
+    
     setSubmitting(true);
     
     try {
       // Get the current authenticated user
-      const { data: authData } = await supabase.auth.getUser();
+      console.log("=== CHECKING AUTHENTICATION ===");
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      console.log("Auth data:", authData);
+      console.log("Auth error:", authError);
+      
+      if (authError) {
+        console.log("Authentication error:", authError);
+        throw new Error(`Authentication error: ${authError.message}`);
+      }
+      
       if (!authData || !authData.user) {
+        console.log("No authenticated user found");
         throw new Error("You must be logged in to place an order");
       }
       
+      console.log("User authenticated:", authData.user.id);
+      
+      console.log("=== PREPARING ORDER DATA ===");
       console.log("Creating orders with data:", {
+        userId: authData.user.id,
         pickupSlotId: orderData.pickupSlotId,
         deliverySlotId: orderData.deliverySlotId,
         pickupDate: orderData.pickupDate,
-        deliveryDate: orderData.deliveryDate
+        deliveryDate: orderData.deliveryDate,
+        addressId: orderData.addressId,
+        servicesCount: orderData.services.length
       });
 
       // Create a separate order for each service
-      const orderPromises = orderData.services.map(service => {
+      const orderPromises = orderData.services.map((service, index) => {
+        const orderToInsert = {
+          service_id: service.id,
+          address_id: orderData.addressId,
+          pickup_date: format(orderData.pickupDate!, 'yyyy-MM-dd'),
+          pickup_slot_id: orderData.pickupSlotId,
+          delivery_date: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
+          delivery_slot_id: orderData.deliverySlotId,
+          special_instructions: orderData.specialInstructions || null,
+          estimated_weight: orderData.estimatedWeight || null,
+          total_amount: orderData.estimatedWeight ? (service.price * orderData.estimatedWeight) : null,
+          user_id: authData.user.id
+        };
+        
+        console.log(`=== ORDER ${index + 1} DATA ===`, orderToInsert);
+        
         return supabase
           .from("orders")
-          .insert([
-            {
-              service_id: service.id,
-              address_id: orderData.addressId,
-              pickup_date: format(orderData.pickupDate!, 'yyyy-MM-dd'),
-              pickup_slot_id: orderData.pickupSlotId,
-              delivery_date: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
-              delivery_slot_id: orderData.deliverySlotId,
-              special_instructions: orderData.specialInstructions || null,
-              estimated_weight: orderData.estimatedWeight || null,
-              total_amount: orderData.estimatedWeight ? (service.price * orderData.estimatedWeight) : null,
-              user_id: authData.user.id
-            },
-          ])
+          .insert([orderToInsert])
           .select();
       });
 
+      console.log("=== EXECUTING ORDER INSERTS ===");
+      console.log(`Creating ${orderPromises.length} orders`);
+      
       try {
         // Wait for all orders to be created
         const results = await Promise.all(orderPromises);
         
+        console.log("=== ORDER CREATION RESULTS ===");
+        console.log("Results:", results);
+        
         // Check if any order failed
         const errors = results.filter(result => result.error);
         if (errors.length > 0) {
-          console.error("Order creation errors:", errors);
-          throw new Error(`Failed to create ${errors.length} orders`);
+          console.error("=== ORDER CREATION ERRORS ===");
+          console.error("Errors:", errors);
+          throw new Error(`Failed to create ${errors.length} orders. Details: ${JSON.stringify(errors)}`);
         }
+        
+        console.log("=== ALL ORDERS CREATED SUCCESSFULLY ===");
+        console.log(`${results.length} orders created`);
         
         // Save dry cleaning items if any
         if (orderData.dryCleaningItems.length > 0) {
+          console.log("=== PROCESSING DRY CLEANING ITEMS ===");
+          console.log("Dry cleaning items:", orderData.dryCleaningItems);
+          
           // Find the dry cleaning service order
           const dryCleaningResult = results.find(result => 
             orderData.services.some(service => 
@@ -108,26 +150,42 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
             )
           );
           
+          console.log("Dry cleaning result:", dryCleaningResult);
+          
           if (dryCleaningResult?.data?.[0]) {
             const orderId = dryCleaningResult.data[0].id;
+            console.log("Adding items to order:", orderId);
             
             // Insert dry cleaning items
-            const itemPromises = orderData.dryCleaningItems.map(item => 
-              supabase
+            const itemPromises = orderData.dryCleaningItems.map(item => {
+              const itemToInsert = {
+                order_id: orderId,
+                item_name: item.name,
+                item_price: item.price,
+                quantity: item.quantity
+              };
+              console.log("Inserting item:", itemToInsert);
+              
+              return supabase
                 .from("order_dry_cleaning_items")
-                .insert([
-                  {
-                    order_id: orderId,
-                    item_name: item.name,
-                    item_price: item.price,
-                    quantity: item.quantity
-                  }
-                ])
-            );
+                .insert([itemToInsert]);
+            });
             
-            await Promise.all(itemPromises);
+            const itemResults = await Promise.all(itemPromises);
+            console.log("Dry cleaning items results:", itemResults);
+            
+            const itemErrors = itemResults.filter(result => result.error);
+            if (itemErrors.length > 0) {
+              console.error("Dry cleaning items errors:", itemErrors);
+            } else {
+              console.log("All dry cleaning items added successfully");
+            }
+          } else {
+            console.log("No dry cleaning service found in results");
           }
         }
+        
+        console.log("=== ORDER PLACEMENT COMPLETE ===");
         
         toast({
           title: "Orders placed successfully!",
@@ -136,17 +194,25 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         
         onComplete();
       } catch (error: any) {
-        console.error("Error during order creation:", error);
+        console.error("=== ERROR DURING ORDER CREATION ===");
+        console.error("Error details:", error);
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
         throw error;
       }
     } catch (error: any) {
-      console.error("Order submission error:", error);
+      console.error("=== FINAL ERROR HANDLER ===");
+      console.error("Final error:", error);
+      console.error("Error type:", typeof error);
+      console.error("Error constructor:", error.constructor.name);
+      
       toast({
         title: "Error placing order",
         description: error.message || "Something went wrong during order placement",
         variant: "destructive",
       });
     } finally {
+      console.log("=== CLEANING UP ===");
       setSubmitting(false);
     }
   };
