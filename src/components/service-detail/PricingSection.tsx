@@ -18,14 +18,21 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showServiceChargeAlert, setShowServiceChargeAlert] = useState(true);
 
-  // Auto-hide service charge alert after 50ms
+  // Auto-hide service charge alert after 3 seconds (3000ms)
   useEffect(() => {
+    console.log('PricingSection useEffect triggered:', { serviceCharge: service.serviceCharge, showServiceChargeAlert });
+    
     if (service.serviceCharge && showServiceChargeAlert) {
+      console.log('Starting service charge alert timer for 3 seconds');
       const timer = setTimeout(() => {
+        console.log('Auto-dismissing service charge alert');
         setShowServiceChargeAlert(false);
-      }, 50);
+      }, 3000);
       
-      return () => clearTimeout(timer);
+      return () => {
+        console.log('Cleaning up service charge alert timer');
+        clearTimeout(timer);
+      };
     }
   }, [service.serviceCharge, showServiceChargeAlert]);
   
