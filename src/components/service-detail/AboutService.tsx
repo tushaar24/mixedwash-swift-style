@@ -7,6 +7,29 @@ interface AboutServiceProps {
 }
 
 export const AboutService = ({ service }: AboutServiceProps) => {
+  // Define what's included based on service type
+  const getWhatsIncluded = () => {
+    const serviceName = service.name.toLowerCase();
+    
+    // For wash & fold and wash & iron, exclude sorting and pre-treatment
+    if (serviceName.includes('wash & fold') || serviceName.includes('wash & iron')) {
+      return [
+        "Quality detergents and fabric softeners",
+        "Careful inspection before delivery",
+        "Next-day delivery at no extra cost"
+      ];
+    }
+    
+    // For other services (heavy wash, dry cleaning), include all items
+    return [
+      "Sorting by color and fabric type",
+      "Pre-treatment for stains",
+      "Quality detergents and fabric softeners",
+      "Careful inspection before delivery",
+      "Next-day delivery at no extra cost"
+    ];
+  };
+
   return (
     <div className="mt-12 sm:mt-16">
       <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">About {service.name}</h2>
@@ -32,11 +55,9 @@ export const AboutService = ({ service }: AboutServiceProps) => {
           </CardHeader>
           <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base">
             <ul className="list-disc pl-5 space-y-1">
-              <li>Sorting by color and fabric type</li>
-              <li>Pre-treatment for stains</li>
-              <li>Quality detergents and fabric softeners</li>
-              <li>Careful inspection before delivery</li>
-              <li>Next-day delivery at no extra cost</li>
+              {getWhatsIncluded().map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
             </ul>
           </CardContent>
         </Card>
