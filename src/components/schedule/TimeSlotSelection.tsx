@@ -6,7 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, Clock, Loader2 } from "lucide-react";
 import { ScheduleOrderData } from "@/pages/Schedule";
-import { addDays, format, isBefore, startOfToday } from "date-fns";
+import { addDays, format, isBefore, startOfToday, isSameDay } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TimeSlot {
@@ -14,6 +14,7 @@ interface TimeSlot {
   label: string;
   start_time: string;
   end_time: string;
+  enabled: boolean;
 }
 
 interface TimeSlotSelectionProps {
@@ -35,7 +36,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   // Next day delivery date
   const deliveryDate = pickupDate ? addDays(pickupDate, 1) : null;
 
-  // Fetch time slots from database - only enabled ones
+  // Fetch all time slots from database (both enabled and disabled)
   useEffect(() => {
     const fetchTimeSlots = async () => {
       try {
@@ -43,7 +44,6 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
         const { data, error } = await supabase
           .from("time_slots")
           .select("*")
-          .eq("enabled", true) // Only fetch enabled time slots
           .order("start_time");
 
         if (error) {
@@ -54,7 +54,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
             variant: "destructive",
           });
         } else {
-          console.log("Fetched enabled time slots:", data);
+          console.log("Fetched all time slots:", data);
           setTimeSlots(data || []);
         }
       } catch (error) {
@@ -71,6 +71,19 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
     fetchTimeSlots();
   }, []);
+
+  // Filter time slots based on date and enabled status
+  const getAvailableTimeSlots = () => {
+    if (!pickupDate) return [];
+    
+    // If pickup date is today, only show enabled slots
+    if (isSameDay(pickupDate, today)) {
+      return timeSlots.filter(slot => slot.enabled);
+    }
+    
+    // For future dates, show all slots
+    return timeSlots;
+  };
 
   // Select a date and reset time slot if needed
   function handleDateSelect(date: Date | null) {
@@ -165,6 +178,8 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     );
   }
 
+  const availableTimeSlots = getAvailableTimeSlots();
+
   return (
     <div className="space-y-6 pb-24">
       <div className="text-center mb-8">
@@ -197,6 +212,11 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
               <p className="text-xs text-gray-600 mt-1">
                 Your laundry will be delivered the next day in the same time slot
               </p>
+              {pickupDate && isSameDay(pickupDate, today) && (
+                <p className="text-xs text-blue-600 mt-1">
+                  Only available time slots are shown for today
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -210,8 +230,8 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
           
           {pickupDate ? (
             <div className="space-y-3">
-              {timeSlots.length > 0 ? (
-                timeSlots.map((slot) => (
+              {availableTimeSlots.length > 0 ? (
+                availableTimeSlots.map((slot) => (
                   <Card 
                     key={slot.id}
                     className={`transition-all cursor-pointer hover:shadow-md ${
@@ -240,7 +260,12 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
                 ))
               ) : (
                 <div className="p-8 bg-gray-50 rounded-lg text-center">
-                  <p className="text-gray-600">No time slots are currently available</p>
+                  <p className="text-gray-600">
+                    {pickupDate && isSameDay(pickupDate, today) 
+                      ? "No available time slots for today" 
+                      : "No time slots are currently available"
+                    }
+                  </p>
                 </div>
               )}
             </div>
