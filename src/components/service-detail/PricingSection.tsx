@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Info, Truck, X } from "lucide-react";
 import { ServiceWeightEstimateDialog } from "@/components/ServiceWeightEstimateDialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 
 interface PricingSectionProps {
@@ -18,6 +17,17 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
   const [activeTab, setActiveTab] = useState("men");
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showServiceChargeAlert, setShowServiceChargeAlert] = useState(true);
+
+  // Auto-hide service charge alert after 1 second
+  useEffect(() => {
+    if (service.serviceCharge && showServiceChargeAlert) {
+      const timer = setTimeout(() => {
+        setShowServiceChargeAlert(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [service.serviceCharge, showServiceChargeAlert]);
   
   return (
     <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">

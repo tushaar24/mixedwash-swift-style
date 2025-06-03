@@ -5,12 +5,23 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const Services = () => {
   const navigate = useNavigate();
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showDiscountAlert, setShowDiscountAlert] = useState(true);
+  
+  // Auto-hide discount alert after 1 second
+  useEffect(() => {
+    if (!loading && isEligibleForDiscount && showDiscountAlert) {
+      const timer = setTimeout(() => {
+        setShowDiscountAlert(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading, isEligibleForDiscount, showDiscountAlert]);
   
   const services = [
     {
