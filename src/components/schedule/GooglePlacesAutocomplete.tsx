@@ -1,10 +1,11 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { MapPin, Loader2, AlertCircle, CheckCircle, ArrowRight, Edit } from "lucide-react";
-import { AddressParser, type ParsedAddress } from "@/utils/addressParser";
+import { MapPin, Loader2 } from "lucide-react";
+import { AddressDetailsForm } from "./AddressDetailsForm";
 
 interface PlaceDetails {
   formatted_address: string;
@@ -26,42 +27,20 @@ declare global {
 }
 
 export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }: GooglePlacesAutocompleteProps) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [scriptLoaded, setScriptLoaded] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
-  const [parsePreview, setParsePreview] = useState<ParsedAddress | null>(null);
-  const [selectedPlace, setSelectedPlace] = useState<any>(null);
-  const [showPlacePreview, setShowPlacePreview] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState("");
   const autocompleteRef = useRef<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Check if Google is already loaded
   useEffect(() => {
     if (window.google && window.google.maps && window.google.maps.places) {
-      setScriptLoaded(true);
       setGoogleReady(true);
       console.log("Google Maps already loaded and ready");
     }
   }, []);
-
-  // Clear autocomplete when dialog closes
-  useEffect(() => {
-    if (!isOpen) {
-      if (autocompleteRef.current) {
-        try {
-          window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
-        } catch (error) {
-          console.log("Error clearing autocomplete listeners:", error);
-        }
-        autocompleteRef.current = null;
-      }
-      setSearchValue("");
-      setSelectedPlace(null);
-      setShowPlacePreview(false);
-      setParsePreview(null);
-    }
-  }, [isOpen]);
 
   // Load Google Maps script when dialog opens
   useEffect(() => {
@@ -76,11 +55,28 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
 
   // Initialize autocomplete when everything is ready
   useEffect(() => {
-    if (isOpen && googleReady && inputRef.current && !autocompleteRef.current && !showPlacePreview) {
+    if (isOpen && googleReady && inputRef.current && !autocompleteRef.current && !showAddressForm) {
       console.log("Initializing Google Places Autocomplete...");
       initializeAutocomplete();
     }
-  }, [isOpen, googleReady, showPlacePreview]);
+  }, [isOpen, googleReady, showAddressForm]);
+
+  // Clear autocomplete when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      if (autocompleteRef.current) {
+        try {
+          window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
+        } catch (error) {
+          console.log("Error clearing autocomplete listeners:", error);
+        }
+        autocompleteRef.current = null;
+      }
+      setSearchValue("");
+      setShowAddressForm(false);
+      setSelectedAddress("");
+    }
+  }, [isOpen]);
 
   const loadGoogleMapsScript = () => {
     // Check if script is already in the document
@@ -113,7 +109,6 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     window.initGooglePlaces = () => {
       console.log("Google Places callback triggered");
       if (window.google && window.google.maps && window.google.maps.places) {
-        setScriptLoaded(true);
         setGoogleReady(true);
         console.log("Google Places API is now ready");
       } else {
@@ -138,7 +133,7 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
         window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
       }
 
-      // Create new autocomplete instance with proper container
+      // Create new autocomplete instance
       autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
         componentRestrictions: { country: 'IN' },
         fields: [
@@ -148,19 +143,18 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
           'name', 
           'types'
         ],
-        // Ensure suggestions appear properly
         strictBounds: false,
       });
 
       console.log("Autocomplete instance created successfully");
 
-      // Set container to ensure proper z-index
+      // Set container z-index for proper display
       const pacContainer = document.querySelector('.pac-container');
       if (pacContainer) {
         (pacContainer as HTMLElement).style.zIndex = '9999';
       }
 
-      // Add place changed listener with proper error handling
+      // Add place changed listener
       const placeChangedListener = () => {
         console.log("Place changed event triggered");
         try {
@@ -168,9 +162,10 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
           console.log("Selected place from autocomplete:", place);
           
           if (place && (place.formatted_address || place.name)) {
-            // Clear the input and handle the selection
-            setSearchValue("");
-            handlePlaceSelect(place);
+            // Set the selected address and show the address form
+            setSelectedAddress(place.formatted_address || place.name);
+            setShowAddressForm(true);
+            setSearchValue(""); // Clear the search input
           } else {
             console.warn("No valid place selected or incomplete place data");
             toast({
@@ -202,65 +197,9 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
     }
   };
 
-  const handlePlaceSelect = (place: any) => {
-    console.log("Processing selected place:", place);
-    
-    // Parse the place data
-    const enhancedResult = AddressParser.enhanceAddressFromPlace(place);
-    console.log("Enhanced parsing result:", enhancedResult);
-    
-    setSelectedPlace(place);
-    setParsePreview(enhancedResult);
-    setShowPlacePreview(true);
-  };
-
-  const handleUseThisAddress = () => {
-    if (!selectedPlace || !parsePreview) return;
-    
-    // Format the result for the parent component
-    const enhancedAddress = [
-      parsePreview.house_building,
-      parsePreview.address_line1,
-      parsePreview.area,
-      parsePreview.city,
-      parsePreview.state && parsePreview.postal_code 
-        ? `${parsePreview.state} ${parsePreview.postal_code}`
-        : parsePreview.state || parsePreview.postal_code,
-      "India"
-    ].filter(Boolean).join(", ");
-    
-    onPlaceSelect({
-      formatted_address: enhancedAddress,
-      address_components: selectedPlace.address_components || [],
-      place_id: selectedPlace.place_id || ''
-    });
-    
-    const confidenceMessage = parsePreview.confidence >= 80 
-      ? "High confidence address detected"
-      : parsePreview.confidence >= 60 
-      ? "Good address match found"
-      : "Address found - please review details";
-    
-    toast({
-      title: "Address selected",
-      description: `${confidenceMessage} (${parsePreview.confidence}%)`,
-    });
-    
-    onOpenChange(false);
-  };
-
-  const handleBackToSearch = () => {
-    setShowPlacePreview(false);
-    setSelectedPlace(null);
-    setParsePreview(null);
-    setSearchValue("");
-    
-    // Reinitialize autocomplete after going back
-    setTimeout(() => {
-      if (inputRef.current && googleReady) {
-        initializeAutocomplete();
-      }
-    }, 200);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
   };
 
   const handleManualSearch = () => {
@@ -273,80 +212,74 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
       return;
     }
 
-    // Preview parse the manual input
-    const previewResult = AddressParser.parseFromFormattedAddress(searchValue);
-    setParsePreview(previewResult);
-    
-    const validation = AddressParser.validate(previewResult);
-    
-    if (validation.isValid || previewResult.confidence >= 40) {
-      const manualPlace = {
-        formatted_address: searchValue,
-        address_components: [],
-        place_id: '',
-        name: searchValue
-      };
-      
-      setSelectedPlace(manualPlace);
-      setShowPlacePreview(true);
-    } else {
-      toast({
-        title: "Address seems incomplete",
-        description: "Please add more details or try a different format",
-        variant: "destructive",
-      });
-    }
+    // Use the manual input as selected address and show form
+    setSelectedAddress(searchValue);
+    setShowAddressForm(true);
+    setSearchValue("");
   };
 
-  // Handle input changes - don't interfere with autocomplete
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchValue(value);
+  const handleAddressSaved = (address: any) => {
+    // Format the address for the parent component
+    const formattedAddress = [
+      address.house_building,
+      address.address_line1,
+      address.area,
+      address.city,
+      address.state && address.postal_code 
+        ? `${address.state} ${address.postal_code}`
+        : address.state || address.postal_code,
+      "India"
+    ].filter(Boolean).join(", ");
+
+    onPlaceSelect({
+      formatted_address: formattedAddress,
+      address_components: [],
+      place_id: ''
+    });
+
+    // Close both dialogs
+    setShowAddressForm(false);
+    onOpenChange(false);
+  };
+
+  const handleBackToSearch = () => {
+    setShowAddressForm(false);
+    setSelectedAddress("");
     
-    // Only do preview parsing if we're typing manually (no autocomplete active)
-    if (value.trim().length > 10 && !showPlacePreview && autocompleteRef.current) {
-      // Don't show preview when autocomplete is active to avoid conflicts
-      setParsePreview(null);
-    } else if (value.trim().length > 10 && !showPlacePreview && !autocompleteRef.current) {
-      const preview = AddressParser.parseFromFormattedAddress(value);
-      setParsePreview(preview);
-    } else if (!showPlacePreview && value.trim().length <= 10) {
-      setParsePreview(null);
-    }
+    // Reinitialize autocomplete after going back
+    setTimeout(() => {
+      if (inputRef.current && googleReady) {
+        initializeAutocomplete();
+      }
+    }, 100);
   };
 
   const getStatusMessage = () => {
-    if (!scriptLoaded && !window.google) return "Loading Google Maps...";
-    if (scriptLoaded && !googleReady) return "Initializing...";
-    if (googleReady && !autocompleteRef.current) return "Setting up suggestions...";
-    if (autocompleteRef.current) return "✓ Ready - Start typing for suggestions";
-    return "Getting ready...";
+    if (!googleReady) return "Loading address suggestions...";
+    if (!autocompleteRef.current) return "Setting up suggestions...";
+    return "✓ Ready - Start typing for suggestions";
   };
 
   const getStatusColor = () => {
-    if (!scriptLoaded) return "text-orange-600";
-    if (!googleReady) return "text-blue-600";
+    if (!googleReady) return "text-orange-600";
     if (!autocompleteRef.current) return "text-blue-600";
     return "text-green-600";
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" style={{ zIndex: 50 }}>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            {showPlacePreview ? "Confirm Address" : "Search Address in India"}
-          </DialogTitle>
-          <DialogDescription>
-            {showPlacePreview 
-              ? "Review the address details below and click 'Use This Address' to continue"
-              : "Type building names, landmarks, or addresses to get suggestions"
-            }
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen && !showAddressForm} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Search Address in India
+            </DialogTitle>
+            <DialogDescription>
+              Type building names, landmarks, or addresses to get suggestions
+            </DialogDescription>
+          </DialogHeader>
 
-        {!showPlacePreview ? (
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label htmlFor="address-search" className="text-sm font-medium">
@@ -359,7 +292,6 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
                   value={searchValue}
                   onChange={handleInputChange}
                   placeholder="e.g., Phoenix Mall Bangalore, Brigade Road, or DLF Cyber City Gurgaon"
-                  disabled={isLoading}
                   autoComplete="off"
                   className="relative z-10"
                 />
@@ -368,57 +300,18 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
                 {getStatusMessage()}
               </p>
             </div>
-
-            {/* Address Preview - only show when not using autocomplete */}
-            {parsePreview && searchValue.length > 10 && !autocompleteRef.current && (
-              <div className="bg-gray-50 border rounded-md p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  {parsePreview.confidence >= 60 ? (
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4 text-yellow-600" />
-                  )}
-                  <span className="text-sm font-medium">
-                    Address Preview ({parsePreview.confidence}% confidence)
-                  </span>
-                </div>
-                <div className="text-xs text-gray-600 space-y-1">
-                  {parsePreview.address_line1 && (
-                    <div>Street: {parsePreview.address_line1}</div>
-                  )}
-                  {parsePreview.area && (
-                    <div>Area: {parsePreview.area}</div>
-                  )}
-                  {parsePreview.city && (
-                    <div>City: {parsePreview.city}</div>
-                  )}
-                  {parsePreview.state && (
-                    <div>State: {parsePreview.state}</div>
-                  )}
-                  {parsePreview.postal_code && (
-                    <div>PIN: {parsePreview.postal_code}</div>
-                  )}
-                </div>
-              </div>
-            )}
             
             <div className="flex gap-2">
               <Button 
                 onClick={handleManualSearch}
-                disabled={isLoading || !searchValue.trim()}
+                disabled={!searchValue.trim()}
                 className="flex-1"
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
-                  </>
-                ) : "Use This Address"}
+                Use This Address
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => onOpenChange(false)}
-                disabled={isLoading}
               >
                 Cancel
               </Button>
@@ -441,103 +334,15 @@ export const GooglePlacesAutocomplete = ({ onPlaceSelect, isOpen, onOpenChange }
               )}
             </div>
           </div>
-        ) : (
-          /* Place Preview Section */
-          <div className="space-y-4 py-4">
-            {/* Selected Place Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-              <div className="flex items-start gap-3">
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <MapPin className="h-5 w-5 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-blue-900">
-                    {selectedPlace?.name || "Selected Location"}
-                  </h3>
-                  <p className="text-sm text-blue-700 mt-1">
-                    {selectedPlace?.formatted_address}
-                  </p>
-                </div>
-              </div>
-            </div>
+        </DialogContent>
+      </Dialog>
 
-            {/* Parsed Address Details */}
-            {parsePreview && (
-              <div className="bg-gray-50 border rounded-md p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  {parsePreview.confidence >= 60 ? (
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4 text-yellow-600" />
-                  )}
-                  <span className="text-sm font-medium">
-                    Parsed Address Details ({parsePreview.confidence}% confidence)
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 gap-2 text-sm">
-                  {parsePreview.house_building && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Building:</span>
-                      <span className="font-medium">{parsePreview.house_building}</span>
-                    </div>
-                  )}
-                  {parsePreview.address_line1 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Street:</span>
-                      <span className="font-medium">{parsePreview.address_line1}</span>
-                    </div>
-                  )}
-                  {parsePreview.area && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Area:</span>
-                      <span className="font-medium">{parsePreview.area}</span>
-                    </div>
-                  )}
-                  {parsePreview.city && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">City:</span>
-                      <span className="font-medium">{parsePreview.city}</span>
-                    </div>
-                  )}
-                  {parsePreview.state && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">State:</span>
-                      <span className="font-medium">{parsePreview.state}</span>
-                    </div>
-                  )}
-                  {parsePreview.postal_code && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">PIN Code:</span>
-                      <span className="font-medium">{parsePreview.postal_code}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-2 pt-2">
-              <Button 
-                onClick={handleUseThisAddress}
-                className="flex-1 bg-black hover:bg-gray-800"
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                Use This Address
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleBackToSearch}
-              >
-                Back
-              </Button>
-            </div>
-
-            <div className="text-xs text-gray-500 text-center">
-              Click "Use This Address" to open the address form where you can edit and add more details
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+      <AddressDetailsForm
+        isOpen={showAddressForm}
+        onOpenChange={setShowAddressForm}
+        initialAddress={selectedAddress}
+        onAddressSaved={handleAddressSaved}
+      />
+    </>
   );
 };
