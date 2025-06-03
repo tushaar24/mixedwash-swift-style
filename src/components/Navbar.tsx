@@ -14,8 +14,9 @@ export const Navbar = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  // Check if we're on the home page
+  // Check if we're on the home page or schedule page
   const isHomePage = location.pathname === "/";
+  const isSchedulePage = location.pathname === "/schedule";
 
   const handleScheduleClick = () => {
     if (!user) {
@@ -79,12 +80,15 @@ export const Navbar = () => {
             
             {user ? (
               <div className="flex items-center space-x-4">
-                <Button 
-                  onClick={handleScheduleClick}
-                  className="bg-black text-white hover:bg-gray-800"
-                >
-                  Schedule Pickup
-                </Button>
+                {/* Only show Schedule Pickup button if not on schedule page */}
+                {!isSchedulePage && (
+                  <Button 
+                    onClick={handleScheduleClick}
+                    className="bg-black text-white hover:bg-gray-800"
+                  >
+                    Schedule Pickup
+                  </Button>
+                )}
                 <Button 
                   variant="outline" 
                   onClick={() => navigate("/profile")}
@@ -103,9 +107,12 @@ export const Navbar = () => {
                 </Button>
               </div>
             ) : (
-              <Button className="bg-black text-white hover:bg-gray-800" onClick={handleScheduleClick}>
-                Schedule Pickup
-              </Button>
+              /* Only show Schedule Pickup button if not on schedule page */
+              !isSchedulePage && (
+                <Button className="bg-black text-white hover:bg-gray-800" onClick={handleScheduleClick}>
+                  Schedule Pickup
+                </Button>
+              )
             )}
           </div>
           
@@ -141,17 +148,20 @@ export const Navbar = () => {
             
             {user ? (
               <>
-                <div className="px-3 py-2">
-                  <Button 
-                    className="w-full bg-black text-white hover:bg-gray-800"
-                    onClick={() => {
-                      handleScheduleClick();
-                      setIsOpen(false);
-                    }}
-                  >
-                    Schedule Pickup
-                  </Button>
-                </div>
+                {/* Only show Schedule Pickup button if not on schedule page */}
+                {!isSchedulePage && (
+                  <div className="px-3 py-2">
+                    <Button 
+                      className="w-full bg-black text-white hover:bg-gray-800"
+                      onClick={() => {
+                        handleScheduleClick();
+                        setIsOpen(false);
+                      }}
+                    >
+                      Schedule Pickup
+                    </Button>
+                  </div>
+                )}
                 <div className="px-3 py-2">
                   <Button 
                     variant="outline" 
@@ -180,17 +190,20 @@ export const Navbar = () => {
                 </div>
               </>
             ) : (
-              <div className="px-3 py-2">
-                <Button 
-                  className="w-full bg-black text-white hover:bg-gray-800"
-                  onClick={() => {
-                    handleScheduleClick();
-                    setIsOpen(false);
-                  }}
-                >
-                  Schedule Pickup
-                </Button>
-              </div>
+              /* Only show Schedule Pickup button if not on schedule page */
+              !isSchedulePage && (
+                <div className="px-3 py-2">
+                  <Button 
+                    className="w-full bg-black text-white hover:bg-gray-800"
+                    onClick={() => {
+                      handleScheduleClick();
+                      setIsOpen(false);
+                    }}
+                  >
+                    Schedule Pickup
+                  </Button>
+                </div>
+              )
             )}
           </div>
         </div>
