@@ -55,7 +55,7 @@ export const AboutService = ({ service }: AboutServiceProps) => {
             <CardTitle className="text-lg sm:text-xl">Turnaround Time</CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base">
-            <p>Standard turnaround time is {service.deliveryTime}. Express service is available at an additional charge.</p>
+            <p>Standard turnaround time is {service.deliveryTime}.</p>
           </CardContent>
         </Card>
       </div>
