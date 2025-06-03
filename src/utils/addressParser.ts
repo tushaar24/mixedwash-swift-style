@@ -1,4 +1,3 @@
-
 export interface ParsedAddress {
   house_building: string;
   address_line1: string;
@@ -77,23 +76,59 @@ export class AddressParser {
       return components.find(c => types.some(type => c.types.includes(type)))?.long_name || '';
     };
 
+    const getShortComponent = (types: string[]) => {
+      return components.find(c => types.some(type => c.types.includes(type)))?.short_name || '';
+    };
+
+    // Extract all relevant components
     const streetNumber = getComponent(['street_number']);
     const route = getComponent(['route']);
     const premise = getComponent(['premise']);
     const subpremise = getComponent(['subpremise']);
+    const establishment = getComponent(['establishment']);
+    const pointOfInterest = getComponent(['point_of_interest']);
+    
+    // Sublocality levels for area detection
     const sublocality1 = getComponent(['sublocality_level_1', 'sublocality']);
     const sublocality2 = getComponent(['sublocality_level_2']);
+    const sublocality3 = getComponent(['sublocality_level_3']);
+    const neighborhood = getComponent(['neighborhood']);
+    
     const locality = getComponent(['locality']);
+    const administrativeArea2 = getComponent(['administrative_area_level_2']);
     const administrativeArea = getComponent(['administrative_area_level_1']);
     const postalCode = getComponent(['postal_code']);
     const country = getComponent(['country']);
 
-    // Build house/building info
-    let houseBuilding = '';
-    if (subpremise) houseBuilding = subpremise;
-    if (premise) houseBuilding = houseBuilding ? `${houseBuilding}, ${premise}` : premise;
+    console.log("Extracted components:", {
+      streetNumber,
+      route,
+      premise,
+      subpremise,
+      establishment,
+      pointOfInterest,
+      sublocality1,
+      sublocality2,
+      sublocality3,
+      neighborhood,
+      locality,
+      administrativeArea2,
+      administrativeArea,
+      postalCode
+    });
 
-    // Build street address
+    // Build house/building info with priority order
+    let houseBuilding = '';
+    const buildingParts = [];
+    
+    if (subpremise) buildingParts.push(subpremise); // Flat/Unit number
+    if (premise) buildingParts.push(premise); // Building name
+    if (establishment && !premise) buildingParts.push(establishment); // Establishment name if no premise
+    if (pointOfInterest && !premise && !establishment) buildingParts.push(pointOfInterest); // POI as fallback
+    
+    houseBuilding = buildingParts.join(', ');
+
+    // Build street address with better logic
     let addressLine1 = '';
     if (streetNumber && route) {
       addressLine1 = `${streetNumber} ${route}`;
@@ -101,19 +136,41 @@ export class AddressParser {
       addressLine1 = route;
     } else if (streetNumber) {
       addressLine1 = streetNumber;
+    } else if (establishment && !houseBuilding) {
+      // If we have establishment but didn't use it for building, use it for street
+      addressLine1 = establishment;
+    } else if (pointOfInterest && !houseBuilding && !establishment) {
+      addressLine1 = pointOfInterest;
     }
 
-    // Area determination
+    // Area determination with comprehensive fallback
     let area = '';
-    if (sublocality1) area = sublocality1;
-    else if (sublocality2) area = sublocality2;
+    const areaCandidates = [
+      sublocality1,
+      sublocality2, 
+      sublocality3,
+      neighborhood,
+      administrativeArea2 // Sometimes contains area info
+    ].filter(Boolean);
+    
+    // Use the most specific area available
+    if (areaCandidates.length > 0) {
+      area = areaCandidates[0]; // Most specific first
+    }
+
+    // City determination
+    let city = locality;
+    if (!city && administrativeArea2) {
+      // Sometimes city is in administrative_area_level_2
+      city = administrativeArea2;
+    }
 
     const result: ParsedAddress = {
       house_building: houseBuilding,
       address_line1: addressLine1,
       address_line2: '',
       area: area,
-      city: this.normalizeCity(locality),
+      city: this.normalizeCity(city),
       state: this.normalizeState(administrativeArea),
       postal_code: postalCode,
       quality: 'precise',
@@ -174,16 +231,40 @@ export class AddressParser {
       parts.pop();
     }
 
-    // Process remaining parts based on length
-    if (parts.length >= 3) {
-      // Format: Street, Area, City, (State PIN already processed)
-      extractedData.address_line1 = parts[0];
-      extractedData.area = parts[1];
-      extractedData.city = parts[2];
+    // Enhanced parsing logic for better area and building extraction
+    if (parts.length >= 4) {
+      // Format: Building/House, Street, Area, City, (State PIN already processed)
+      const firstPart = parts[0];
+      const secondPart = parts[1];
+      const thirdPart = parts[2];
+      const fourthPart = parts[3];
       
-      // If we have more parts and no state from PIN part, use next part as state
-      if (!stateFromPinPart && parts.length >= 4) {
-        stateFromPinPart = parts[3];
+      // Check if first part looks like a building/house number
+      if (this.looksLikeBuildingInfo(firstPart)) {
+        extractedData.house_building = firstPart;
+        extractedData.address_line1 = secondPart;
+        extractedData.area = thirdPart;
+        extractedData.city = fourthPart;
+      } else {
+        // First part is likely street address
+        extractedData.address_line1 = firstPart;
+        extractedData.area = secondPart;
+        extractedData.city = thirdPart;
+        // Fourth part might be district or additional area info
+      }
+    } else if (parts.length === 3) {
+      // Format: Street/Building, Area, City
+      const firstPart = parts[0];
+      
+      if (this.looksLikeBuildingInfo(firstPart)) {
+        extractedData.house_building = firstPart;
+        // Need to extract street from area or use area as street
+        extractedData.address_line1 = parts[1];
+        extractedData.city = parts[2];
+      } else {
+        extractedData.address_line1 = firstPart;
+        extractedData.area = parts[1];
+        extractedData.city = parts[2];
       }
     } else if (parts.length === 2) {
       // Format: Street/Area, City
@@ -206,6 +287,19 @@ export class AddressParser {
     const result = this.finalizeParsingResult(extractedData, 'approximate');
     console.log("Formatted address parsing result:", result);
     return result;
+  }
+
+  private static looksLikeBuildingInfo(text: string): boolean {
+    // Check if text looks like building/house information
+    const buildingPatterns = [
+      /^\d+/,                    // Starts with number
+      /\d+[a-zA-Z]$/,           // Number followed by letter (like 123A)
+      /flat|apartment|apt|house|building|bldg|tower|complex/i,
+      /^[a-zA-Z]\s*\d+/,        // Letter followed by number (like A 123)
+      /floor|flr|#/i,           // Contains floor indicators
+    ];
+    
+    return buildingPatterns.some(pattern => pattern.test(text.trim()));
   }
 
   private static finalizeParsingResult(data: Partial<ParsedAddress>, quality: 'precise' | 'approximate' | 'fallback'): ParsedAddress {
