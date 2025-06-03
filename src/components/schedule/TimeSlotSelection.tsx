@@ -1,11 +1,12 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, Clock, Loader2, Truck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, Clock, Loader2, Truck, Edit3 } from "lucide-react";
 import { ScheduleOrderData } from "@/pages/Schedule";
-import { addDays, format, isBefore, startOfToday, isSameDay } from "date-fns";
+import { addDays, format, isBefore, startOfToday, isSameDay, isAfter } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TimeSlot {
@@ -31,6 +32,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   const [deliveryDate, setDeliveryDate] = useState<Date | null>(orderData.deliveryDate || (orderData.pickupDate ? addDays(orderData.pickupDate, 1) : addDays(new Date(), 1)));
   const [selectedPickupSlotId, setSelectedPickupSlotId] = useState<string | null>(orderData.pickupSlotId);
   const [selectedDeliverySlotId, setSelectedDeliverySlotId] = useState<string | null>(orderData.deliverySlotId);
+  const [showDeliveryCustomization, setShowDeliveryCustomization] = useState(false);
 
   // Today for date validation
   const today = startOfToday();
@@ -72,7 +74,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   }, []);
 
   // Filter time slots based on date and enabled status
-  const getAvailableTimeSlots = (selectedDate: Date | null) => {
+  const getAvailableTimeSlots = (selectedDate: Date | null, isPickup: boolean = true) => {
     if (!selectedDate) return [];
     
     // If selected date is today, only show enabled slots
@@ -80,32 +82,73 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       return timeSlots.filter(slot => slot.enabled);
     }
     
+    // For delivery, if it's tomorrow and pickup is today, filter by pickup slot time or later
+    if (!isPickup && pickupDate && isSameDay(pickupDate, today) && isSameDay(selectedDate, addDays(today, 1))) {
+      const pickupSlot = timeSlots.find(slot => slot.id === selectedPickupSlotId);
+      if (pickupSlot) {
+        return timeSlots.filter(slot => slot.start_time >= pickupSlot.start_time);
+      }
+    }
+    
     // For future dates, show all slots
     return timeSlots;
   };
 
-  // Select pickup date and reset time slot if needed
+  // Select pickup date and auto-set delivery
   function handlePickupDateSelect(date: Date | null) {
     setPickupDate(date);
     
     // Reset pickup time slot when changing date
     setSelectedPickupSlotId(null);
     
-    // Auto-set delivery date to next day if not manually changed
+    // Auto-set delivery date to next day (24-hour delivery)
     const newDeliveryDate = date ? addDays(date, 1) : null;
-    if (!deliveryDate || (pickupDate && isSameDay(deliveryDate, addDays(pickupDate, 1)))) {
-      setDeliveryDate(newDeliveryDate);
-    }
+    setDeliveryDate(newDeliveryDate);
+    
+    // Reset delivery slot selection
+    setSelectedDeliverySlotId(null);
     
     updateOrderData({ 
       pickupDate: date,
-      deliveryDate: deliveryDate || newDeliveryDate,
+      deliveryDate: newDeliveryDate,
       pickupSlotId: null,
       pickupSlotLabel: null,
+      deliverySlotId: null,
+      deliverySlotLabel: null,
     });
   }
 
-  // Select delivery date and reset time slot if needed
+  // Select pickup time slot and auto-set same delivery slot
+  function handlePickupTimeSlotSelect(timeSlot: TimeSlot) {
+    console.log("Selecting pickup time slot:", timeSlot);
+    setSelectedPickupSlotId(timeSlot.id);
+    
+    // Auto-set delivery slot to the same slot if available, otherwise first available slot
+    const deliverySlots = getAvailableTimeSlots(deliveryDate, false);
+    let autoDeliverySlot = deliverySlots.find(slot => slot.id === timeSlot.id);
+    
+    // If same slot not available, pick the first available slot that's equal or later
+    if (!autoDeliverySlot) {
+      autoDeliverySlot = deliverySlots.find(slot => slot.start_time >= timeSlot.start_time) || deliverySlots[0];
+    }
+    
+    if (autoDeliverySlot) {
+      setSelectedDeliverySlotId(autoDeliverySlot.id);
+      updateOrderData({
+        pickupSlotId: timeSlot.id,
+        pickupSlotLabel: timeSlot.label,
+        deliverySlotId: autoDeliverySlot.id,
+        deliverySlotLabel: autoDeliverySlot.label,
+      });
+    } else {
+      updateOrderData({
+        pickupSlotId: timeSlot.id,
+        pickupSlotLabel: timeSlot.label,
+      });
+    }
+  }
+
+  // Select delivery date (only when customizing)
   function handleDeliveryDateSelect(date: Date | null) {
     setDeliveryDate(date);
     
@@ -119,18 +162,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     });
   }
 
-  // Select pickup time slot
-  function handlePickupTimeSlotSelect(timeSlot: TimeSlot) {
-    console.log("Selecting pickup time slot:", timeSlot);
-    setSelectedPickupSlotId(timeSlot.id);
-    
-    updateOrderData({
-      pickupSlotId: timeSlot.id,
-      pickupSlotLabel: timeSlot.label,
-    });
-  }
-
-  // Select delivery time slot
+  // Select delivery time slot (only when customizing)
   function handleDeliveryTimeSlotSelect(timeSlot: TimeSlot) {
     console.log("Selecting delivery time slot:", timeSlot);
     setSelectedDeliverySlotId(timeSlot.id);
@@ -141,7 +173,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     });
   }
 
-  // Continue to next step - using orderData for validation instead of local state
+  // Continue to next step
   function handleContinue() {
     if (!orderData.pickupDate) {
       toast({
@@ -221,14 +253,14 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     );
   }
 
-  const availablePickupSlots = getAvailableTimeSlots(pickupDate);
-  const availableDeliverySlots = getAvailableTimeSlots(deliveryDate);
+  const availablePickupSlots = getAvailableTimeSlots(pickupDate, true);
+  const availableDeliverySlots = getAvailableTimeSlots(deliveryDate, false);
 
   return (
     <div className="space-y-6 pb-24">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold">Schedule Pickup & Delivery</h1>
-        <p className="text-gray-600 mt-2">Select your preferred pickup and delivery schedule</p>
+        <p className="text-gray-600 mt-2">Select your preferred pickup schedule</p>
       </div>
       
       {/* Pickup Section */}
@@ -317,86 +349,149 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
       {/* Delivery Section */}
       <div className="border border-gray-200 rounded-lg p-6 bg-blue-50">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Truck className="h-5 w-5" />
-          Delivery Schedule
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Delivery Calendar */}
-          <div className="space-y-4">
-            <h3 className="font-medium">Select Delivery Date</h3>
-            <div className="border rounded-lg p-3 bg-white">
-              <Calendar
-                mode="single"
-                selected={deliveryDate || undefined}
-                onSelect={handleDeliveryDateSelect}
-                disabled={(date) => isBefore(date, pickupDate || today)}
-                className="p-3 pointer-events-auto"
-              />
-            </div>
-            {deliveryDate && isSameDay(deliveryDate, today) && (
-              <p className="text-xs text-blue-600">
-                Only available time slots are shown for today
-              </p>
-            )}
-          </div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            Delivery Schedule
+          </h2>
           
-          {/* Delivery Time slots */}
-          <div className="space-y-4">
-            <h3 className="font-medium flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Select Delivery Time
-            </h3>
-            
-            {deliveryDate ? (
-              <div className="space-y-3">
-                {availableDeliverySlots.length > 0 ? (
-                  availableDeliverySlots.map((slot) => (
-                    <Card 
-                      key={slot.id}
-                      className={`transition-all cursor-pointer hover:shadow-md ${
-                        selectedDeliverySlotId === slot.id 
-                          ? "ring-2 ring-blue-500 shadow-md" 
-                          : "hover:scale-[1.01] border-gray-200"
-                      }`}
-                      onClick={() => handleDeliveryTimeSlotSelect(slot)}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{slot.label}</p>
-                          </div>
-                          
-                          {selectedDeliverySlotId === slot.id && (
-                            <div className="h-6 w-6 bg-blue-500 rounded-full flex items-center justify-center">
-                              <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                ) : (
-                  <div className="p-6 bg-white rounded-lg text-center border">
-                    <p className="text-gray-600">
-                      {deliveryDate && isSameDay(deliveryDate, today) 
-                        ? "No available time slots for today" 
-                        : "No time slots are currently available"
-                      }
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="p-6 bg-white rounded-lg text-center border">
-                <p className="text-gray-600">Please select a delivery date first</p>
-              </div>
-            )}
-          </div>
+          {selectedPickupSlotId && !showDeliveryCustomization && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowDeliveryCustomization(true)}
+              className="flex items-center gap-2"
+            >
+              <Edit3 className="h-4 w-4" />
+              Change Delivery Schedule
+            </Button>
+          )}
         </div>
+
+        {/* Default 24-hour delivery display */}
+        {selectedPickupSlotId && !showDeliveryCustomization && (
+          <div className="bg-white rounded-lg p-4 border">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-100 p-2 rounded-lg">
+                <Truck className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-medium">24-Hour Delivery</h3>
+                <p className="text-sm text-gray-600">
+                  {deliveryDate && format(deliveryDate, 'EEEE, MMMM d, yyyy')} • {timeSlots.find(slot => slot.id === selectedDeliverySlotId)?.label || timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Custom delivery selection */}
+        {showDeliveryCustomization && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Delivery Calendar */}
+            <div className="space-y-4">
+              <h3 className="font-medium">Select Delivery Date</h3>
+              <div className="border rounded-lg p-3 bg-white">
+                <Calendar
+                  mode="single"
+                  selected={deliveryDate || undefined}
+                  onSelect={handleDeliveryDateSelect}
+                  disabled={(date) => !pickupDate || isBefore(date, addDays(pickupDate, 1))}
+                  className="p-3 pointer-events-auto"
+                />
+              </div>
+              {deliveryDate && isSameDay(deliveryDate, addDays(today, 1)) && pickupDate && isSameDay(pickupDate, today) && (
+                <p className="text-xs text-blue-600">
+                  Only slots equal or later than pickup time are shown for next day delivery
+                </p>
+              )}
+            </div>
+            
+            {/* Delivery Time slots */}
+            <div className="space-y-4">
+              <h3 className="font-medium flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Select Delivery Time
+              </h3>
+              
+              {deliveryDate ? (
+                <div className="space-y-3">
+                  {availableDeliverySlots.length > 0 ? (
+                    availableDeliverySlots.map((slot) => (
+                      <Card 
+                        key={slot.id}
+                        className={`transition-all cursor-pointer hover:shadow-md ${
+                          selectedDeliverySlotId === slot.id 
+                            ? "ring-2 ring-blue-500 shadow-md" 
+                            : "hover:scale-[1.01] border-gray-200"
+                        }`}
+                        onClick={() => handleDeliveryTimeSlotSelect(slot)}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{slot.label}</p>
+                            </div>
+                            
+                            {selectedDeliverySlotId === slot.id && (
+                              <div className="h-6 w-6 bg-blue-500 rounded-full flex items-center justify-center">
+                                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="p-6 bg-white rounded-lg text-center border">
+                      <p className="text-gray-600">
+                        No time slots are currently available for this date
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-6 bg-white rounded-lg text-center border">
+                  <p className="text-gray-600">Please select a delivery date first</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {showDeliveryCustomization && (
+          <div className="mt-4 flex justify-end">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => {
+                setShowDeliveryCustomization(false);
+                // Reset to 24-hour delivery
+                const newDeliveryDate = pickupDate ? addDays(pickupDate, 1) : null;
+                setDeliveryDate(newDeliveryDate);
+                const pickupSlot = timeSlots.find(slot => slot.id === selectedPickupSlotId);
+                if (pickupSlot) {
+                  const deliverySlots = getAvailableTimeSlots(newDeliveryDate, false);
+                  const autoDeliverySlot = deliverySlots.find(slot => slot.id === pickupSlot.id) || 
+                                          deliverySlots.find(slot => slot.start_time >= pickupSlot.start_time) || 
+                                          deliverySlots[0];
+                  if (autoDeliverySlot) {
+                    setSelectedDeliverySlotId(autoDeliverySlot.id);
+                    updateOrderData({
+                      deliveryDate: newDeliveryDate,
+                      deliverySlotId: autoDeliverySlot.id,
+                      deliverySlotLabel: autoDeliverySlot.label,
+                    });
+                  }
+                }
+              }}
+            >
+              Use 24-Hour Delivery
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Summary */}
