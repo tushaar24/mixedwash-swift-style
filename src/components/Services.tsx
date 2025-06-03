@@ -78,15 +78,15 @@ export const Services = () => {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
             {!loading && isEligibleForDiscount && showDiscountAlert && (
-              <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300 relative">
+              <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300 relative pr-10">
                 <BadgePercent className="h-4 w-4" />
                 <span className="text-sm font-semibold">20% OFF on your first order!</span>
                 <button
                   onClick={() => setShowDiscountAlert(false)}
-                  className="ml-2 hover:bg-amber-200 rounded-full p-1 transition-colors"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 hover:bg-amber-200 rounded-full p-1.5 transition-colors"
                   aria-label="Dismiss discount alert"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             )}

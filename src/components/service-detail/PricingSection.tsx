@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,15 +25,15 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
       
       {/* Add service charge note for dry cleaning */}
       {service.serviceCharge && showServiceChargeAlert && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm flex items-start gap-2 relative">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm flex items-start gap-2 relative pr-10">
           <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-          <p className="flex-1">{service.serviceCharge}</p>
+          <p className="flex-1 pr-2">{service.serviceCharge}</p>
           <button
             onClick={() => setShowServiceChargeAlert(false)}
-            className="ml-2 hover:bg-red-100 rounded-full p-1 transition-colors flex-shrink-0"
+            className="absolute right-2 top-2 hover:bg-red-100 rounded-full p-1.5 transition-colors"
             aria-label="Dismiss service charge alert"
           >
-            <X className="h-3 w-3" />
+            <X className="h-4 w-4" />
           </button>
         </div>
       )}
