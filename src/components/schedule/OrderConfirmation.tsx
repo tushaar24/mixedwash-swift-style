@@ -5,7 +5,6 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, Clock, Home, Loader2, Truck, ShoppingBag } from "lucide-react";
 import { OrderData, SelectedService } from "@/pages/Schedule";
 import { format } from "date-fns";
-import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 
 interface OrderConfirmationProps {
   orderData: OrderData;
@@ -15,7 +14,6 @@ interface OrderConfirmationProps {
 
 export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfirmationProps) => {
   const [submitting, setSubmitting] = useState(false);
-  const { addPhoneNumberToTracking } = useDiscountEligibility();
   
   // Submit order to Supabase
   const handleSubmitOrder = async () => {
@@ -130,10 +128,6 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
             await Promise.all(itemPromises);
           }
         }
-        
-        // Add phone number to tracking table after successful order placement
-        // This is when we mark that the user has placed their first order
-        await addPhoneNumberToTracking();
         
         toast({
           title: "Orders placed successfully!",
