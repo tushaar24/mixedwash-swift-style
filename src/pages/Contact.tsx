@@ -1,6 +1,5 @@
 
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -83,7 +82,6 @@ const Contact = () => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

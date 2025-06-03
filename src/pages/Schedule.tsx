@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { ServiceSelection } from "@/components/schedule/ServiceSelection";
 import { AddressSelection } from "@/components/schedule/AddressSelection";
 import { TimeSlotSelection } from "@/components/schedule/TimeSlotSelection";
@@ -226,7 +225,6 @@ const Schedule = () => {
           {renderStep()}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

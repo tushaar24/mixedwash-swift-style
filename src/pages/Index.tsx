@@ -8,7 +8,6 @@ import { HowItWorks } from "@/components/HowItWorks";
 import { Testimonials } from "@/components/Testimonials";
 import { FAQ } from "@/components/FAQ";
 import { CallToAction } from "@/components/CallToAction";
-import { Footer } from "@/components/Footer";
 
 const Index = () => {
   return (
@@ -24,7 +23,6 @@ const Index = () => {
         <FAQ />
         <CallToAction />
       </main>
-      <Footer />
     </div>
   );
 };

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { servicesData } from "@/components/service-detail/ServiceData";
 import { ServiceHeader } from "@/components/service-detail/ServiceHeader";
 import { ServiceSwitcher } from "@/components/service-detail/ServiceSwitcher";
@@ -60,8 +59,6 @@ const ServiceDetail = () => {
       
       {/* Sticky Schedule Pickup CTA */}
       <SchedulePickupFooter />
-      
-      <Footer />
     </div>
   );
 };
