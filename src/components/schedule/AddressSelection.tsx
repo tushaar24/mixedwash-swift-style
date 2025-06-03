@@ -119,9 +119,44 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
 
   // Reverse geocode coordinates to get address using Google Geocoding API
   const reverseGeocode = async (latitude: number, longitude: number) => {
-    // For now, we'll disable reverse geocoding since there's no valid API key
-    // In a production app, you would need to set up a valid Google Maps API key
-    throw new Error("Reverse geocoding is not configured. Please enter your address manually.");
+    const GOOGLE_API_KEY = "AIzaSyDSOihPDFQdD9JampWVU_CD6RpdPM4qbnw";
+    
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch address from coordinates');
+      }
+      
+      const data = await response.json();
+      
+      if (data.status === 'OK' && data.results.length > 0) {
+        const result = data.results[0];
+        console.log("Geocoding result:", result);
+        
+        // Use the AddressParser to parse the address properly
+        const parsedAddress = AddressParser.parseFromGoogleComponents(result.address_components);
+        
+        // Convert to the format expected by the form
+        return {
+          house_building: parsedAddress.house_building,
+          address_line1: parsedAddress.address_line1,
+          address_line2: parsedAddress.address_line2,
+          area: parsedAddress.area,
+          city: parsedAddress.city,
+          state: parsedAddress.state,
+          postal_code: parsedAddress.postal_code,
+          is_default: addresses.length === 0 // Make it default if it's the first address
+        };
+      } else {
+        throw new Error(data.error_message || 'No address found for these coordinates');
+      }
+    } catch (error) {
+      console.error("Reverse geocoding error:", error);
+      throw error;
+    }
   };
 
   // Get user's current location and reverse geocode it
@@ -145,32 +180,25 @@ export const AddressSelection = ({ orderData, updateOrderData, onNext, onBack }:
           console.log("Location obtained:", position.coords);
           const { latitude, longitude } = position.coords;
           
-          // Since reverse geocoding is not available, just open the dialog for manual entry
-          // In the future, when a valid API key is available, this would reverse geocode
-          setNewAddress({
-            house_building: "",
-            address_line1: "",
-            address_line2: "",
-            area: "",
-            city: "",
-            state: "",
-            postal_code: "",
-            is_default: addresses.length === 0
-          });
+          // Reverse geocode the coordinates
+          const addressData = await reverseGeocode(latitude, longitude);
           
-          // Open the address dialog for manual entry
+          // Populate the form with the geocoded address
+          setNewAddress(addressData);
+          
+          // Open the address dialog for editing
           setDialogOpen(true);
           
           toast({
             title: "Location found",
-            description: "Please enter your address manually as reverse geocoding is not available.",
+            description: "Address has been populated. Please review and edit if needed.",
           });
           
         } catch (error) {
-          console.error("Location processing failed:", error);
+          console.error("Reverse geocoding failed:", error);
           toast({
             title: "Address lookup failed",
-            description: "Please enter your address manually.",
+            description: "Could not determine address from your location. Please enter it manually.",
             variant: "destructive",
           });
           
