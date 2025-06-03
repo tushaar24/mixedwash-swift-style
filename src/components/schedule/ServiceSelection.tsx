@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,15 @@ interface ServiceSelectionProps {
   updateOrderData: (data: Partial<OrderData>) => void;
   onNext: () => void;
 }
+
+// Helper function to get minimum kg for each service
+const getMinimumKg = (serviceName: string): number | null => {
+  const name = serviceName.toLowerCase();
+  if (name.includes('wash & fold') || name.includes('wash fold')) return 4;
+  if (name.includes('wash & iron') || name.includes('wash iron')) return 3;
+  if (name.includes('heavy wash')) return 5;
+  return null; // For dry cleaning or other services
+};
 
 export const ServiceSelection = ({ orderData, updateOrderData, onNext }: ServiceSelectionProps) => {
   const [services, setServices] = useState<Service[]>([]);
@@ -160,69 +168,80 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {services.map((service) => (
-          <Card 
-            key={service.id}
-            className={`transition-all cursor-pointer hover:shadow-md ${
-              selectedServiceIds.has(service.id) 
-                ? "ring-2 ring-black shadow-md" 
-                : "hover:scale-[1.01] border-gray-200"
-            }`}
-            onClick={() => toggleServiceSelection(service)}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-start">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    checked={selectedServiceIds.has(service.id)} 
-                    onCheckedChange={() => toggleServiceSelection(service)}
-                    className="data-[state=checked]:bg-black data-[state=checked]:border-black"
-                  />
-                  <div className="text-4xl mr-2">{service.icon}</div>
-                </div>
-                <div className="flex-1 ml-2">
-                  <h3 className="font-bold text-lg">{service.name}</h3>
-                  <p className="text-sm text-gray-600">{service.description}</p>
-                  
-                  <div className="mt-2">
-                    {!discountLoading && service.discount_price !== null && isEligibleForDiscount ? (
-                      <div className="space-y-1">
-                        <div className="flex items-center">
-                          <span className="font-bold text-green-700">₹{service.discount_price}/kg</span>
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium ml-2 flex items-center">
-                            <BadgePercent className="h-3 w-3 mr-1" />
-                            Save {Math.round((1 - service.discount_price / service.price) * 100)}%
-                          </span>
+        {services.map((service) => {
+          const minimumKg = getMinimumKg(service.name);
+          
+          return (
+            <Card 
+              key={service.id}
+              className={`transition-all cursor-pointer hover:shadow-md ${
+                selectedServiceIds.has(service.id) 
+                  ? "ring-2 ring-black shadow-md" 
+                  : "hover:scale-[1.01] border-gray-200"
+              }`}
+              onClick={() => toggleServiceSelection(service)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      checked={selectedServiceIds.has(service.id)} 
+                      onCheckedChange={() => toggleServiceSelection(service)}
+                      className="data-[state=checked]:bg-black data-[state=checked]:border-black"
+                    />
+                    <div className="text-4xl mr-2">{service.icon}</div>
+                  </div>
+                  <div className="flex-1 ml-2">
+                    <h3 className="font-bold text-lg">{service.name}</h3>
+                    <p className="text-sm text-gray-600">{service.description}</p>
+                    
+                    <div className="mt-2">
+                      {!discountLoading && service.discount_price !== null && isEligibleForDiscount ? (
+                        <div className="space-y-1">
+                          <div className="flex items-center">
+                            <span className="font-bold text-green-700">₹{service.discount_price}/kg</span>
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium ml-2 flex items-center">
+                              <BadgePercent className="h-3 w-3 mr-1" />
+                              Save {Math.round((1 - service.discount_price / service.price) * 100)}%
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            <span className="line-through">₹{service.price}/kg</span>
+                            <span className="ml-1 text-xs">regular price</span>
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-500">
-                          <span className="line-through">₹{service.price}/kg</span>
-                          <span className="ml-1 text-xs">regular price</span>
+                      ) : (
+                        <div className="font-bold">
+                          {service.name.toLowerCase().includes('dry cleaning')
+                            ? `From ₹${service.price}`
+                            : `₹${service.price}/kg`
+                          }
                         </div>
-                      </div>
-                    ) : (
-                      <div className="font-bold">
-                        {service.name.toLowerCase().includes('dry cleaning')
-                          ? `From ₹${service.price}`
-                          : `₹${service.price}/kg`
-                        }
+                      )}
+                      
+                      {/* Add minimum kg requirement */}
+                      {minimumKg && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Min {minimumKg}kg
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Add Items button for dry cleaning */}
+                    {selectedServiceIds.has(service.id) && service.name.toLowerCase().includes('dry cleaning') && (
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <DryCleaningItemsDialog
+                          selectedItems={orderData.dryCleaningItems}
+                          onItemsChange={handleDryCleaningItemsChange}
+                        />
                       </div>
                     )}
                   </div>
-                  
-                  {/* Add Items button for dry cleaning */}
-                  {selectedServiceIds.has(service.id) && service.name.toLowerCase().includes('dry cleaning') && (
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <DryCleaningItemsDialog
-                        selectedItems={orderData.dryCleaningItems}
-                        onItemsChange={handleDryCleaningItemsChange}
-                      />
-                    </div>
-                  )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
       
       {/* Selected services summary */}
