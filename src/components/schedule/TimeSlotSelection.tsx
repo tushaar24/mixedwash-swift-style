@@ -77,20 +77,32 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
   const getAvailableTimeSlots = (selectedDate: Date | null, isPickup: boolean = true) => {
     if (!selectedDate) return [];
     
-    // If selected date is today, only show enabled slots
-    if (isSameDay(selectedDate, today)) {
-      return timeSlots.filter(slot => slot.enabled);
+    // For pickup slots
+    if (isPickup) {
+      // If selected date is today, only show enabled slots
+      if (isSameDay(selectedDate, today)) {
+        return timeSlots.filter(slot => slot.enabled);
+      }
+      // For future dates, show all slots
+      return timeSlots;
     }
     
-    // For delivery, if it's tomorrow and pickup is today, filter by pickup slot time or later
-    if (!isPickup && pickupDate && isSameDay(pickupDate, today) && isSameDay(selectedDate, addDays(today, 1))) {
+    // For delivery slots
+    if (!isPickup && pickupDate && selectedPickupSlotId) {
       const pickupSlot = timeSlots.find(slot => slot.id === selectedPickupSlotId);
-      if (pickupSlot) {
+      
+      // If delivery is next day after pickup, filter by pickup slot time or later
+      if (pickupSlot && isSameDay(selectedDate, addDays(pickupDate, 1))) {
         return timeSlots.filter(slot => slot.start_time >= pickupSlot.start_time);
+      }
+      
+      // For delivery dates more than 1 day after pickup, show all slots
+      if (isAfter(selectedDate, addDays(pickupDate, 1))) {
+        return timeSlots;
       }
     }
     
-    // For future dates, show all slots
+    // Default: show all slots
     return timeSlots;
   };
 
@@ -400,9 +412,9 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
                   className="p-3 pointer-events-auto"
                 />
               </div>
-              {deliveryDate && isSameDay(deliveryDate, addDays(today, 1)) && pickupDate && isSameDay(pickupDate, today) && (
+              {deliveryDate && pickupDate && isSameDay(deliveryDate, addDays(pickupDate, 1)) && selectedPickupSlotId && (
                 <p className="text-xs text-blue-600">
-                  Only slots equal or later than pickup time are shown for next day delivery
+                  Only slots equal or later than pickup time ({timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label}) are shown for next day delivery
                 </p>
               )}
             </div>
