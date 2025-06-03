@@ -11,6 +11,8 @@ import Schedule from "./pages/Schedule";
 import Contact from "./pages/Contact";
 import ServiceDetail from "./pages/ServiceDetail";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import React from "react";
