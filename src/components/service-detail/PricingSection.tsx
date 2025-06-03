@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,16 +19,16 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showServiceChargeAlert, setShowServiceChargeAlert] = useState(true);
 
-  // Auto-hide service charge alert after 3 seconds - only if service has a charge and alert is showing
+  // Auto-hide service charge alert after 1 second - only if service has a charge and alert is showing
   useEffect(() => {
     console.log('PricingSection useEffect triggered:', { serviceCharge: service.serviceCharge, showServiceChargeAlert });
     
     if (service.serviceCharge && showServiceChargeAlert) {
-      console.log('Starting service charge alert timer for 3 seconds');
+      console.log('Starting service charge alert timer for 1 second');
       const timer = setTimeout(() => {
         console.log('Auto-dismissing service charge alert');
         setShowServiceChargeAlert(false);
-      }, 3000);
+      }, 1000);
       
       return () => {
         console.log('Cleaning up service charge alert timer');

@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,16 +13,16 @@ export const Services = () => {
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showDiscountAlert, setShowDiscountAlert] = useState(true);
   
-  // Auto-hide discount alert after 3 seconds - only if user is eligible and alert is showing
+  // Auto-hide discount alert after 1 second - only if user is eligible and alert is showing
   useEffect(() => {
     console.log('Services useEffect triggered:', { loading, isEligibleForDiscount, showDiscountAlert });
     
     if (!loading && isEligibleForDiscount && showDiscountAlert) {
-      console.log('Starting discount alert timer for 3 seconds');
+      console.log('Starting discount alert timer for 1 second');
       const timer = setTimeout(() => {
         console.log('Auto-dismissing discount alert');
         setShowDiscountAlert(false);
-      }, 3000);
+      }, 1000);
       
       return () => {
         console.log('Cleaning up discount alert timer');
