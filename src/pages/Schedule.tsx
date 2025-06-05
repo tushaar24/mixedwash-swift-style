@@ -86,7 +86,7 @@ const Schedule = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Track step views - delay slightly when coming from CTA to ensure proper order
+  // Track step views - delay when coming from CTA to ensure CTA click event fires first
   useEffect(() => {
     const userInfo = getUserInfo();
     
@@ -127,9 +127,9 @@ const Schedule = () => {
       }
     };
 
-    // If coming from CTA and on service selection step, delay to ensure CTA click event fires first
+    // If coming from CTA and on service selection step, delay significantly to ensure CTA click event fires first
     if (fromCTA && currentStep === ScheduleStep.SERVICE_SELECTION) {
-      const timer = setTimeout(trackStepView, 100);
+      const timer = setTimeout(trackStepView, 500); // Increased delay to 500ms
       return () => clearTimeout(timer);
     } else {
       trackStepView();
