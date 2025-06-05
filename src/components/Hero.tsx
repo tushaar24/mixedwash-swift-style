@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -26,19 +27,11 @@ export const Hero = () => {
   const handleScheduleClick = () => {
     const userInfo = getUserInfo();
     
-    // New event format
     trackEvent('schedule_cta_clicked', {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
       'current_time': getCurrentTime()
     });
-    
-    // Keep existing tracking for backward compatibility
-    trackEvent('CTA Clicked', {
-      'CTA Type': 'Schedule Pickup',
-      'CTA Location': 'Hero Section',
-      'Page Name': 'Home Page'
-    }, getUserInfo());
     
     if (!user) {
       navigate("/auth");
@@ -50,19 +43,11 @@ export const Hero = () => {
   const handleContactClick = () => {
     const userInfo = getUserInfo();
     
-    // New event format
     trackEvent('contact_us_cta_clicked', {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
       'current_time': getCurrentTime()
     });
-    
-    // Keep existing tracking for backward compatibility
-    trackEvent('CTA Clicked', {
-      'CTA Type': 'Contact Us',
-      'CTA Location': 'Hero Section',
-      'Page Name': 'Home Page'
-    }, getUserInfo());
     
     navigate("/contact");
   };

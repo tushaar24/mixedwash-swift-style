@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,7 +104,6 @@ export const Services = () => {
   const handleServiceClick = (route: string, serviceName: string) => {
     const userInfo = getUserInfo();
     
-    // Track quick services CTA clicked with new format
     trackEvent('quick_services_cta_clicked', {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
@@ -111,23 +111,17 @@ export const Services = () => {
       'service_type': serviceName
     });
     
-    // Keep existing tracking for backward compatibility
-    trackEvent('Service Clicked', {
-      'Service Name': serviceName,
-      'Service Route': route,
-      'Page Name': 'Home Page',
-      'Location': 'Services Section'
-    }, getUserInfo());
-    
     navigate(`/service/${route}`);
   };
 
   const handleScheduleClick = () => {
-    trackEvent('CTA Clicked', {
-      'CTA Type': 'Schedule Pickup',
-      'CTA Location': 'Services Section',
-      'Page Name': 'Home Page'
-    }, getUserInfo());
+    const userInfo = getUserInfo();
+    
+    trackEvent('schedule_cta_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime()
+    });
     
     navigate("/schedule");
   };

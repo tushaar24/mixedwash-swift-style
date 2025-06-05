@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -26,19 +27,11 @@ export const CallToAction = () => {
   const handleScheduleClick = () => {
     const userInfo = getUserInfo();
     
-    // New event format
     trackEvent('schedule_cta_clicked', {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
       'current_time': getCurrentTime()
     });
-    
-    // Keep existing tracking for backward compatibility
-    trackEvent('CTA Clicked', {
-      'CTA Type': 'Schedule Pickup',
-      'CTA Location': 'Call To Action Section',
-      'Page Name': 'Home Page'
-    }, getUserInfo());
     
     if (!user) {
       navigate("/auth");

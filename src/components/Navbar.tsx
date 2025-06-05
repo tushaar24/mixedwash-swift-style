@@ -6,31 +6,18 @@ import { LogOut, Menu, X, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { trackEvent } from "@/utils/clevertap";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   
   const isHomePage = location.pathname === "/";
   const isSchedulePage = location.pathname === "/schedule";
 
-  const getUserInfo = () => user ? {
-    user_id: user.id,
-    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
-    phone: profile?.mobile_number
-  } : undefined;
-
   const handleScheduleClick = () => {
-    trackEvent('CTA Clicked', {
-      'CTA Type': 'Schedule Pickup',
-      'CTA Location': 'Navbar',
-      'Page Name': location.pathname === "/" ? "Home Page" : location.pathname
-    }, getUserInfo());
-    
     if (!user) {
       navigate("/auth");
     } else {
@@ -39,22 +26,10 @@ export const Navbar = () => {
   };
 
   const handleProfileClick = () => {
-    trackEvent('Navigation Clicked', {
-      'Navigation Type': 'Profile',
-      'Location': 'Navbar',
-      'Page Name': location.pathname === "/" ? "Home Page" : location.pathname
-    }, getUserInfo());
-    
     navigate("/profile");
   };
 
   const handleSignOut = async () => {
-    trackEvent('User Action', {
-      'Action Type': 'Sign Out',
-      'Location': 'Navbar',
-      'Page Name': location.pathname === "/" ? "Home Page" : location.pathname
-    }, getUserInfo());
-    
     try {
       const { error } = await supabase.auth.signOut();
       

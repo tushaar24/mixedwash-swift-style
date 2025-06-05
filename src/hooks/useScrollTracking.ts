@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from 'react';
 import { trackEvent } from '@/utils/clevertap';
 import { useAuth } from '@/context/AuthContext';
@@ -27,37 +26,25 @@ export const useScrollTracking = (pageName: string) => {
       // Track 25% scroll
       if (scrollPercentage >= 25 && !scrollTrackingRef.current.hasTracked25) {
         scrollTrackingRef.current.hasTracked25 = true;
-        trackEvent('Page Scroll', {
-          'Page Name': pageName,
-          'Scroll Percentage': 25
-        }, userInfo);
+        
       }
 
       // Track 50% scroll
       if (scrollPercentage >= 50 && !scrollTrackingRef.current.hasTracked50) {
         scrollTrackingRef.current.hasTracked50 = true;
-        trackEvent('Page Scroll', {
-          'Page Name': pageName,
-          'Scroll Percentage': 50
-        }, userInfo);
+        
       }
 
       // Track 75% scroll
       if (scrollPercentage >= 75 && !scrollTrackingRef.current.hasTracked75) {
         scrollTrackingRef.current.hasTracked75 = true;
-        trackEvent('Page Scroll', {
-          'Page Name': pageName,
-          'Scroll Percentage': 75
-        }, userInfo);
+        
       }
 
       // Track 100% scroll
       if (scrollPercentage >= 90 && !scrollTrackingRef.current.hasTracked100) {
         scrollTrackingRef.current.hasTracked100 = true;
-        trackEvent('Page Scroll', {
-          'Page Name': pageName,
-          'Scroll Percentage': 100
-        }, userInfo);
+        
       }
     };
 

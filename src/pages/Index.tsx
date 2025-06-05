@@ -11,16 +11,12 @@ import { Testimonials } from "@/components/Testimonials";
 import { FAQ } from "@/components/FAQ";
 import { CallToAction } from "@/components/CallToAction";
 import { Footer } from "@/components/Footer";
-import { trackPageView, trackEvent } from "@/utils/clevertap";
+import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
-import { useScrollTracking } from "@/hooks/useScrollTracking";
 
 const Index = () => {
   const { user, profile, isLoading, isProfileComplete } = useAuth();
   const navigate = useNavigate();
-  
-  // Add scroll tracking for the home page
-  useScrollTracking('Home Page');
   
   const getCurrentTime = () => {
     const now = new Date();
@@ -40,15 +36,12 @@ const Index = () => {
   useEffect(() => {
     const userInfo = getUserInfo();
     
-    // Track home page viewed with new format - only once when component mounts
+    // Track home page viewed - only once when component mounts
     trackEvent('home_page_viewed', {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
       'current_time': getCurrentTime()
     });
-    
-    // Keep existing page view tracking
-    trackPageView('Home Page', {}, userInfo);
   }, []); // Empty dependency array to run only once
 
   // Redirect to profile page if user is logged in but profile is incomplete
