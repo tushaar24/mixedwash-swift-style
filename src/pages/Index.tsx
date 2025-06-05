@@ -1,5 +1,6 @@
 
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Services } from "@/components/Services";
@@ -15,7 +16,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useScrollTracking } from "@/hooks/useScrollTracking";
 
 const Index = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, isLoading, isProfileComplete } = useAuth();
+  const navigate = useNavigate();
   
   // Add scroll tracking for the home page
   useScrollTracking('Home Page');
@@ -29,6 +31,13 @@ const Index = () => {
     
     trackPageView('Home Page', {}, userInfo);
   }, [user, profile]);
+
+  // Redirect to profile page if user is logged in but profile is incomplete
+  useEffect(() => {
+    if (!isLoading && user && !isProfileComplete) {
+      navigate("/profile");
+    }
+  }, [user, isProfileComplete, isLoading, navigate]);
 
   return (
     <div className="min-h-screen bg-white">
