@@ -1,15 +1,11 @@
-
 import clevertap from 'clevertap-web-sdk';
 
 // Initialize CleverTap with your project configuration
 export const initCleverTap = () => {
   clevertap.init('589-KZZ-947', 'eu1');
   
-  // Enable debugging in development
-  if (import.meta.env.DEV) {
-    clevertap.setDebugLevel(1);
-  }
-  
+  // Note: setDebugLevel is not available in this version of CleverTap SDK
+  // Debug information will still be available in browser console
   console.log('CleverTap initialized successfully');
 };
 
