@@ -10,6 +10,8 @@ import { AboutService } from "@/components/service-detail/AboutService";
 import { SchedulePickupFooter } from "@/components/service-detail/SchedulePickupFooter";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
+import { useSEO } from "@/hooks/useSEO";
+import { seoPages } from "@/utils/seo";
 
 const ServiceDetail = () => {
   const { serviceSlug } = useParams();
@@ -18,6 +20,37 @@ const ServiceDetail = () => {
   const { user, profile } = useAuth();
   
   console.log('ServiceDetail component mounted with serviceSlug:', serviceSlug);
+  
+  // SEO optimization based on service type
+  useEffect(() => {
+    if (serviceSlug && service) {
+      let seoData;
+      switch (serviceSlug) {
+        case 'wash-fold':
+          seoData = seoPages.services.washFold;
+          break;
+        case 'dry-cleaning':
+          seoData = seoPages.services.dryClean;
+          break;
+        case 'premium-wash':
+          seoData = seoPages.services.premiumWash;
+          break;
+        case 'steam-iron':
+          seoData = seoPages.services.steamIron;
+          break;
+        default:
+          seoData = {
+            title: `${service.name} Service - MixedWash Bangalore`,
+            description: `Professional ${service.name.toLowerCase()} service in Bangalore with next-day delivery. Book online now!`,
+            canonical: `https://mixedwash.in/service/${serviceSlug}`
+          };
+      }
+      // Update SEO data
+      if (seoData) {
+        useSEO(seoData);
+      }
+    }
+  }, [serviceSlug, service]);
   
   const getCurrentTime = () => {
     const now = new Date();

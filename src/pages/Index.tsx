@@ -12,10 +12,15 @@ import { FAQ } from "@/components/FAQ";
 import { CallToAction } from "@/components/CallToAction";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
+import { useSEO } from "@/hooks/useSEO";
+import { seoPages } from "@/utils/seo";
 
 const Index = () => {
   const { user, profile, isLoading, isProfileComplete } = useAuth();
   const navigate = useNavigate();
+
+  // SEO optimization for homepage
+  useSEO(seoPages.home);
 
   // Redirect to profile page if user is logged in but profile is incomplete
   useEffect(() => {

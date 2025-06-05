@@ -3,9 +3,14 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSEO } from "@/hooks/useSEO";
+import { seoPages } from "@/utils/seo";
 
 const Contact = () => {
   const navigate = useNavigate();
+  
+  // SEO optimization for contact page
+  useSEO(seoPages.contact);
   
   const handleWhatsAppClick = () => {
     window.open("https://wa.me/916362290686", "_blank");
