@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { Order, Address, TimeSlot } from "@/types/models";
+import { trackEvent } from "@/utils/clevertap";
 import { 
   Dialog, 
   DialogContent, 
@@ -82,6 +83,15 @@ const Profile = () => {
   const [rescheduleDeliverySlot, setRescheduleDeliverySlot] = useState<string>("");
   const [rescheduling, setRescheduling] = useState(false);
 
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
   // Set initial name and phone values from the profile
   useEffect(() => {
     if (profile) {
@@ -89,6 +99,15 @@ const Profile = () => {
       setPhone(profile.mobile_number || "");
     }
   }, [profile]);
+
+  // Track complete_profile_viewed event for incomplete profiles
+  useEffect(() => {
+    if (!isProfileComplete && user) {
+      trackEvent('complete_profile_viewed', {
+        'current_time': getCurrentTime()
+      });
+    }
+  }, [isProfileComplete, user]);
 
   useEffect(() => {
     if (!user) {
@@ -225,6 +244,13 @@ const Profile = () => {
       });
       return;
     }
+
+    // Track complete_profile_cta_clicked event
+    trackEvent('complete_profile_cta_clicked', {
+      'name': name.trim(),
+      'phone_number': phone.trim(),
+      'current_time': getCurrentTime()
+    });
     
     setLoading(true);
 

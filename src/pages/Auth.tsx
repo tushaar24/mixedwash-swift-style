@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +13,6 @@ const Auth = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [hasTrackedPageView, setHasTrackedPageView] = useState(false);
   const navigate = useNavigate();
   const { user, isLoading, isProfileComplete } = useAuth();
 
@@ -28,14 +26,11 @@ const Auth = () => {
   };
 
   useEffect(() => {
-    // Track auth page viewed only once
-    if (!hasTrackedPageView) {
-      trackEvent('auth_page_viewed', {
-        'current_time': getCurrentTime()
-      });
-      setHasTrackedPageView(true);
-    }
-  }, [hasTrackedPageView]);
+    // Track auth page viewed when component mounts
+    trackEvent('auth_page_viewed', {
+      'current_time': getCurrentTime()
+    });
+  }, []); // Empty dependency array ensures it runs only once
 
   useEffect(() => {
     // Don't redirect while auth context is still loading
