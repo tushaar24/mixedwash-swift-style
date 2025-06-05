@@ -127,14 +127,14 @@ const Schedule = () => {
       }
     };
 
-    // If coming from CTA and on service selection step, delay significantly to ensure CTA click event fires first
+    // If coming from CTA and on service selection step, delay to ensure CTA click event fires first
     if (fromCTA && currentStep === ScheduleStep.SERVICE_SELECTION) {
-      const timer = setTimeout(trackStepView, 500); // Increased delay to 500ms
+      const timer = setTimeout(trackStepView, 500);
       return () => clearTimeout(timer);
     } else {
       trackStepView();
     }
-  }, [currentStep, user, profile, orderData, fromCTA]);
+  }, [currentStep, user, profile, fromCTA]);
 
   // Check if user is logged in
   useEffect(() => {
