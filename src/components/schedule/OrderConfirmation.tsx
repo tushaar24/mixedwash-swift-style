@@ -6,6 +6,7 @@ import { ArrowLeft, Calendar, Clock, Home, Loader2, Truck, ShoppingBag } from "l
 import { ScheduleOrderData, SelectedService } from "@/pages/Schedule";
 import { format } from "date-fns";
 import { trackOrderPlaced, trackServiceScheduled } from "@/utils/clevertap";
+import { useAuth } from "@/context/AuthContext";
 
 // Declare dataLayer for GTM
 declare global {
@@ -22,6 +23,46 @@ interface OrderConfirmationProps {
 
 export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfirmationProps) => {
   const [submitting, setSubmitting] = useState(false);
+  const { profile } = useAuth();
+  
+  // Function to check and add phone number to tracking table
+  const trackPhoneNumber = async (phoneNumber: string) => {
+    try {
+      console.log("=== CHECKING PHONE NUMBER TRACKING ===");
+      console.log("Phone number to check:", phoneNumber);
+      
+      // Check if phone number exists in the table
+      const { data: existingPhone, error: checkError } = await supabase
+        .from("phone_numbers")
+        .select("phone")
+        .eq("phone", phoneNumber)
+        .maybeSingle();
+      
+      if (checkError) {
+        console.error("Error checking phone number:", checkError);
+        return;
+      }
+      
+      if (!existingPhone) {
+        console.log("Phone number not found, adding to tracking table");
+        
+        // Add phone number to the table
+        const { error: insertError } = await supabase
+          .from("phone_numbers")
+          .insert({ phone: phoneNumber });
+        
+        if (insertError) {
+          console.error("Error adding phone number to tracking table:", insertError);
+        } else {
+          console.log("Phone number successfully added to tracking table");
+        }
+      } else {
+        console.log("Phone number already exists in tracking table");
+      }
+    } catch (error) {
+      console.error("Error in phone number tracking:", error);
+    }
+  };
   
   // Submit order to Supabase
   const handleSubmitOrder = async () => {
@@ -88,6 +129,12 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
       }
       
       console.log("User authenticated:", authData.user.id);
+      
+      // Track phone number if user has one
+      if (profile?.mobile_number) {
+        console.log("=== TRACKING PHONE NUMBER ===");
+        await trackPhoneNumber(profile.mobile_number);
+      }
       
       console.log("=== PREPARING ORDER DATA ===");
       console.log("Creating orders with data:", {
