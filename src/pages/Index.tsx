@@ -1,4 +1,5 @@
 
+import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { Services } from "@/components/Services";
@@ -9,8 +10,13 @@ import { Testimonials } from "@/components/Testimonials";
 import { FAQ } from "@/components/FAQ";
 import { CallToAction } from "@/components/CallToAction";
 import { Footer } from "@/components/Footer";
+import { trackPageView } from "@/utils/clevertap";
 
 const Index = () => {
+  useEffect(() => {
+    trackPageView('Home Page');
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />

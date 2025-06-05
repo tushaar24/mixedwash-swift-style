@@ -15,11 +15,17 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import React from "react";
+import { initCleverTap } from "./utils/clevertap";
+import React, { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 const App = () => {
+  useEffect(() => {
+    // Initialize CleverTap when the app starts
+    initCleverTap();
+  }, []);
+
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>

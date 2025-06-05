@@ -1,8 +1,8 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Profile } from "@/types/models";
+import { setUserProfile, trackEvent } from "@/utils/clevertap";
 
 interface AuthContextType {
   session: Session | null;
@@ -92,6 +92,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(newSession?.user ?? null);
         
         if (newSession?.user) {
+          // Track user login in CleverTap
+          if (event === 'SIGNED_IN') {
+            setUserProfile({
+              Identity: newSession.user.id,
+              Email: newSession.user.email,
+              Name: newSession.user.user_metadata?.full_name || newSession.user.user_metadata?.name
+            });
+            trackEvent('User Logged In', {
+              'Login Method': newSession.user.app_metadata?.provider || 'email'
+            });
+          }
+          
           // Use setTimeout to avoid blocking the auth state change
           setTimeout(async () => {
             const profileData = await fetchProfile(newSession.user.id);
@@ -121,6 +133,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setIsFirstLogin(false);
           setIsProfileComplete(false);
           setIsLoading(false);
+          
+          // Track user logout
+          if (event === 'SIGNED_OUT') {
+            trackEvent('User Logged Out');
+          }
         }
       }
     );
@@ -132,6 +149,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        // Set user profile in CleverTap for existing session
+        setUserProfile({
+          Identity: session.user.id,
+          Email: session.user.email,
+          Name: session.user.user_metadata?.full_name || session.user.user_metadata?.name
+        });
+        
         const profileData = await fetchProfile(session.user.id);
         setProfile(profileData);
         

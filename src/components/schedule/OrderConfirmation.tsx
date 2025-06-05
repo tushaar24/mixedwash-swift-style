@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,12 +5,7 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Calendar, Clock, Home, Loader2, Truck, ShoppingBag } from "lucide-react";
 import { ScheduleOrderData, SelectedService } from "@/pages/Schedule";
 import { format } from "date-fns";
-
-interface OrderConfirmationProps {
-  orderData: ScheduleOrderData;
-  onBack: () => void;
-  onComplete: () => void;
-}
+import { trackOrderPlaced, trackServiceScheduled } from "@/utils/clevertap";
 
 // Declare dataLayer for GTM
 declare global {
@@ -141,6 +135,33 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         
         console.log("=== ALL ORDERS CREATED SUCCESSFULLY ===");
         console.log(`${results.length} orders created`);
+        
+        // Track order placement in CleverTap
+        const totalAmount = orderData.dryCleaningItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        // Track each service individually
+        orderData.services.forEach((service, index) => {
+          const orderResult = results[index];
+          if (orderResult.data?.[0]) {
+            trackServiceScheduled({
+              serviceName: service.name,
+              serviceId: service.id,
+              pickupDate: format(orderData.pickupDate!, 'yyyy-MM-dd'),
+              deliveryDate: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
+              amount: service.price
+            });
+          }
+        });
+        
+        // Track overall order if there are dry cleaning items
+        if (orderData.dryCleaningItems.length > 0) {
+          trackOrderPlaced({
+            orderId: results[0]?.data?.[0]?.id || 'unknown',
+            amount: totalAmount,
+            currency: 'INR',
+            items: orderData.dryCleaningItems
+          });
+        }
         
         // Save dry cleaning items if any
         if (orderData.dryCleaningItems.length > 0) {
