@@ -26,7 +26,6 @@ export const Footer = () => {
             <a href="/privacy" className="hover:underline" rel="nofollow">Privacy Policy</a>
             <a href="/terms" className="hover:underline" rel="nofollow">Terms & Conditions</a>
             <a href="/contact" className="hover:underline">Contact Us</a>
-            <a href="/sitemap.xml" className="hover:underline" rel="nofollow">Sitemap</a>
           </div>
           <p>&copy; {currentYear} MixedWash. All rights reserved.</p>
           <p className="mt-2 text-xs">
