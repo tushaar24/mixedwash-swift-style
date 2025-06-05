@@ -19,8 +19,8 @@ export const ServiceSwitcher = ({ otherServices }: ServiceSwitcherProps) => {
   const navigate = useNavigate();
   
   const handleServiceClick = (serviceId: string) => {
-    // Force a full navigation to the new service detail page to ensure proper loading
-    window.location.href = `/service/${serviceId}`;
+    console.log('ServiceSwitcher: Navigating to service:', serviceId);
+    navigate(`/service/${serviceId}`);
   };
   
   return (
