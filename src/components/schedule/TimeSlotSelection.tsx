@@ -8,6 +8,8 @@ import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, Clock, Loader2, Truck,
 import { ScheduleOrderData } from "@/pages/Schedule";
 import { addDays, format, isBefore, startOfToday, isSameDay, isAfter } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/utils/clevertap";
+import { useAuth } from "@/context/AuthContext";
 
 interface TimeSlot {
   id: string;
@@ -25,6 +27,7 @@ interface TimeSlotSelectionProps {
 }
 
 export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }: TimeSlotSelectionProps) => {
+  const { user, profile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
@@ -36,6 +39,21 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
   // Today for date validation
   const today = startOfToday();
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const getUserInfo = () => user ? {
+    user_id: user.id,
+    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
+    phone: profile?.mobile_number
+  } : undefined;
 
   // Fetch all time slots from database (both enabled and disabled)
   useEffect(() => {
@@ -108,6 +126,17 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
   // Select pickup date and auto-set delivery
   function handlePickupDateSelect(date: Date | null) {
+    const userInfo = getUserInfo();
+    
+    // Track pickup date selection
+    trackEvent('pickup_date_selected', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'selected_date': date?.toDateString() || '',
+      'previous_date': pickupDate?.toDateString() || ''
+    });
+
     setPickupDate(date);
     
     // Reset pickup time slot when changing date
@@ -132,6 +161,19 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
   // Select pickup time slot and auto-set same delivery slot
   function handlePickupTimeSlotSelect(timeSlot: TimeSlot) {
+    const userInfo = getUserInfo();
+    
+    // Track pickup time slot selection
+    trackEvent('pickup_time_slot_selected', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'selected_time_slot': timeSlot.label,
+      'selected_time_slot_id': timeSlot.id,
+      'pickup_date': pickupDate?.toDateString() || '',
+      'previous_time_slot': timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label || ''
+    });
+
     console.log("Selecting pickup time slot:", timeSlot);
     setSelectedPickupSlotId(timeSlot.id);
     
@@ -162,6 +204,18 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
   // Select delivery date (only when customizing)
   function handleDeliveryDateSelect(date: Date | null) {
+    const userInfo = getUserInfo();
+    
+    // Track delivery date selection
+    trackEvent('delivery_date_selected', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'selected_delivery_date': date?.toDateString() || '',
+      'previous_delivery_date': deliveryDate?.toDateString() || '',
+      'pickup_date': pickupDate?.toDateString() || ''
+    });
+
     setDeliveryDate(date);
     
     // Reset delivery time slot when changing date
@@ -176,6 +230,21 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
   // Select delivery time slot (only when customizing)
   function handleDeliveryTimeSlotSelect(timeSlot: TimeSlot) {
+    const userInfo = getUserInfo();
+    
+    // Track delivery time slot selection
+    trackEvent('delivery_time_slot_selected', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'selected_delivery_time_slot': timeSlot.label,
+      'selected_delivery_time_slot_id': timeSlot.id,
+      'delivery_date': deliveryDate?.toDateString() || '',
+      'pickup_date': pickupDate?.toDateString() || '',
+      'pickup_time_slot': timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label || '',
+      'previous_delivery_time_slot': timeSlots.find(slot => slot.id === selectedDeliverySlotId)?.label || ''
+    });
+
     console.log("Selecting delivery time slot:", timeSlot);
     setSelectedDeliverySlotId(timeSlot.id);
     
@@ -183,6 +252,24 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       deliverySlotId: timeSlot.id,
       deliverySlotLabel: timeSlot.label,
     });
+  }
+
+  // Handle change delivery schedule CTA click
+  function handleChangeDeliveryClick() {
+    const userInfo = getUserInfo();
+    
+    // Track change delivery schedule CTA click
+    trackEvent('change_delivery_schedule_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'current_delivery_date': deliveryDate?.toDateString() || '',
+      'current_delivery_time_slot': timeSlots.find(slot => slot.id === selectedDeliverySlotId)?.label || '',
+      'pickup_date': pickupDate?.toDateString() || '',
+      'pickup_time_slot': timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label || ''
+    });
+
+    setShowDeliveryCustomization(true);
   }
 
   // Continue to next step
@@ -371,7 +458,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => setShowDeliveryCustomization(true)}
+              onClick={handleChangeDeliveryClick}
               className="flex items-center gap-2"
             >
               <Edit3 className="h-4 w-4" />
