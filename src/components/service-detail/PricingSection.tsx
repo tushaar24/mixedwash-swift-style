@@ -12,9 +12,11 @@ import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 interface PricingSectionProps {
   service: any;
   serviceId: string | undefined;
+  onSchedulePickup: () => void;
+  onGetEstimate: () => void;
 }
 
-export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
+export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEstimate }: PricingSectionProps) => {
   const [activeTab, setActiveTab] = useState("men");
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showServiceChargeAlert, setShowServiceChargeAlert] = useState(true);
@@ -179,6 +181,7 @@ export const PricingSection = ({ service, serviceId }: PricingSectionProps) => {
           >
             <Button 
               className="mt-2 sm:mt-3 text-sm sm:text-base bg-black hover:bg-gray-800"
+              onClick={onGetEstimate}
             >
               Get an estimate
             </Button>
