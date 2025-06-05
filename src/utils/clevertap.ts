@@ -4,22 +4,26 @@ import clevertap from 'clevertap-web-sdk';
 // Initialize CleverTap with your project configuration
 export const initCleverTap = () => {
   try {
-    clevertap.init('589-KZZ-947', 'eu1');
+    // Use the correct Project ID from your dashboard: 589-KZZ-947Z
+    clevertap.init('589-KZZ-947Z', 'global');
     
     // Wait for CleverTap to be ready
     clevertap.onUserLogin.push({});
     
     console.log('=== CLEVERTAP INITIALIZATION ===');
     console.log('CleverTap initialized successfully');
+    console.log('Project ID: 589-KZZ-947Z');
+    console.log('Region: global');
     console.log('CleverTap object:', clevertap);
     
     // Test if CleverTap is working by sending a test event
     setTimeout(() => {
       clevertap.event.push('SDK_Test', {
         'Test': true,
-        'Timestamp': new Date().toISOString()
+        'Timestamp': new Date().toISOString(),
+        'Source': 'Web SDK'
       });
-      console.log('Test event sent to CleverTap');
+      console.log('Test event sent to CleverTap with correct credentials');
     }, 1000);
     
   } catch (error) {
