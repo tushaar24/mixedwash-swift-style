@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -26,10 +25,10 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
   const [submitting, setSubmitting] = useState(false);
   const { profile } = useAuth();
   
-  // Function to check and add phone number to tracking table
-  const trackPhoneNumber = async (phoneNumber: string) => {
+  // Function to add phone number to tracking table only if it doesn't exist
+  const addPhoneNumberIfNotExists = async (phoneNumber: string) => {
     try {
-      console.log("=== CHECKING PHONE NUMBER TRACKING ===");
+      console.log("=== CHECKING AND ADDING PHONE NUMBER IF NOT EXISTS ===");
       console.log("Phone number to check:", phoneNumber);
       
       // Check if phone number exists in the table
@@ -58,7 +57,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
           console.log("Phone number successfully added to tracking table");
         }
       } else {
-        console.log("Phone number already exists in tracking table");
+        console.log("Phone number already exists in tracking table, not adding");
       }
     } catch (error) {
       console.error("Error in phone number tracking:", error);
@@ -184,10 +183,10 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         console.log("=== ALL ORDERS CREATED SUCCESSFULLY ===");
         console.log(`${results.length} orders created`);
         
-        // Track phone number ONLY after orders are successfully placed
+        // Add phone number to tracking table ONLY after successful order placement
         if (profile?.mobile_number) {
-          console.log("=== TRACKING PHONE NUMBER AFTER SUCCESSFUL ORDER ===");
-          await trackPhoneNumber(profile.mobile_number);
+          console.log("=== ADDING PHONE NUMBER AFTER SUCCESSFUL ORDER ===");
+          await addPhoneNumberIfNotExists(profile.mobile_number);
         }
         
         // Prepare user info for tracking
