@@ -38,7 +38,22 @@ export const useDiscountEligibility = () => {
           setIsEligibleForDiscount(false);
         } else {
           // Phone number not found, user is eligible for discounts
+          // Add the phone number to the table so they won't get discounts next time
           setIsEligibleForDiscount(true);
+          
+          try {
+            const { error: insertError } = await supabase
+              .from("phone_numbers")
+              .insert({ phone: profile.mobile_number });
+              
+            if (insertError) {
+              console.error("Error adding phone number to table:", insertError);
+            } else {
+              console.log("Phone number added to discount tracking table");
+            }
+          } catch (insertError) {
+            console.error("Error inserting phone number:", insertError);
+          }
         }
       } catch (error) {
         console.error("Error in discount eligibility check:", error);

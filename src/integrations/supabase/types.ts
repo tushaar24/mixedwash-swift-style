@@ -445,10 +445,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      delete_order_permanently: {
-        Args: { order_id_param: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
