@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -11,7 +10,7 @@ import { Testimonials } from "@/components/Testimonials";
 import { FAQ } from "@/components/FAQ";
 import { CallToAction } from "@/components/CallToAction";
 import { Footer } from "@/components/Footer";
-import { trackPageView } from "@/utils/clevertap";
+import { trackPageView, trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
 import { useScrollTracking } from "@/hooks/useScrollTracking";
 
@@ -22,13 +21,32 @@ const Index = () => {
   // Add scroll tracking for the home page
   useScrollTracking('Home Page');
   
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const getUserInfo = () => user ? {
+    user_id: user.id,
+    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
+    phone: profile?.mobile_number
+  } : undefined;
+
   useEffect(() => {
-    const userInfo = user ? {
-      user_id: user.id,
-      name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
-      phone: profile?.mobile_number
-    } : undefined;
+    const userInfo = getUserInfo();
     
+    // Track home page viewed with new format
+    trackEvent('home_page_viewed', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime()
+    });
+    
+    // Keep existing page view tracking
     trackPageView('Home Page', {}, userInfo);
   }, [user, profile]);
 

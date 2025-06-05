@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +8,15 @@ export const Hero = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+  
   const getUserInfo = () => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
@@ -16,6 +24,16 @@ export const Hero = () => {
   } : undefined;
   
   const handleScheduleClick = () => {
+    const userInfo = getUserInfo();
+    
+    // New event format
+    trackEvent('schedule_cta_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime()
+    });
+    
+    // Keep existing tracking for backward compatibility
     trackEvent('CTA Clicked', {
       'CTA Type': 'Schedule Pickup',
       'CTA Location': 'Hero Section',
@@ -30,6 +48,16 @@ export const Hero = () => {
   };
 
   const handleContactClick = () => {
+    const userInfo = getUserInfo();
+    
+    // New event format
+    trackEvent('contact_us_cta_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime()
+    });
+    
+    // Keep existing tracking for backward compatibility
     trackEvent('CTA Clicked', {
       'CTA Type': 'Contact Us',
       'CTA Location': 'Hero Section',

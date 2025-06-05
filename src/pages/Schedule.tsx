@@ -10,6 +10,7 @@ import { OrderConfirmation } from "@/components/schedule/OrderConfirmation";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { addDays, startOfToday } from "date-fns";
+import { trackEvent } from "@/utils/clevertap";
 
 // Steps in the scheduling flow
 enum ScheduleStep {
@@ -48,7 +49,7 @@ export interface ScheduleOrderData {
 }
 
 const Schedule = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, profile } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(ScheduleStep.SERVICE_SELECTION);
   
@@ -67,6 +68,61 @@ const Schedule = () => {
     dryCleaningItems: [],
   });
 
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const getUserInfo = () => user ? {
+    user_id: user.id,
+    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
+    phone: profile?.mobile_number
+  } : undefined;
+
+  // Track step views
+  useEffect(() => {
+    const userInfo = getUserInfo();
+    
+    switch (currentStep) {
+      case ScheduleStep.SERVICE_SELECTION:
+        trackEvent('select_service_screen_viewed', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': getCurrentTime()
+        });
+        break;
+      case ScheduleStep.ADDRESS_SELECTION:
+        trackEvent('add_address_screen_viewed', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': getCurrentTime()
+        });
+        break;
+      case ScheduleStep.TIME_SLOT_SELECTION:
+        trackEvent('slot_selection_viewed', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': getCurrentTime()
+        });
+        break;
+      case ScheduleStep.ORDER_CONFIRMATION:
+        trackEvent('confirm_order_viewed', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': getCurrentTime(),
+          'selected_services': orderData.services.map(s => s.name).join(', '),
+          'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
+          'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
+          'pickup and delivery address': orderData.addressId || 'Not selected'
+        });
+        break;
+    }
+  }, [currentStep, user, profile, orderData]);
+
   // Check if user is logged in
   useEffect(() => {
     if (!isLoading && !user) {
@@ -83,6 +139,30 @@ const Schedule = () => {
     // Log the current state before moving to the next step
     console.log("Current step:", currentStep);
     console.log("Order data before next step:", orderData);
+    
+    const userInfo = getUserInfo();
+    
+    // Track step-specific events before validation
+    if (currentStep === ScheduleStep.SERVICE_SELECTION) {
+      trackEvent('select_service_screen_continue_to_address_clicked', {
+        'customer name': userInfo?.name || 'Anonymous',
+        'customer id': userInfo?.user_id || 'Anonymous',
+        'current_time': getCurrentTime(),
+        'services_selected': orderData.services.map(s => s.name).join(', ')
+      });
+    }
+    
+    if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
+      trackEvent('slot_selection_continue_to_confirm_clicked', {
+        'customer name': userInfo?.name || 'Anonymous',
+        'customer id': userInfo?.user_id || 'Anonymous',
+        'current_time': getCurrentTime(),
+        'date': orderData.pickupDate?.toDateString() || '',
+        'time_slot': orderData.pickupSlotLabel || '',
+        'delivery_date': orderData.deliveryDate?.toDateString() || '',
+        'delivery_time_slot': orderData.deliverySlotLabel || ''
+      });
+    }
     
     // Validate current step data before proceeding
     if (currentStep === ScheduleStep.SERVICE_SELECTION && orderData.services.length === 0) {
@@ -123,6 +203,30 @@ const Schedule = () => {
 
   // Handle previous step transitions
   const handlePrevStep = () => {
+    const userInfo = getUserInfo();
+    
+    // Track back button events
+    if (currentStep === ScheduleStep.ADDRESS_SELECTION) {
+      trackEvent('add_address_screen_back_to_services_clicked', {
+        'customer name': userInfo?.name || 'Anonymous',
+        'customer id': userInfo?.user_id || 'Anonymous',
+        'current_time': getCurrentTime(),
+        'type': 'manual' // This would need to be dynamic based on address type
+      });
+    }
+    
+    if (currentStep === ScheduleStep.ORDER_CONFIRMATION) {
+      trackEvent('confirm_order_back_to_schedule_clicked', {
+        'customer name': userInfo?.name || 'Anonymous',
+        'customer id': userInfo?.user_id || 'Anonymous',
+        'current_time': getCurrentTime(),
+        'selected_services': orderData.services.map(s => s.name).join(', '),
+        'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
+        'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
+        'pickup and delivery address': orderData.addressId || 'Not selected'
+      });
+    }
+    
     setCurrentStep((prev) => prev - 1);
     window.scrollTo(0, 0);
   };

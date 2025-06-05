@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -7,21 +8,49 @@ import { ServiceSwitcher } from "@/components/service-detail/ServiceSwitcher";
 import { PricingSection } from "@/components/service-detail/PricingSection";
 import { AboutService } from "@/components/service-detail/AboutService";
 import { SchedulePickupFooter } from "@/components/service-detail/SchedulePickupFooter";
+import { trackEvent } from "@/utils/clevertap";
+import { useAuth } from "@/context/AuthContext";
 
 const ServiceDetail = () => {
   const { serviceId } = useParams();
   const navigate = useNavigate();
   const [service, setService] = useState<any>(null);
+  const { user, profile } = useAuth();
+  
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const getUserInfo = () => user ? {
+    user_id: user.id,
+    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
+    phone: profile?.mobile_number
+  } : undefined;
   
   useEffect(() => {
     // Find the service data based on the serviceId
     if (serviceId && serviceId in servicesData) {
-      setService(servicesData[serviceId as keyof typeof servicesData]);
+      const foundService = servicesData[serviceId as keyof typeof servicesData];
+      setService(foundService);
+      
+      // Track service detail screen viewed
+      const userInfo = getUserInfo();
+      trackEvent('service_detail_screen_viewed', {
+        'customer name': userInfo?.name || 'Anonymous',
+        'customer id': userInfo?.user_id || 'Anonymous',
+        'current_time': getCurrentTime(),
+        'service_type': foundService.name
+      });
     } else {
       // Redirect to services if the service is not found
       navigate("/");
     }
-  }, [serviceId, navigate]);
+  }, [serviceId, navigate, user, profile]);
   
   if (!service) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;

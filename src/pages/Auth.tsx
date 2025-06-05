@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { trackEvent } from "@/utils/clevertap";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -15,6 +15,22 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { user, isLoading, isProfileComplete } = useAuth();
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  useEffect(() => {
+    // Track auth page viewed
+    trackEvent('auth_page_viewed', {
+      'current_time': getCurrentTime()
+    });
+  }, []);
 
   useEffect(() => {
     // Don't redirect while auth context is still loading
@@ -45,6 +61,12 @@ const Auth = () => {
       
       if (error) throw error;
       
+      // Track user login with Google
+      trackEvent('user_logged_in', {
+        'provider': 'google',
+        'current_time': getCurrentTime()
+      });
+      
       // The redirect will happen automatically
     } catch (error: any) {
       toast({
@@ -65,6 +87,12 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) throw error;
+      
+      // Track user login with email
+      trackEvent('user_logged_in', {
+        'provider': 'email',
+        'current_time': getCurrentTime()
+      });
       
       toast({
         title: "Success!",
