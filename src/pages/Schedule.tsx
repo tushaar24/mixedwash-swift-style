@@ -86,45 +86,55 @@ const Schedule = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Track step views - always track, including when coming from CTA
+  // Track step views - delay slightly when coming from CTA to ensure proper order
   useEffect(() => {
     const userInfo = getUserInfo();
     
-    switch (currentStep) {
-      case ScheduleStep.SERVICE_SELECTION:
-        trackEvent('select_service_screen_viewed', {
-          'customer name': userInfo?.name || 'Anonymous',
-          'customer id': userInfo?.user_id || 'Anonymous',
-          'current_time': getCurrentTime()
-        });
-        break;
-      case ScheduleStep.ADDRESS_SELECTION:
-        trackEvent('add_address_screen_viewed', {
-          'customer name': userInfo?.name || 'Anonymous',
-          'customer id': userInfo?.user_id || 'Anonymous',
-          'current_time': getCurrentTime()
-        });
-        break;
-      case ScheduleStep.TIME_SLOT_SELECTION:
-        trackEvent('slot_selection_viewed', {
-          'customer name': userInfo?.name || 'Anonymous',
-          'customer id': userInfo?.user_id || 'Anonymous',
-          'current_time': getCurrentTime()
-        });
-        break;
-      case ScheduleStep.ORDER_CONFIRMATION:
-        trackEvent('confirm_order_viewed', {
-          'customer name': userInfo?.name || 'Anonymous',
-          'customer id': userInfo?.user_id || 'Anonymous',
-          'current_time': getCurrentTime(),
-          'selected_services': orderData.services.map(s => s.name).join(', '),
-          'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
-          'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
-          'pickup and delivery address': orderData.addressId || 'Not selected'
-        });
-        break;
+    const trackStepView = () => {
+      switch (currentStep) {
+        case ScheduleStep.SERVICE_SELECTION:
+          trackEvent('select_service_screen_viewed', {
+            'customer name': userInfo?.name || 'Anonymous',
+            'customer id': userInfo?.user_id || 'Anonymous',
+            'current_time': getCurrentTime()
+          });
+          break;
+        case ScheduleStep.ADDRESS_SELECTION:
+          trackEvent('add_address_screen_viewed', {
+            'customer name': userInfo?.name || 'Anonymous',
+            'customer id': userInfo?.user_id || 'Anonymous',
+            'current_time': getCurrentTime()
+          });
+          break;
+        case ScheduleStep.TIME_SLOT_SELECTION:
+          trackEvent('slot_selection_viewed', {
+            'customer name': userInfo?.name || 'Anonymous',
+            'customer id': userInfo?.user_id || 'Anonymous',
+            'current_time': getCurrentTime()
+          });
+          break;
+        case ScheduleStep.ORDER_CONFIRMATION:
+          trackEvent('confirm_order_viewed', {
+            'customer name': userInfo?.name || 'Anonymous',
+            'customer id': userInfo?.user_id || 'Anonymous',
+            'current_time': getCurrentTime(),
+            'selected_services': orderData.services.map(s => s.name).join(', '),
+            'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
+            'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
+            'pickup and delivery address': orderData.addressId || 'Not selected'
+          });
+          break;
+      }
+    };
+
+    // If coming from CTA and on service selection step, delay to ensure CTA click event fires first
+    if (fromCTA && currentStep === ScheduleStep.SERVICE_SELECTION) {
+      const timer = setTimeout(trackStepView, 100);
+      return () => clearTimeout(timer);
+    } else {
+      trackStepView();
     }
-  }, [currentStep, user, profile, orderData]);
+  }, [currentStep, user, profile, orderData, fromCTA]);
 
   // Check if user is logged in
   useEffect(() => {
