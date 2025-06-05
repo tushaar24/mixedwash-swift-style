@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -141,6 +142,44 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         
         console.log("=== ALL ORDERS CREATED SUCCESSFULLY ===");
         console.log(`${results.length} orders created`);
+        
+        // Get user profile to check phone number
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("mobile_number")
+          .eq("id", authData.user.id)
+          .single();
+        
+        // Add phone number to phone_numbers table if user has a mobile number and order was successful
+        if (profileData?.mobile_number) {
+          console.log("=== CHECKING PHONE NUMBER IN PHONE_NUMBERS TABLE ===");
+          
+          // Check if phone number already exists
+          const { data: existingPhone, error: phoneCheckError } = await supabase
+            .from("phone_numbers")
+            .select("phone")
+            .eq("phone", profileData.mobile_number)
+            .maybeSingle();
+          
+          if (phoneCheckError) {
+            console.error("Error checking existing phone number:", phoneCheckError);
+          } else if (!existingPhone) {
+            // Phone number doesn't exist, add it
+            console.log("Adding phone number to phone_numbers table:", profileData.mobile_number);
+            
+            const { error: insertPhoneError } = await supabase
+              .from("phone_numbers")
+              .insert({ phone: profileData.mobile_number });
+            
+            if (insertPhoneError) {
+              console.error("Error adding phone number to table:", insertPhoneError);
+            } else {
+              console.log("Phone number successfully added to phone_numbers table");
+            }
+          } else {
+            console.log("Phone number already exists in phone_numbers table");
+          }
+        }
         
         // Prepare user info for tracking
         const userInfo = {
