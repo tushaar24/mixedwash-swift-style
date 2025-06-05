@@ -13,6 +13,13 @@ interface OrderConfirmationProps {
   onComplete: () => void;
 }
 
+// Declare dataLayer for GTM
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
+
 export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfirmationProps) => {
   const [submitting, setSubmitting] = useState(false);
   
@@ -184,6 +191,28 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         }
         
         console.log("=== ORDER PLACEMENT COMPLETE ===");
+        
+        // Track conversion for Google Tag Manager (only first time)
+        const hasConverted = localStorage.getItem('hasConverted');
+        if (!hasConverted) {
+          console.log("=== TRACKING FIRST CONVERSION ===");
+          
+          // Push event to dataLayer for GTM
+          if (typeof window !== 'undefined' && window.dataLayer) {
+            window.dataLayer.push({
+              event: 'first_conversion',
+              order_count: orderData.services.length,
+              services: orderData.services.map(service => service.name)
+            });
+            console.log("GTM first_conversion event pushed to dataLayer");
+          }
+          
+          // Set flag in localStorage
+          localStorage.setItem('hasConverted', 'true');
+          console.log("hasConverted flag set in localStorage");
+        } else {
+          console.log("User has already converted before, skipping GTM tracking");
+        }
         
         toast({
           title: "Orders placed successfully!",
