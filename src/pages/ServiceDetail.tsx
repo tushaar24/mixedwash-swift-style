@@ -12,10 +12,12 @@ import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
 
 const ServiceDetail = () => {
-  const { serviceId } = useParams();
+  const { serviceSlug } = useParams();
   const navigate = useNavigate();
   const [service, setService] = useState<any>(null);
   const { user, profile } = useAuth();
+  
+  console.log('ServiceDetail component mounted with serviceSlug:', serviceSlug);
   
   const getCurrentTime = () => {
     const now = new Date();
@@ -39,7 +41,7 @@ const ServiceDetail = () => {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
       'current_time': getCurrentTime(),
-      'service_type': service?.name || serviceId
+      'service_type': service?.name || serviceSlug
     });
     
     if (!user) {
@@ -56,16 +58,20 @@ const ServiceDetail = () => {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
       'current_time': getCurrentTime(),
-      'service_type': service?.name || serviceId
+      'service_type': service?.name || serviceSlug
     });
     
     // Add logic for get estimate action here
   };
   
   useEffect(() => {
-    // Find the service data based on the serviceId
-    if (serviceId && serviceId in servicesData) {
-      const foundService = servicesData[serviceId as keyof typeof servicesData];
+    console.log('ServiceDetail useEffect triggered with serviceSlug:', serviceSlug);
+    console.log('Available services:', Object.keys(servicesData));
+    
+    // Find the service data based on the serviceSlug
+    if (serviceSlug && serviceSlug in servicesData) {
+      const foundService = servicesData[serviceSlug as keyof typeof servicesData];
+      console.log('Found service:', foundService);
       setService(foundService);
       
       // Track service detail screen viewed - only once when service is found
@@ -77,10 +83,11 @@ const ServiceDetail = () => {
         'service_type': foundService.name
       });
     } else {
+      console.log('Service not found, redirecting to home');
       // Redirect to services if the service is not found
       navigate("/");
     }
-  }, [serviceId, navigate]); // Removed user and profile from dependencies to prevent re-tracking
+  }, [serviceSlug, navigate]); // Removed user and profile from dependencies to prevent re-tracking
   
   if (!service) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -88,7 +95,7 @@ const ServiceDetail = () => {
 
   // Get other services for the service switcher
   const otherServices = Object.entries(servicesData)
-    .filter(([id]) => id !== serviceId)
+    .filter(([id]) => id !== serviceSlug)
     .map(([id, serviceData]: [string, any]) => ({
       id,
       name: serviceData.name,
@@ -111,7 +118,7 @@ const ServiceDetail = () => {
           {/* Pricing Section Component */}
           <PricingSection 
             service={service} 
-            serviceId={serviceId} 
+            serviceId={serviceSlug} 
             onSchedulePickup={handleSchedulePickupClick}
             onGetEstimate={handleGetEstimateClick}
           />
