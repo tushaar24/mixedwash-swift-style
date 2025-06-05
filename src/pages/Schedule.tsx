@@ -86,20 +86,17 @@ const Schedule = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Track step views - only track service selection if NOT from CTA
+  // Track step views - always track, including when coming from CTA
   useEffect(() => {
     const userInfo = getUserInfo();
     
     switch (currentStep) {
       case ScheduleStep.SERVICE_SELECTION:
-        // Only track page view if user didn't come from CTA click
-        if (!fromCTA) {
-          trackEvent('select_service_screen_viewed', {
-            'customer name': userInfo?.name || 'Anonymous',
-            'customer id': userInfo?.user_id || 'Anonymous',
-            'current_time': getCurrentTime()
-          });
-        }
+        trackEvent('select_service_screen_viewed', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': getCurrentTime()
+        });
         break;
       case ScheduleStep.ADDRESS_SELECTION:
         trackEvent('add_address_screen_viewed', {
@@ -127,7 +124,7 @@ const Schedule = () => {
         });
         break;
     }
-  }, [currentStep, user, profile, orderData, fromCTA]);
+  }, [currentStep, user, profile, orderData]);
 
   // Check if user is logged in
   useEffect(() => {
