@@ -26,13 +26,6 @@ const Auth = () => {
   };
 
   useEffect(() => {
-    // Track auth page viewed when component mounts
-    trackEvent('auth_page_viewed', {
-      'current_time': getCurrentTime()
-    });
-  }, []); // Empty dependency array ensures it runs only once
-
-  useEffect(() => {
     // Don't redirect while auth context is still loading
     if (isLoading) return;
     
