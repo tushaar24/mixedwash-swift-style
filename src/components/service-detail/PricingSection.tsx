@@ -23,9 +23,9 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
 
   // Auto-hide service charge alert after 1 second - only if service has a charge and alert is showing
   useEffect(() => {
-    console.log('PricingSection useEffect triggered:', { serviceCharge: service.serviceCharge, showServiceChargeAlert });
+    console.log('PricingSection useEffect triggered:', { serviceCharge: service?.serviceCharge, showServiceChargeAlert });
     
-    if (service.serviceCharge && showServiceChargeAlert) {
+    if (service?.serviceCharge && showServiceChargeAlert) {
       console.log('Starting service charge alert timer for 1 second');
       const timer = setTimeout(() => {
         console.log('Auto-dismissing service charge alert');
@@ -37,7 +37,12 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
         clearTimeout(timer);
       };
     }
-  }, [service.serviceCharge, showServiceChargeAlert]);
+  }, [service?.serviceCharge, showServiceChargeAlert]);
+
+  // Early return if service data is not available
+  if (!service || !service.prices) {
+    return <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">Loading pricing information...</div>;
+  }
   
   return (
     <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">
@@ -77,7 +82,7 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {service.prices[0].items.map((item: any, itemIndex: number) => (
+                      {(service.prices[0]?.items || []).map((item: any, itemIndex: number) => (
                         <TableRow key={itemIndex} className="border-t border-gray-200 hover:bg-gray-50">
                           <TableCell className="text-left py-2 hover:text-gray-900">{item.name}</TableCell>
                           <TableCell className="text-right py-2 font-medium hover:text-gray-900">{item.price}</TableCell>
@@ -102,7 +107,7 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {service.prices[1].items.map((item: any, itemIndex: number) => (
+                      {(service.prices[1]?.items || []).map((item: any, itemIndex: number) => (
                         <TableRow key={itemIndex} className="border-t border-gray-200 hover:bg-gray-50">
                           <TableCell className="text-left py-2 hover:text-gray-900">{item.name}</TableCell>
                           <TableCell className="text-right py-2 font-medium hover:text-gray-900">{item.price}</TableCell>
