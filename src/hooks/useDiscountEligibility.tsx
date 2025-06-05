@@ -10,8 +10,15 @@ export const useDiscountEligibility = () => {
 
   useEffect(() => {
     const checkDiscountEligibility = async () => {
-      // If user is not logged in, don't show discounts
-      if (!user || !profile?.mobile_number) {
+      // If user is not logged in, show discounts
+      if (!user) {
+        setIsEligibleForDiscount(true);
+        setLoading(false);
+        return;
+      }
+
+      // If user is logged in but doesn't have mobile number, don't show discounts
+      if (!profile?.mobile_number) {
         setIsEligibleForDiscount(false);
         setLoading(false);
         return;
