@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
@@ -56,6 +56,9 @@ const Schedule = () => {
   // Check if user came from CTA click
   const fromCTA = location.state?.fromCTA;
   
+  // Track previous step to only fire events on actual step transitions
+  const prevStepRef = useRef<ScheduleStep | null>(null);
+  
   // Initialize with today's date as default pickup date
   const today = startOfToday();
   const [orderData, setOrderData] = useState<ScheduleOrderData>({
@@ -86,55 +89,64 @@ const Schedule = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Track step views - delay when coming from CTA to ensure CTA click event fires first
+  // Track step views only on actual step transitions
   useEffect(() => {
-    const userInfo = getUserInfo();
-    
-    const trackStepView = () => {
-      switch (currentStep) {
-        case ScheduleStep.SERVICE_SELECTION:
-          trackEvent('select_service_screen_viewed', {
-            'customer name': userInfo?.name || 'Anonymous',
-            'customer id': userInfo?.user_id || 'Anonymous',
-            'current_time': getCurrentTime()
-          });
-          break;
-        case ScheduleStep.ADDRESS_SELECTION:
-          trackEvent('add_address_screen_viewed', {
-            'customer name': userInfo?.name || 'Anonymous',
-            'customer id': userInfo?.user_id || 'Anonymous',
-            'current_time': getCurrentTime()
-          });
-          break;
-        case ScheduleStep.TIME_SLOT_SELECTION:
-          trackEvent('slot_selection_viewed', {
-            'customer name': userInfo?.name || 'Anonymous',
-            'customer id': userInfo?.user_id || 'Anonymous',
-            'current_time': getCurrentTime()
-          });
-          break;
-        case ScheduleStep.ORDER_CONFIRMATION:
-          trackEvent('confirm_order_viewed', {
-            'customer name': userInfo?.name || 'Anonymous',
-            'customer id': userInfo?.user_id || 'Anonymous',
-            'current_time': getCurrentTime(),
-            'selected_services': orderData.services.map(s => s.name).join(', '),
-            'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
-            'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
-            'pickup and delivery address': orderData.addressId || 'Not selected'
-          });
-          break;
-      }
-    };
+    // Only fire "viewed" events when there's an actual step change
+    // or on the very first load (when prevStepRef.current is null)
+    if (prevStepRef.current !== currentStep) {
+      const userInfo = getUserInfo();
+      
+      const trackStepView = () => {
+        switch (currentStep) {
+          case ScheduleStep.SERVICE_SELECTION:
+            trackEvent('select_service_screen_viewed', {
+              'customer name': userInfo?.name || 'Anonymous',
+              'customer id': userInfo?.user_id || 'Anonymous',
+              'current_time': getCurrentTime()
+            });
+            break;
+          case ScheduleStep.ADDRESS_SELECTION:
+            trackEvent('add_address_screen_viewed', {
+              'customer name': userInfo?.name || 'Anonymous',
+              'customer id': userInfo?.user_id || 'Anonymous',
+              'current_time': getCurrentTime()
+            });
+            break;
+          case ScheduleStep.TIME_SLOT_SELECTION:
+            trackEvent('slot_selection_viewed', {
+              'customer name': userInfo?.name || 'Anonymous',
+              'customer id': userInfo?.user_id || 'Anonymous',
+              'current_time': getCurrentTime()
+            });
+            break;
+          case ScheduleStep.ORDER_CONFIRMATION:
+            trackEvent('confirm_order_viewed', {
+              'customer name': userInfo?.name || 'Anonymous',
+              'customer id': userInfo?.user_id || 'Anonymous',
+              'current_time': getCurrentTime(),
+              'selected_services': orderData.services.map(s => s.name).join(', '),
+              'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
+              'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
+              'pickup and delivery address': orderData.addressId || 'Not selected'
+            });
+            break;
+        }
+      };
 
-    // If coming from CTA and on service selection step, delay to ensure CTA click event fires first
-    if (fromCTA && currentStep === ScheduleStep.SERVICE_SELECTION) {
-      const timer = setTimeout(trackStepView, 500);
-      return () => clearTimeout(timer);
-    } else {
-      trackStepView();
+      // If coming from CTA and on service selection step (first load), 
+      // delay to ensure CTA click event fires first
+      if (fromCTA && currentStep === ScheduleStep.SERVICE_SELECTION && prevStepRef.current === null) {
+        const timer = setTimeout(trackStepView, 500);
+        // Update the ref after scheduling the event
+        prevStepRef.current = currentStep;
+        return () => clearTimeout(timer);
+      } else {
+        // For all other step transitions, fire immediately
+        trackStepView();
+        prevStepRef.current = currentStep;
+      }
     }
-  }, [currentStep, user, profile, fromCTA]);
+  }, [currentStep, user, profile, fromCTA, orderData.services, orderData.deliveryDate, orderData.pickupDate, orderData.deliverySlotLabel, orderData.pickupSlotLabel, orderData.addressId]);
 
   // Check if user is logged in
   useEffect(() => {
