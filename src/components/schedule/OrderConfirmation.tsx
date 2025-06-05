@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -130,12 +131,6 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
       
       console.log("User authenticated:", authData.user.id);
       
-      // Track phone number if user has one
-      if (profile?.mobile_number) {
-        console.log("=== TRACKING PHONE NUMBER ===");
-        await trackPhoneNumber(profile.mobile_number);
-      }
-      
       console.log("=== PREPARING ORDER DATA ===");
       console.log("Creating orders with data:", {
         userId: authData.user.id,
@@ -188,6 +183,12 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         
         console.log("=== ALL ORDERS CREATED SUCCESSFULLY ===");
         console.log(`${results.length} orders created`);
+        
+        // Track phone number ONLY after orders are successfully placed
+        if (profile?.mobile_number) {
+          console.log("=== TRACKING PHONE NUMBER AFTER SUCCESSFUL ORDER ===");
+          await trackPhoneNumber(profile.mobile_number);
+        }
         
         // Prepare user info for tracking
         const userInfo = {
