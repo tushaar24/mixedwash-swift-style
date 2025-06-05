@@ -21,9 +21,14 @@ export const setUserProfile = (profileData: {
   Identity?: string;
   [key: string]: any;
 }) => {
+  console.log('=== CLEVERTAP PROFILE SET ===');
+  console.log('Profile data being sent:', profileData);
+  
   clevertap.onUserLogin.push({
     Site: profileData
   });
+  
+  console.log('CleverTap profile set successfully');
 };
 
 // Get current user info for events
@@ -40,7 +45,14 @@ export const trackEvent = (eventName: string, eventData?: Record<string, any>, u
     ...(userInfo?.name && { customer_name: userInfo.name })
   };
   
+  console.log('=== CLEVERTAP EVENT ===');
+  console.log('Event name:', eventName);
+  console.log('Event payload:', eventPayload);
+  console.log('User info:', userInfo);
+  
   clevertap.event.push(eventName, eventPayload);
+  
+  console.log('CleverTap event sent successfully');
 };
 
 // Page view tracking with user info
@@ -52,7 +64,15 @@ export const trackPageView = (pageName: string, pageData?: Record<string, any>, 
     ...(userInfo?.name && { customer_name: userInfo.name })
   };
   
+  console.log('=== CLEVERTAP PAGE VIEW ===');
+  console.log('Page name:', pageName);
+  console.log('Page data:', pageData);
+  console.log('Event payload:', eventPayload);
+  console.log('User info:', userInfo);
+  
   clevertap.event.push('Page Viewed', eventPayload);
+  
+  console.log('CleverTap page view event sent successfully');
 };
 
 // E-commerce events with user info
@@ -71,7 +91,14 @@ export const trackOrderPlaced = (orderData: {
     ...(userInfo?.name && { customer_name: userInfo.name })
   };
   
+  console.log('=== CLEVERTAP ORDER PLACED ===');
+  console.log('Order data:', orderData);
+  console.log('Event payload:', eventPayload);
+  console.log('User info:', userInfo);
+  
   clevertap.event.push('Order Placed', eventPayload);
+  
+  console.log('CleverTap order placed event sent successfully');
 };
 
 export const trackServiceScheduled = (serviceData: {
@@ -91,7 +118,14 @@ export const trackServiceScheduled = (serviceData: {
     ...(userInfo?.name && { customer_name: userInfo.name })
   };
   
+  console.log('=== CLEVERTAP SERVICE SCHEDULED ===');
+  console.log('Service data:', serviceData);
+  console.log('Event payload:', eventPayload);
+  console.log('User info:', userInfo);
+  
   clevertap.event.push('Service Scheduled', eventPayload);
+  
+  console.log('CleverTap service scheduled event sent successfully');
 };
 
 export default clevertap;
