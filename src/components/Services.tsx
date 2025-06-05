@@ -7,11 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 import { useState, useEffect } from "react";
+import { trackEvent } from "@/utils/clevertap";
+import { useAuth } from "@/context/AuthContext";
 
 export const Services = () => {
   const navigate = useNavigate();
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showDiscountAlert, setShowDiscountAlert] = useState(true);
+  const { user, profile } = useAuth();
+  
+  const getUserInfo = () => user ? {
+    user_id: user.id,
+    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
+    phone: profile?.mobile_number
+  } : undefined;
   
   // Auto-hide discount alert after 1 second - only if user is eligible and alert is showing
   useEffect(() => {
@@ -83,8 +92,25 @@ export const Services = () => {
     }
   ];
 
-  const handleServiceClick = (route: string) => {
+  const handleServiceClick = (route: string, serviceName: string) => {
+    trackEvent('Service Clicked', {
+      'Service Name': serviceName,
+      'Service Route': route,
+      'Page Name': 'Home Page',
+      'Location': 'Services Section'
+    }, getUserInfo());
+    
     navigate(`/service/${route}`);
+  };
+
+  const handleScheduleClick = () => {
+    trackEvent('CTA Clicked', {
+      'CTA Type': 'Schedule Pickup',
+      'CTA Location': 'Services Section',
+      'Page Name': 'Home Page'
+    }, getUserInfo());
+    
+    navigate("/schedule");
   };
 
   return (
@@ -121,7 +147,7 @@ export const Services = () => {
             <Card 
               key={index} 
               className="border-none shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative cursor-pointer hover:scale-105 group"
-              onClick={() => handleServiceClick(service.route)}
+              onClick={() => handleServiceClick(service.route, service.title)}
             >
               {/* Delivery time badge - updated with dynamic time */}
               <Badge 
@@ -198,7 +224,7 @@ export const Services = () => {
         <div className="mt-12 text-center">
           <Button 
             className="bg-black hover:bg-gray-800 text-white group px-6 py-5 h-auto text-base"
-            onClick={() => navigate("/schedule")}
+            onClick={handleScheduleClick}
           >
             Schedule a Pickup
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />

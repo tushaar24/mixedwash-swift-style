@@ -3,18 +3,40 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { trackEvent } from "@/utils/clevertap";
 
 export const Hero = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  
+  const getUserInfo = () => user ? {
+    user_id: user.id,
+    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
+    phone: profile?.mobile_number
+  } : undefined;
   
   const handleScheduleClick = () => {
+    trackEvent('CTA Clicked', {
+      'CTA Type': 'Schedule Pickup',
+      'CTA Location': 'Hero Section',
+      'Page Name': 'Home Page'
+    }, getUserInfo());
+    
     if (!user) {
       navigate("/auth");
     } else {
-      // User is already logged in, navigate to scheduling page
       navigate("/schedule");
     }
+  };
+
+  const handleContactClick = () => {
+    trackEvent('CTA Clicked', {
+      'CTA Type': 'Contact Us',
+      'CTA Location': 'Hero Section',
+      'Page Name': 'Home Page'
+    }, getUserInfo());
+    
+    navigate("/contact");
   };
 
   return (
@@ -42,7 +64,7 @@ export const Hero = () => {
               <Button 
                 variant="outline" 
                 className="border-gray-300 hover:bg-gray-100 px-6 py-4 h-auto text-lg w-full sm:w-auto"
-                onClick={() => navigate("/contact")}
+                onClick={handleContactClick}
               >
                 <MessageSquare className="mr-2 h-5 w-5" />
                 Contact Us
@@ -50,7 +72,6 @@ export const Hero = () => {
             </div>
           </div>
           
-          {/* Image section - visible on all screen sizes */}
           <div className="flex justify-center items-center">
             <div className="bg-gray-100 rounded-xl overflow-hidden shadow-md w-full">
               <img 

@@ -3,16 +3,28 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { trackEvent } from "@/utils/clevertap";
 
 export const CallToAction = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  
+  const getUserInfo = () => user ? {
+    user_id: user.id,
+    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
+    phone: profile?.mobile_number
+  } : undefined;
   
   const handleScheduleClick = () => {
+    trackEvent('CTA Clicked', {
+      'CTA Type': 'Schedule Pickup',
+      'CTA Location': 'Call To Action Section',
+      'Page Name': 'Home Page'
+    }, getUserInfo());
+    
     if (!user) {
       navigate("/auth");
     } else {
-      // User is already logged in, navigate to scheduling page
       navigate("/schedule");
     }
   };
