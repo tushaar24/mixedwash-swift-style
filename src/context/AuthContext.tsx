@@ -92,21 +92,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(newSession?.user ?? null);
         
         if (newSession?.user) {
-          // Track user login in CleverTap
-          if (event === 'SIGNED_IN') {
-            const userName = newSession.user.user_metadata?.full_name || newSession.user.user_metadata?.name;
-            setUserProfile({
-              Identity: newSession.user.id,
-              Email: newSession.user.email,
-              Name: userName
-            });
-            trackEvent('User Logged In', {
-              'Login Method': newSession.user.app_metadata?.provider || 'email'
-            }, {
-              user_id: newSession.user.id,
-              name: userName
-            });
-          }
+          // Set user profile in CleverTap for any session (login or restoration)
+          const userName = newSession.user.user_metadata?.full_name || newSession.user.user_metadata?.name;
+          setUserProfile({
+            Identity: newSession.user.id,
+            Email: newSession.user.email,
+            Name: userName
+          });
           
           // Use setTimeout to avoid blocking the auth state change
           setTimeout(async () => {
