@@ -88,11 +88,20 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: window.location.origin
+        }
+      });
       
       if (error) throw error;
       
-      // Removed the email confirmation toast message
+      toast({
+        title: "Success!",
+        description: "Please check your email and click the link to verify your account.",
+      });
     } catch (error: any) {
       toast({
         title: "Error signing up",
