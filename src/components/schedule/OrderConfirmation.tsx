@@ -14,6 +14,12 @@ declare global {
   }
 }
 
+interface OrderConfirmationProps {
+  orderData: ScheduleOrderData;
+  onBack: () => void;
+  onComplete: () => void;
+}
+
 export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfirmationProps) => {
   const [submitting, setSubmitting] = useState(false);
   
@@ -136,6 +142,12 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         console.log("=== ALL ORDERS CREATED SUCCESSFULLY ===");
         console.log(`${results.length} orders created`);
         
+        // Prepare user info for tracking
+        const userInfo = {
+          user_id: authData.user.id,
+          name: authData.user.user_metadata?.full_name || authData.user.user_metadata?.name
+        };
+        
         // Track order placement in CleverTap
         const totalAmount = orderData.dryCleaningItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         
@@ -149,7 +161,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
               pickupDate: format(orderData.pickupDate!, 'yyyy-MM-dd'),
               deliveryDate: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
               amount: service.price
-            });
+            }, userInfo);
           }
         });
         
@@ -160,7 +172,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
             amount: totalAmount,
             currency: 'INR',
             items: orderData.dryCleaningItems
-          });
+          }, userInfo);
         }
         
         // Save dry cleaning items if any

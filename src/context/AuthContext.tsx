@@ -94,13 +94,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (newSession?.user) {
           // Track user login in CleverTap
           if (event === 'SIGNED_IN') {
+            const userName = newSession.user.user_metadata?.full_name || newSession.user.user_metadata?.name;
             setUserProfile({
               Identity: newSession.user.id,
               Email: newSession.user.email,
-              Name: newSession.user.user_metadata?.full_name || newSession.user.user_metadata?.name
+              Name: userName
             });
             trackEvent('User Logged In', {
               'Login Method': newSession.user.app_metadata?.provider || 'email'
+            }, {
+              user_id: newSession.user.id,
+              name: userName
             });
           }
           
@@ -150,10 +154,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (session?.user) {
         // Set user profile in CleverTap for existing session
+        const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
         setUserProfile({
           Identity: session.user.id,
           Email: session.user.email,
-          Name: session.user.user_metadata?.full_name || session.user.user_metadata?.name
+          Name: userName
         });
         
         const profileData = await fetchProfile(session.user.id);

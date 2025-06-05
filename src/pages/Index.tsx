@@ -11,11 +11,19 @@ import { FAQ } from "@/components/FAQ";
 import { CallToAction } from "@/components/CallToAction";
 import { Footer } from "@/components/Footer";
 import { trackPageView } from "@/utils/clevertap";
+import { useAuth } from "@/context/AuthContext";
 
 const Index = () => {
+  const { user, profile } = useAuth();
+  
   useEffect(() => {
-    trackPageView('Home Page');
-  }, []);
+    const userInfo = user ? {
+      user_id: user.id,
+      name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username
+    } : undefined;
+    
+    trackPageView('Home Page', {}, userInfo);
+  }, [user, profile]);
 
   return (
     <div className="min-h-screen bg-white">
