@@ -102,6 +102,8 @@ export const Services = () => {
   ];
 
   const handleServiceClick = (route: string, serviceName: string) => {
+    console.log('Service card clicked:', { route, serviceName });
+    
     const userInfo = getUserInfo();
     
     trackEvent('quick_services_cta_clicked', {
@@ -111,6 +113,7 @@ export const Services = () => {
       'service_type': serviceName
     });
     
+    console.log('Navigating to service detail:', `/service/${route}`);
     navigate(`/service/${route}`);
   };
 
@@ -163,7 +166,10 @@ export const Services = () => {
             <Card 
               key={index} 
               className="border-none shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative cursor-pointer hover:scale-105 group"
-              onClick={() => handleServiceClick(service.route, service.title)}
+              onClick={() => {
+                console.log('Card clicked for service:', service.title, 'with route:', service.route);
+                handleServiceClick(service.route, service.title);
+              }}
             >
               {/* Delivery time badge - updated with dynamic time */}
               <Badge 
