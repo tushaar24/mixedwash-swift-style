@@ -3,9 +3,9 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Info, Truck, X } from "lucide-react";
+import { Info, Truck } from "lucide-react";
 import { ServiceWeightEstimateDialog } from "@/components/ServiceWeightEstimateDialog";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 
 interface PricingSectionProps {
@@ -31,16 +31,9 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
       
       {/* Add service charge note for dry cleaning */}
       {service.serviceCharge && showServiceChargeAlert && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm flex items-start gap-2 relative pr-10">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm flex items-start gap-2">
           <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-          <p className="flex-1 pr-2">{service.serviceCharge}</p>
-          <button
-            onClick={() => setShowServiceChargeAlert(false)}
-            className="absolute right-2 top-2 bg-red-100 rounded-full p-1.5 transition-colors hover:bg-red-200"
-            aria-label="Dismiss service charge alert"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <p className="flex-1">{service.serviceCharge}</p>
         </div>
       )}
       
