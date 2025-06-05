@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +14,15 @@ export const Services = () => {
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showDiscountAlert, setShowDiscountAlert] = useState(true);
   const { user, profile } = useAuth();
+  
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
   
   const getUserInfo = () => user ? {
     user_id: user.id,
@@ -93,6 +101,17 @@ export const Services = () => {
   ];
 
   const handleServiceClick = (route: string, serviceName: string) => {
+    const userInfo = getUserInfo();
+    
+    // Track quick services CTA clicked with new format
+    trackEvent('quick_services_cta_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'service_type': serviceName
+    });
+    
+    // Keep existing tracking for backward compatibility
     trackEvent('Service Clicked', {
       'Service Name': serviceName,
       'Service Route': route,

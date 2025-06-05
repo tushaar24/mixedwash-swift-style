@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -39,7 +40,7 @@ const Index = () => {
   useEffect(() => {
     const userInfo = getUserInfo();
     
-    // Track home page viewed with new format
+    // Track home page viewed with new format - only once when component mounts
     trackEvent('home_page_viewed', {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
@@ -48,7 +49,7 @@ const Index = () => {
     
     // Keep existing page view tracking
     trackPageView('Home Page', {}, userInfo);
-  }, [user, profile]);
+  }, []); // Empty dependency array to run only once
 
   // Redirect to profile page if user is logged in but profile is incomplete
   useEffect(() => {

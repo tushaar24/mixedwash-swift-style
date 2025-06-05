@@ -31,6 +31,36 @@ const ServiceDetail = () => {
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
   } : undefined;
+
+  const handleSchedulePickupClick = () => {
+    const userInfo = getUserInfo();
+    
+    trackEvent('service_detail_screen_schedule_pickup_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'service_type': service?.name || serviceId
+    });
+    
+    if (!user) {
+      navigate("/auth");
+    } else {
+      navigate("/schedule");
+    }
+  };
+
+  const handleGetEstimateClick = () => {
+    const userInfo = getUserInfo();
+    
+    trackEvent('service_detail_screen_get_estimate_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'service_type': service?.name || serviceId
+    });
+    
+    // Add logic for get estimate action here
+  };
   
   useEffect(() => {
     // Find the service data based on the serviceId
@@ -38,7 +68,7 @@ const ServiceDetail = () => {
       const foundService = servicesData[serviceId as keyof typeof servicesData];
       setService(foundService);
       
-      // Track service detail screen viewed
+      // Track service detail screen viewed - only once when service is found
       const userInfo = getUserInfo();
       trackEvent('service_detail_screen_viewed', {
         'customer name': userInfo?.name || 'Anonymous',
@@ -50,7 +80,7 @@ const ServiceDetail = () => {
       // Redirect to services if the service is not found
       navigate("/");
     }
-  }, [serviceId, navigate, user, profile]);
+  }, [serviceId, navigate]); // Removed user and profile from dependencies to prevent re-tracking
   
   if (!service) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -79,7 +109,12 @@ const ServiceDetail = () => {
           <ServiceSwitcher otherServices={otherServices} />
           
           {/* Pricing Section Component */}
-          <PricingSection service={service} serviceId={serviceId} />
+          <PricingSection 
+            service={service} 
+            serviceId={serviceId} 
+            onSchedulePickup={handleSchedulePickupClick}
+            onGetEstimate={handleGetEstimateClick}
+          />
           
           {/* About Service Component */}
           <AboutService service={service} />
@@ -87,7 +122,7 @@ const ServiceDetail = () => {
       </main>
       
       {/* Sticky Schedule Pickup CTA */}
-      <SchedulePickupFooter />
+      <SchedulePickupFooter onSchedulePickup={handleSchedulePickupClick} />
     </div>
   );
 };
