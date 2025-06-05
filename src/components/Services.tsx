@@ -1,6 +1,5 @@
-
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BadgePercent, Clock, Truck, Info, X } from "lucide-react";
+import { ArrowRight, BadgePercent, Clock, Truck, Info, X, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Badge } from "@/components/ui/badge";
@@ -180,6 +179,21 @@ export const Services = () => {
                 <span className="text-xs">{service.deliveryTime} delivery</span>
               </Badge>
               
+              {/* Mobile-only clickable icon button */}
+              <div className="md:hidden absolute bottom-3 right-3 z-10">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-8 w-8 rounded-full bg-white border-gray-300 hover:bg-gray-50 shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleServiceClick(service.route, service.title);
+                  }}
+                >
+                  <ChevronRight className="h-4 w-4 text-gray-600" />
+                </Button>
+              </div>
+              
               <CardHeader className="pb-2">
                 <div className="text-5xl pb-4">
                   {typeof service.icon === 'string' ? service.icon : service.icon}
@@ -234,8 +248,8 @@ export const Services = () => {
                   </div>
                 )}
                 
-                {/* Arrow indicator with consistent positioning */}
-                <div className="mt-auto pt-4 flex justify-end">
+                {/* Arrow indicator with consistent positioning - hidden on mobile to avoid overlap with button */}
+                <div className="mt-auto pt-4 flex justify-end hidden md:block">
                   <ArrowRight className="h-5 w-5 text-black group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </CardContent>
