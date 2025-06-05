@@ -15,7 +15,7 @@ export const initCleverTap = () => {
         console.log('=== CLEVERTAP INITIALIZATION ===');
         console.log('CleverTap SDK loaded successfully');
         console.log('Project ID: 589-KZZ-947Z');
-        console.log('Region: global');
+        console.log('Region: eu1');
         console.log('CleverTap object:', window.clevertap);
         
         // Test if CleverTap is working by sending a test event
