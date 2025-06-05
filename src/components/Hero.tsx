@@ -27,16 +27,19 @@ export const Hero = () => {
   const handleScheduleClick = () => {
     const userInfo = getUserInfo();
     
+    // Track the CTA click event FIRST
     trackEvent('schedule_cta_clicked', {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
-      'current_time': getCurrentTime()
+      'current_time': getCurrentTime(),
+      'source': 'hero_section'
     });
     
+    // Then navigate with a flag to indicate this came from CTA
     if (!user) {
       navigate("/auth");
     } else {
-      navigate("/schedule");
+      navigate("/schedule", { state: { fromCTA: true } });
     }
   };
 

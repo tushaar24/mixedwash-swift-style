@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { ServiceSelection } from "@/components/schedule/ServiceSelection";
@@ -51,7 +50,11 @@ export interface ScheduleOrderData {
 const Schedule = () => {
   const { user, isLoading, profile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentStep, setCurrentStep] = useState(ScheduleStep.SERVICE_SELECTION);
+  
+  // Check if user came from CTA click
+  const fromCTA = location.state?.fromCTA;
   
   // Initialize with today's date as default pickup date
   const today = startOfToday();
@@ -83,17 +86,20 @@ const Schedule = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Track step views
+  // Track step views - only track service selection if NOT from CTA
   useEffect(() => {
     const userInfo = getUserInfo();
     
     switch (currentStep) {
       case ScheduleStep.SERVICE_SELECTION:
-        trackEvent('select_service_screen_viewed', {
-          'customer name': userInfo?.name || 'Anonymous',
-          'customer id': userInfo?.user_id || 'Anonymous',
-          'current_time': getCurrentTime()
-        });
+        // Only track page view if user didn't come from CTA click
+        if (!fromCTA) {
+          trackEvent('select_service_screen_viewed', {
+            'customer name': userInfo?.name || 'Anonymous',
+            'customer id': userInfo?.user_id || 'Anonymous',
+            'current_time': getCurrentTime()
+          });
+        }
         break;
       case ScheduleStep.ADDRESS_SELECTION:
         trackEvent('add_address_screen_viewed', {
@@ -121,7 +127,7 @@ const Schedule = () => {
         });
         break;
     }
-  }, [currentStep, user, profile, orderData]);
+  }, [currentStep, user, profile, orderData, fromCTA]);
 
   // Check if user is logged in
   useEffect(() => {

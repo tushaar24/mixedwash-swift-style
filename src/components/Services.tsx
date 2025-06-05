@@ -117,13 +117,16 @@ export const Services = () => {
   const handleScheduleClick = () => {
     const userInfo = getUserInfo();
     
+    // Track the CTA click event FIRST
     trackEvent('schedule_cta_clicked', {
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
-      'current_time': getCurrentTime()
+      'current_time': getCurrentTime(),
+      'source': 'services_section'
     });
     
-    navigate("/schedule");
+    // Then navigate with a flag to indicate this came from CTA
+    navigate("/schedule", { state: { fromCTA: true } });
   };
 
   return (
