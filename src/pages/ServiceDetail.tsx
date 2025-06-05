@@ -21,36 +21,36 @@ const ServiceDetail = () => {
   
   console.log('ServiceDetail component mounted with serviceSlug:', serviceSlug);
   
-  // SEO optimization based on service type
-  useEffect(() => {
-    if (serviceSlug && service) {
-      let seoData;
-      switch (serviceSlug) {
-        case 'wash-fold':
-          seoData = seoPages.services.washFold;
-          break;
-        case 'dry-cleaning':
-          seoData = seoPages.services.dryClean;
-          break;
-        case 'premium-wash':
-          seoData = seoPages.services.premiumWash;
-          break;
-        case 'steam-iron':
-          seoData = seoPages.services.steamIron;
-          break;
-        default:
-          seoData = {
-            title: `${service.name} Service - MixedWash Bangalore`,
-            description: `Professional ${service.name.toLowerCase()} service in Bangalore with next-day delivery. Book online now!`,
-            canonical: `https://mixedwash.in/service/${serviceSlug}`
-          };
-      }
-      // Update SEO data
-      if (seoData) {
-        useSEO(seoData);
-      }
+  // Determine SEO data based on service slug
+  const getSEOData = () => {
+    if (!serviceSlug) {
+      return {
+        title: "Service - MixedWash Bangalore",
+        description: "Professional laundry service in Bangalore with next-day delivery. Book online now!",
+        canonical: "https://mixedwash.in/"
+      };
     }
-  }, [serviceSlug, service]);
+
+    switch (serviceSlug) {
+      case 'wash-fold':
+        return seoPages.services.washFold;
+      case 'dry-cleaning':
+        return seoPages.services.dryClean;
+      case 'premium-wash':
+        return seoPages.services.premiumWash;
+      case 'steam-iron':
+        return seoPages.services.steamIron;
+      default:
+        return {
+          title: `${service?.name || 'Service'} - MixedWash Bangalore`,
+          description: `Professional ${service?.name?.toLowerCase() || 'laundry'} service in Bangalore with next-day delivery. Book online now!`,
+          canonical: `https://mixedwash.in/service/${serviceSlug}`
+        };
+    }
+  };
+
+  // Apply SEO - this hook is called at the top level
+  useSEO(getSEOData());
   
   const getCurrentTime = () => {
     const now = new Date();
