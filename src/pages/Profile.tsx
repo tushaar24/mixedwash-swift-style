@@ -92,19 +92,25 @@ const Profile = () => {
     });
   };
 
-  // Set initial name and phone values from the profile - improved initialization
+  // Initialize form fields when component mounts or user/profile changes
   useEffect(() => {
-    console.log("Profile data received:", profile);
+    console.log("Initializing form fields. User:", user?.id, "Profile:", profile, "IsProfileComplete:", isProfileComplete);
+    
     if (profile) {
+      // Profile exists, use profile data
       setName(profile.username || "");
       setPhone(profile.mobile_number || "");
     } else if (user) {
-      // If no profile but user exists, initialize with user metadata
+      // No profile but user exists, use user metadata or empty values
       const userDisplayName = user.user_metadata?.full_name || user.user_metadata?.name || "";
       setName(userDisplayName);
       setPhone("");
+    } else {
+      // No user, reset to empty
+      setName("");
+      setPhone("");
     }
-  }, [profile, user]);
+  }, [profile, user, isProfileComplete]);
 
   // Track complete_profile_viewed event for incomplete profiles
   useEffect(() => {
@@ -624,7 +630,15 @@ const Profile = () => {
 
   // Show first-time user form if profile is incomplete
   if (!isProfileComplete) {
-    console.log("Showing incomplete profile form. Current state:", { name, phone, profile, user });
+    console.log("Rendering incomplete profile form. State:", { 
+      name, 
+      phone, 
+      profile, 
+      user: user?.id,
+      isProfileComplete,
+      loading 
+    });
+    
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md mx-auto shadow-lg border-0">
@@ -664,6 +678,7 @@ const Profile = () => {
                   required
                   className="h-12 text-base"
                   placeholder="Enter your phone number"
+                  maxLength={10}
                 />
                 {phoneError && (
                   <p className="text-sm text-red-500">{phoneError}</p>
