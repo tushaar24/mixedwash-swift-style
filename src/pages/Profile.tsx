@@ -92,13 +92,19 @@ const Profile = () => {
     });
   };
 
-  // Set initial name and phone values from the profile
+  // Set initial name and phone values from the profile - improved initialization
   useEffect(() => {
+    console.log("Profile data received:", profile);
     if (profile) {
       setName(profile.username || "");
       setPhone(profile.mobile_number || "");
+    } else if (user) {
+      // If no profile but user exists, initialize with user metadata
+      const userDisplayName = user.user_metadata?.full_name || user.user_metadata?.name || "";
+      setName(userDisplayName);
+      setPhone("");
     }
-  }, [profile]);
+  }, [profile, user]);
 
   // Track complete_profile_viewed event for incomplete profiles
   useEffect(() => {
@@ -618,6 +624,7 @@ const Profile = () => {
 
   // Show first-time user form if profile is incomplete
   if (!isProfileComplete) {
+    console.log("Showing incomplete profile form. Current state:", { name, phone, profile, user });
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md mx-auto shadow-lg border-0">
@@ -658,11 +665,14 @@ const Profile = () => {
                   className="h-12 text-base"
                   placeholder="Enter your phone number"
                 />
+                {phoneError && (
+                  <p className="text-sm text-red-500">{phoneError}</p>
+                )}
               </div>
               <Button 
                 type="submit" 
                 className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium text-base rounded-lg"
-                disabled={loading}
+                disabled={loading || !!phoneError || phone.length !== 10}
               >
                 {loading ? (
                   <>
