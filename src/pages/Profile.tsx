@@ -94,27 +94,34 @@ const Profile = () => {
 
   // Initialize form fields when component mounts or user/profile changes
   useEffect(() => {
-    console.log("Initializing form fields. User:", user?.id, "Profile:", profile, "IsProfileComplete:", isProfileComplete);
+    console.log("=== PROFILE FORM INITIALIZATION ===");
+    console.log("User:", user?.id, "Profile:", profile, "IsProfileComplete:", isProfileComplete);
     
     if (profile) {
       // Profile exists, use profile data
+      console.log("Using profile data for form fields");
       setName(profile.username || "");
       setPhone(profile.mobile_number || "");
     } else if (user) {
       // No profile but user exists, use user metadata or empty values
+      console.log("Using user metadata for form fields");
       const userDisplayName = user.user_metadata?.full_name || user.user_metadata?.name || "";
       setName(userDisplayName);
       setPhone("");
     } else {
       // No user, reset to empty
+      console.log("Resetting form fields to empty");
       setName("");
       setPhone("");
     }
+    
+    console.log("Form fields set to:", { name: name, phone: phone });
   }, [profile, user, isProfileComplete]);
 
   // Track complete_profile_viewed event for incomplete profiles
   useEffect(() => {
     if (!isProfileComplete && user) {
+      console.log("Tracking complete_profile_viewed event");
       trackEvent('complete_profile_viewed', {
         'current_time': getCurrentTime()
       });
@@ -122,13 +129,18 @@ const Profile = () => {
   }, [isProfileComplete, user]);
 
   useEffect(() => {
+    console.log("=== PROFILE PAGE MAIN EFFECT ===");
+    console.log("User:", user?.id, "IsProfileComplete:", isProfileComplete);
+    
     if (!user) {
+      console.log("No user, redirecting to auth");
       navigate("/auth");
       return;
     }
 
     // Only fetch orders and addresses if profile is complete
     if (!isProfileComplete) {
+      console.log("Profile incomplete, skipping data fetch");
       setDataLoading(false);
       return;
     }
@@ -625,12 +637,14 @@ const Profile = () => {
   };
 
   if (!user) {
+    console.log("Rendering null - no user");
     return null;
   }
 
   // Show first-time user form if profile is incomplete
   if (!isProfileComplete) {
-    console.log("Rendering incomplete profile form. State:", { 
+    console.log("=== RENDERING INCOMPLETE PROFILE FORM ===");
+    console.log("State:", { 
       name, 
       phone, 
       profile, 
