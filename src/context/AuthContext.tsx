@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +48,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .single();
 
       if (error) {
+        // If profile doesn't exist, create one
+        if (error.code === 'PGRST116') {
+          console.log("Profile doesn't exist, creating new profile for user:", userId);
+          const { data: newProfile, error: createError } = await supabase
+            .from("profiles")
+            .insert([{ id: userId }])
+            .select()
+            .single();
+          
+          if (createError) {
+            console.error("Error creating profile:", createError);
+            return null;
+          }
+          
+          console.log("New profile created:", newProfile);
+          return newProfile as Profile;
+        }
+        
         console.error("Error fetching profile:", error);
         return null;
       }
