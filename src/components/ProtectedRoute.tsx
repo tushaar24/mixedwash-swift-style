@@ -16,6 +16,7 @@ export const ProtectedRoute = ({ children, requireCompleteProfile = true }: Prot
   console.log("user:", user?.id);
   console.log("isProfileComplete:", isProfileComplete);
   console.log("requireCompleteProfile:", requireCompleteProfile);
+  console.log("Current location:", window.location.pathname);
 
   if (isLoading) {
     console.log("ProtectedRoute: Showing loading spinner");
@@ -29,6 +30,12 @@ export const ProtectedRoute = ({ children, requireCompleteProfile = true }: Prot
   if (!user) {
     console.log("ProtectedRoute: No user, redirecting to /auth");
     return <Navigate to="/auth" replace />;
+  }
+
+  // If we're on the profile page, allow access even with incomplete profile
+  if (window.location.pathname === '/profile') {
+    console.log("ProtectedRoute: On profile page, allowing access regardless of profile completeness");
+    return <>{children}</>;
   }
 
   if (requireCompleteProfile && !isProfileComplete) {
