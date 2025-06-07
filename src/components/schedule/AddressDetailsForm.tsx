@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -6,13 +7,12 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AddressParser, type ParsedAddress, type ValidationResult } from "@/utils/addressParser";
-import { Address } from "@/types/models";
 
 interface AddressDetailsFormProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   initialAddress: string;
-  onAddressSaved: (address: Address) => void;
+  onAddressSaved: (address: any) => void;
 }
 
 export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAddressSaved }: AddressDetailsFormProps) => {
@@ -44,7 +44,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
       quality: 'approximate' as const,
       confidence: 0
     };
-    parsedData.confidence = AddressParser.calculateConfidence(parsedData);
+    parsedData.confidence = AddressParser['calculateConfidence'](parsedData);
     const validationResult = AddressParser.validate(parsedData);
     
     setValidation(validationResult);
@@ -103,7 +103,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
           description: `Address saved with ${confidence}% confidence`,
         });
 
-        onAddressSaved(data[0] as Address);
+        onAddressSaved(data[0]);
         onOpenChange(false);
         
         // Reset form
@@ -120,11 +120,10 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
         setValidation(null);
         setConfidence(0);
       }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    } catch (error: any) {
       toast({
         title: "Error saving address",
-        description: errorMessage,
+        description: error.message,
         variant: "destructive",
       });
     } finally {

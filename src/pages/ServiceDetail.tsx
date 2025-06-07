@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -11,12 +12,11 @@ import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
 import { useSEO } from "@/hooks/useSEO";
 import { seoPages } from "@/utils/seo";
-import { ServiceData, OtherService } from "@/types/models";
 
 const ServiceDetail = () => {
   const { serviceSlug } = useParams();
   const navigate = useNavigate();
-  const [service, setService] = useState<ServiceData | null>(null);
+  const [service, setService] = useState<any>(null);
   const { user, profile } = useAuth();
   
   console.log('ServiceDetail component mounted with serviceSlug:', serviceSlug);
@@ -127,9 +127,9 @@ const ServiceDetail = () => {
   }
 
   // Get other services for the service switcher
-  const otherServices: OtherService[] = Object.entries(servicesData)
+  const otherServices = Object.entries(servicesData)
     .filter(([id]) => id !== serviceSlug)
-    .map(([id, serviceData]: [string, ServiceData]) => ({
+    .map(([id, serviceData]: [string, any]) => ({
       id,
       name: serviceData.name,
       icon: serviceData.icon,

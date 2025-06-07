@@ -1,9 +1,9 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Info } from "lucide-react";
-import { ServiceData } from "@/types/models";
 
 interface AboutServiceProps {
-  service: ServiceData;
+  service: any;
 }
 
 export const AboutService = ({ service }: AboutServiceProps) => {

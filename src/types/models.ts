@@ -1,4 +1,3 @@
-
 export interface Profile {
   id: string;
   username?: string;
@@ -63,43 +62,4 @@ export interface Order {
   service?: Service;
   pickup_slot?: TimeSlot | any; // Allow for error cases
   delivery_slot?: TimeSlot | any; // Allow for error cases
-}
-
-// Service pricing types
-export interface ServicePrice {
-  title: string;
-  amount: string;
-  oldPrice: string;
-  details: string;
-  minimumOrder?: number;
-  items?: ServicePriceItem[];
-}
-
-export interface ServicePriceItem {
-  name: string;
-  price: number;
-}
-
-// Complete service data type
-export interface ServiceData {
-  name: string;
-  icon: React.ReactNode;
-  iconBg: string;
-  color: string;
-  themeColor: string;
-  description: string;
-  discount: number;
-  minimumOrder?: number | null;
-  deliveryTime: string;
-  serviceCharge?: string;
-  prices: ServicePrice[];
-}
-
-// Type for other services in the service switcher
-export interface OtherService {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  iconBg: string;
-  color: string;
 }
