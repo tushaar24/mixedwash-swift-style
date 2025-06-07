@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -7,12 +6,13 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AddressParser, type ParsedAddress, type ValidationResult } from "@/utils/addressParser";
+import { Address } from "@/types/models";
 
 interface AddressDetailsFormProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   initialAddress: string;
-  onAddressSaved: (address: any) => void;
+  onAddressSaved: (address: Address) => void;
 }
 
 export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAddressSaved }: AddressDetailsFormProps) => {
@@ -103,7 +103,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
           description: `Address saved with ${confidence}% confidence`,
         });
 
-        onAddressSaved(data[0]);
+        onAddressSaved(data[0] as Address);
         onOpenChange(false);
         
         // Reset form
@@ -120,10 +120,11 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
         setValidation(null);
         setConfidence(0);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       toast({
         title: "Error saving address",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
