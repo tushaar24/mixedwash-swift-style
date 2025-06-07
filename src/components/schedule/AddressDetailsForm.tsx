@@ -44,7 +44,7 @@ export const AddressDetailsForm = ({ isOpen, onOpenChange, initialAddress, onAdd
       quality: 'approximate' as const,
       confidence: 0
     };
-    parsedData.confidence = AddressParser['calculateConfidence'](parsedData);
+    parsedData.confidence = AddressParser.calculateConfidence(parsedData);
     const validationResult = AddressParser.validate(parsedData);
     
     setValidation(validationResult);
