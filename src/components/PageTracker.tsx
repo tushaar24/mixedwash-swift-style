@@ -29,8 +29,7 @@ export const PageTracker = ({ children, pageName }: PageTrackerProps) => {
     
     const userInfo = user ? {
       user_id: user.id,
-      name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
-      phone: profile?.mobile_number
+      name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username
     } : undefined;
     
     // Special handling for Homepage
@@ -39,7 +38,7 @@ export const PageTracker = ({ children, pageName }: PageTrackerProps) => {
         'URL': location.pathname,
         'Search': location.search,
         ...(userInfo?.user_id && { user_id: userInfo.user_id }),
-        ...(userInfo?.name && { customer_name: userInfo.name })
+        'customer_name': userInfo?.name || 'anonymous user'
       });
     } else {
       // Use regular page view tracking for other pages
