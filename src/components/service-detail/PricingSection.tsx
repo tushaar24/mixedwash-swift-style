@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,9 +8,10 @@ import { Info, Truck } from "lucide-react";
 import { ServiceWeightEstimateDialog } from "@/components/ServiceWeightEstimateDialog";
 import { useState } from "react";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
+import { ServiceData, ServicePriceItem } from "@/types/models";
 
 interface PricingSectionProps {
-  service: any;
+  service: ServiceData;
   serviceId: string | undefined;
   onSchedulePickup: () => void;
   onGetEstimate: () => void;
@@ -56,7 +58,7 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {(service.prices[0]?.items || []).map((item: any, itemIndex: number) => (
+                      {(service.prices[0]?.items || []).map((item: ServicePriceItem, itemIndex: number) => (
                         <TableRow key={itemIndex} className="border-t border-gray-200 hover:bg-gray-50">
                           <TableCell className="text-left py-2 hover:text-gray-900">{item.name}</TableCell>
                           <TableCell className="text-right py-2 font-medium hover:text-gray-900">{item.price}</TableCell>
@@ -81,7 +83,7 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {(service.prices[1]?.items || []).map((item: any, itemIndex: number) => (
+                      {(service.prices[1]?.items || []).map((item: ServicePriceItem, itemIndex: number) => (
                         <TableRow key={itemIndex} className="border-t border-gray-200 hover:bg-gray-50">
                           <TableCell className="text-left py-2 hover:text-gray-900">{item.name}</TableCell>
                           <TableCell className="text-right py-2 font-medium hover:text-gray-900">{item.price}</TableCell>
@@ -100,7 +102,7 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
           </Card>
         ) : (
           // Regular services pricing display
-          service.prices.map((price: any, index: number) => (
+          service.prices.map((price, index) => (
             <Card key={index} className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">

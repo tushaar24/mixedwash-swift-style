@@ -1,14 +1,15 @@
 
 import { Package, Shirt, WashingMachine, Weight } from "lucide-react";
+import { ServiceData } from "@/types/models";
 
 // Service data moved to its own file for better organization
-export const servicesData = {
+export const servicesData: Record<string, ServiceData> = {
   "wash-fold": {
     name: "Wash & Fold",
     icon: <WashingMachine className="h-8 w-8 text-white" />,
     iconBg: "bg-blue-600",
     color: "bg-blue-50",
-    themeColor: "#2563EB", // Added theme color
+    themeColor: "#2563EB",
     description: "For everyday laundry, bedsheets and towels.",
     discount: 20,
     minimumOrder: null,
@@ -28,7 +29,7 @@ export const servicesData = {
     icon: <Shirt className="h-8 w-8 text-white" />,
     iconBg: "bg-pink-500",
     color: "bg-pink-50",
-    themeColor: "#EC4899", // Added theme color
+    themeColor: "#EC4899",
     description: "Your outfits, wrinkle-free and crisp.",
     discount: 20,
     minimumOrder: null,
@@ -48,7 +49,7 @@ export const servicesData = {
     icon: <Package className="h-8 w-8 text-white" />,
     iconBg: "bg-teal-500",
     color: "bg-teal-50",
-    themeColor: "#14B8A6", // Added theme color
+    themeColor: "#14B8A6",
     description: "Big laundry loads handled with ease.",
     discount: 20,
     minimumOrder: null,
@@ -67,13 +68,12 @@ export const servicesData = {
     icon: <Weight className="h-8 w-8 text-white" />,
     iconBg: "bg-green-500",
     color: "bg-green-50",
-    themeColor: "#22C55E", // Added theme color
+    themeColor: "#22C55E",
     description: "Delicate care, speedy turnaround.",
     discount: 0,
     minimumOrder: null,
     deliveryTime: "24-48h",
     serviceCharge: "₹50 service fee on orders under ₹250",
-    // Updated with detailed price items for dry cleaning
     prices: [
       {
         title: "Men's Wear",
