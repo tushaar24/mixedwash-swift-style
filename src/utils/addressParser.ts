@@ -1,4 +1,3 @@
-
 export interface ParsedAddress {
   house_building: string;
   address_line1: string;
@@ -18,6 +17,19 @@ export interface ValidationResult {
   isCityValid: boolean;
   isStateValid: boolean;
   isPinValid: boolean;
+}
+
+interface GoogleAddressComponent {
+  long_name: string;
+  short_name: string;
+  types: string[];
+}
+
+interface GooglePlace {
+  formatted_address?: string;
+  address_components?: GoogleAddressComponent[];
+  name?: string;
+  types?: string[];
 }
 
 export class AddressParser {
@@ -104,6 +116,103 @@ export class AddressParser {
     result.confidence = this.calculateConfidence(result);
     
     console.log("Parsed result:", result);
+    return result;
+  }
+
+  static parseFromGoogleComponents(addressComponents: GoogleAddressComponent[]): ParsedAddress {
+    console.log("Parsing Google address components:", addressComponents);
+    
+    const result: ParsedAddress = {
+      house_building: "",
+      address_line1: "",
+      address_line2: "",
+      area: "",
+      city: "",
+      state: "",
+      postal_code: "",
+      quality: 'exact',
+      confidence: 0
+    };
+
+    // Parse each component based on its type
+    for (const component of addressComponents) {
+      const types = component.types;
+      const longName = component.long_name;
+      const shortName = component.short_name;
+
+      if (types.includes('street_number')) {
+        result.house_building = longName;
+      } else if (types.includes('route')) {
+        result.address_line1 = result.house_building 
+          ? `${result.house_building}, ${longName}` 
+          : longName;
+      } else if (types.includes('sublocality_level_2') || types.includes('sublocality_level_1')) {
+        if (!result.area) {
+          result.area = longName;
+        }
+      } else if (types.includes('locality')) {
+        result.city = longName;
+      } else if (types.includes('administrative_area_level_1')) {
+        result.state = longName;
+      } else if (types.includes('postal_code')) {
+        result.postal_code = longName;
+      } else if (types.includes('neighborhood') || types.includes('sublocality')) {
+        if (!result.area) {
+          result.area = longName;
+        }
+      }
+    }
+
+    // If address_line1 is empty, use area or any available location info
+    if (!result.address_line1 && result.area) {
+      result.address_line1 = result.area;
+      result.area = "";
+    }
+
+    result.confidence = this.calculateConfidence(result);
+    
+    console.log("Parsed Google components result:", result);
+    return result;
+  }
+
+  static enhanceAddressFromPlace(place: GooglePlace): ParsedAddress {
+    console.log("Enhancing address from Google place:", place);
+    
+    let result: ParsedAddress;
+    
+    // First try to parse from address components if available
+    if (place.address_components && place.address_components.length > 0) {
+      result = this.parseFromGoogleComponents(place.address_components);
+    } else {
+      // Fallback to parsing formatted address
+      const addressToParse = place.formatted_address || place.name || "";
+      result = this.parseFromFormattedAddress(addressToParse);
+    }
+
+    // Enhance with place name if it's more specific than what we found
+    if (place.name && place.types) {
+      const isEstablishment = place.types.includes('establishment') || 
+                             place.types.includes('point_of_interest') ||
+                             place.types.includes('store');
+      
+      if (isEstablishment && !result.address_line2) {
+        result.address_line2 = place.name;
+      } else if (isEstablishment && !result.address_line1.includes(place.name)) {
+        result.address_line1 = place.name;
+      }
+    }
+
+    // Update quality based on source
+    if (place.address_components && place.address_components.length > 0) {
+      result.quality = 'exact';
+    } else {
+      result.quality = 'approximate';
+    }
+
+    // Recalculate confidence after enhancement
+    result.confidence = this.calculateConfidence(result);
+    
+    console.log("Enhanced place result:", result);
     return result;
   }
 
