@@ -94,3 +94,12 @@ export interface ServiceData {
   serviceCharge?: string;
   prices: ServicePrice[];
 }
+
+// Type for other services in the service switcher
+export interface OtherService {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  iconBg: string;
+  color: string;
+}
