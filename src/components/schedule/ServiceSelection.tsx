@@ -186,24 +186,14 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
                       {!discountLoading && service.discount_price !== null && isEligibleForDiscount ? (
                         <div className="space-y-1">
                           <div className="flex items-center">
-                            <span className="font-bold text-green-700">
-                              {service.name.toLowerCase().includes('dry cleaning')
-                                ? `From ₹${service.discount_price}`
-                                : `₹${service.discount_price}/kg`
-                              }
-                            </span>
+                            <span className="font-bold text-green-700">₹{service.discount_price}/kg</span>
                             <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium ml-2 flex items-center">
                               <BadgePercent className="h-3 w-3 mr-1" />
                               Save {Math.round((1 - service.discount_price / service.price) * 100)}%
                             </span>
                           </div>
                           <div className="text-sm text-gray-500">
-                            <span className="line-through">
-                              {service.name.toLowerCase().includes('dry cleaning')
-                                ? `From ₹${service.price}`
-                                : `₹${service.price}/kg`
-                              }
-                            </span>
+                            <span className="line-through">₹{service.price}/kg</span>
                             <span className="ml-1 text-xs">regular price</span>
                           </div>
                         </div>
