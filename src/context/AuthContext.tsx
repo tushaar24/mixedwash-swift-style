@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -129,7 +130,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     // Only attempt migration if profile is complete
     if (isComplete && profileData?.mobile_number) {
-      console.log("🔄 Profile is complete, checking for temp customer migration...");
+      console.log("🔄 Profile is complete, attempting temp customer migration...");
       console.log("📞 Using phone number for migration:", profileData.mobile_number);
       
       const migrationSuccess = await migrateTempCustomerData(
@@ -193,11 +194,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             Name: userName
           });
           
-          // Use setTimeout to avoid blocking the auth state change
+          // Use setTimeout to avoid blocking the auth state change and ensure migration runs
           setTimeout(async () => {
+            console.log("🚀 About to call handleProfileAndMigration for user:", newSession.user.id);
             await handleProfileAndMigration(newSession.user.id);
             setIsLoading(false);
-          }, 0);
+          }, 100); // Small delay to ensure everything is set up
         } else {
           // Clear profile when signed out
           setProfile(null);
@@ -228,6 +230,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           Name: userName
         });
         
+        console.log("🚀 About to call handleProfileAndMigration for existing session user:", session.user.id);
         await handleProfileAndMigration(session.user.id);
       }
       
