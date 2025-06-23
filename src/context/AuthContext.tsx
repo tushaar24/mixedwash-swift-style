@@ -41,7 +41,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const migrateTempCustomerData = async (userId: string, userPhone: string) => {
     try {
-      console.log("Attempting to migrate temp customer data for phone:", userPhone);
+      console.log("=== MIGRATION DEBUG ===");
+      console.log("Attempting to migrate temp customer data for:");
+      console.log("- userId:", userId);
+      console.log("- userPhone:", userPhone);
       
       const { data, error } = await supabase.rpc('migrate_temp_customer_data', {
         user_phone: userPhone,
@@ -49,14 +52,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       
       if (error) {
-        console.error("Error migrating temp customer data:", error);
+        console.error("❌ Error migrating temp customer data:", error);
         return false;
       }
       
-      console.log("Migration result:", data);
-      return data; // Returns true if migration happened, false if no temp customer found
+      console.log("✅ Migration result:", data);
+      console.log("Migration successful:", data === true ? "YES" : "NO");
+      console.log("=== END MIGRATION DEBUG ===");
+      return data;
     } catch (error) {
-      console.error("Error in migrateTempCustomerData:", error);
+      console.error("❌ Exception in migrateTempCustomerData:", error);
       return false;
     }
   };
@@ -106,31 +111,50 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const handleProfileAndMigration = async (userId: string) => {
-    let profileData = await fetchProfile(userId);
-    const isComplete = checkProfileCompleteness(profileData);
+    console.log("=== PROFILE & MIGRATION CHECK ===");
+    console.log("Handling profile and migration for userId:", userId);
     
-    console.log("Profile completeness check:", {
+    let profileData = await fetchProfile(userId);
+    console.log("📋 Profile data fetched:", {
       hasProfile: !!profileData,
       username: profileData?.username,
       mobile_number: profileData?.mobile_number,
-      isComplete
+      email: profileData?.email
+    });
+    
+    const isComplete = checkProfileCompleteness(profileData);
+    console.log("✅ Profile completeness check:", {
+      isComplete,
+      hasUsername: !!(profileData?.username?.trim()),
+      hasMobileNumber: !!(profileData?.mobile_number?.trim())
     });
     
     // Only attempt migration if profile is complete
     if (isComplete && profileData?.mobile_number) {
-      console.log("Profile is complete, checking for temp customer migration...");
+      console.log("🔄 Profile is complete, checking for temp customer migration...");
+      console.log("📞 Using phone number for migration:", profileData.mobile_number);
+      
       const migrationSuccess = await migrateTempCustomerData(
         userId, 
         profileData.mobile_number
       );
       
       if (migrationSuccess) {
-        console.log("Temp customer data migrated successfully!");
+        console.log("🎉 Temp customer data migrated successfully!");
         // Refresh profile after migration to get updated data
         profileData = await fetchProfile(userId);
+        console.log("📋 Profile after migration:", profileData);
+      } else {
+        console.log("ℹ️  No temp customer data found to migrate or migration failed");
       }
     } else if (!isComplete) {
-      console.log("Profile is incomplete, skipping migration check");
+      console.log("⚠️  Profile is incomplete, skipping migration check");
+      console.log("Missing:", {
+        username: !profileData?.username?.trim(),
+        mobile_number: !profileData?.mobile_number?.trim()
+      });
+    } else {
+      console.log("⚠️  No mobile number found, skipping migration");
     }
     
     setProfile(profileData);
@@ -142,6 +166,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } else {
       setIsFirstLogin(false);
     }
+    
+    console.log("=== END PROFILE & MIGRATION CHECK ===");
   };
 
   const refreshProfile = async () => {
