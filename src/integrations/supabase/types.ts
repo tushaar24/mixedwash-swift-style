@@ -60,6 +60,65 @@ export type Database = {
         }
         Relationships: []
       }
+      addresses_temp: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          area: string | null
+          city: string
+          created_at: string
+          house_building: string | null
+          id: string
+          is_default: boolean | null
+          latitude: number | null
+          longitude: number | null
+          postal_code: string
+          state: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_line1: string
+          address_line2?: string | null
+          area?: string | null
+          city: string
+          created_at?: string
+          house_building?: string | null
+          id?: string
+          is_default?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          postal_code: string
+          state: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          area?: string | null
+          city?: string
+          created_at?: string
+          house_building?: string | null
+          id?: string
+          is_default?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          postal_code?: string
+          state?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addresses_temp_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "temp_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_area: {
         Row: {
           created_at: string
@@ -336,6 +395,100 @@ export type Database = {
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "orders_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders_temp: {
+        Row: {
+          address_id: string
+          created_at: string
+          delivery_date: string
+          delivery_slot_id: string
+          estimated_weight: number | null
+          id: string
+          pickup_date: string
+          pickup_slot_id: string
+          service_id: string
+          special_instructions: string | null
+          status: string
+          total_amount: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_id: string
+          created_at?: string
+          delivery_date: string
+          delivery_slot_id: string
+          estimated_weight?: number | null
+          id?: string
+          pickup_date: string
+          pickup_slot_id: string
+          service_id: string
+          special_instructions?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_id?: string
+          created_at?: string
+          delivery_date?: string
+          delivery_slot_id?: string
+          estimated_weight?: number | null
+          id?: string
+          pickup_date?: string
+          pickup_slot_id?: string
+          service_id?: string
+          special_instructions?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_temp_address_id_fkey"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses_temp"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_temp_delivery_slot_id_fkey"
+            columns: ["delivery_slot_id"]
+            isOneToOne: false
+            referencedRelation: "time_slots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_temp_pickup_slot_id_fkey"
+            columns: ["pickup_slot_id"]
+            isOneToOne: false
+            referencedRelation: "time_slots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_temp_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_temp_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "temp_customers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       phone_numbers: {
@@ -356,6 +509,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
+          email: string | null
           id: string
           mobile_number: string | null
           updated_at: string | null
@@ -363,6 +517,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          email?: string | null
           id: string
           mobile_number?: string | null
           updated_at?: string | null
@@ -370,6 +525,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          email?: string | null
           id?: string
           mobile_number?: string | null
           updated_at?: string | null
@@ -410,6 +566,30 @@ export type Database = {
         }
         Relationships: []
       }
+      temp_customers: {
+        Row: {
+          created_at: string
+          customer_email_address: string
+          customer_name: string
+          customer_phone_number: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email_address: string
+          customer_name: string
+          customer_phone_number: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          customer_email_address?: string
+          customer_name?: string
+          customer_phone_number?: string
+          id?: string
+        }
+        Relationships: []
+      }
       time_slots: {
         Row: {
           created_at: string
@@ -447,6 +627,10 @@ export type Database = {
     Functions: {
       delete_order_permanently: {
         Args: { order_id_param: string }
+        Returns: boolean
+      }
+      migrate_temp_customer_data: {
+        Args: { user_phone: string; authenticated_user_id: string }
         Returns: boolean
       }
     }

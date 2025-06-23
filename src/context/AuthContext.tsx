@@ -39,6 +39,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
 
+  const migrateTempCustomerData = async (userId: string, userPhone?: string) => {
+    if (!userPhone) return false;
+    
+    try {
+      console.log("Attempting to migrate temp customer data for phone:", userPhone);
+      
+      const { data, error } = await supabase.rpc('migrate_temp_customer_data', {
+        user_phone: userPhone,
+        authenticated_user_id: userId
+      });
+      
+      if (error) {
+        console.error("Error migrating temp customer data:", error);
+        return false;
+      }
+      
+      console.log("Migration result:", data);
+      return data; // Returns true if migration happened, false if no temp customer found
+    } catch (error) {
+      console.error("Error in migrateTempCustomerData:", error);
+      return false;
+    }
+  };
+
   const fetchProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -121,7 +145,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // Use setTimeout to avoid blocking the auth state change
           setTimeout(async () => {
-            const profileData = await fetchProfile(newSession.user.id);
+            let profileData = await fetchProfile(newSession.user.id);
+            
+            // If profile has mobile number, attempt temp customer migration
+            if (profileData?.mobile_number) {
+              console.log("Checking for temp customer migration...");
+              const migrationSuccess = await migrateTempCustomerData(
+                newSession.user.id, 
+                profileData.mobile_number
+              );
+              
+              if (migrationSuccess) {
+                console.log("Temp customer data migrated successfully!");
+                // Refresh profile after migration to get updated data
+                profileData = await fetchProfile(newSession.user.id);
+              }
+            }
+            
             setProfile(profileData);
             
             const isComplete = checkProfileCompleteness(profileData);
@@ -172,7 +212,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           Name: userName
         });
         
-        const profileData = await fetchProfile(session.user.id);
+        let profileData = await fetchProfile(session.user.id);
+        
+        // If profile has mobile number, attempt temp customer migration
+        if (profileData?.mobile_number) {
+          console.log("Checking for temp customer migration on session restore...");
+          const migrationSuccess = await migrateTempCustomerData(
+            session.user.id, 
+            profileData.mobile_number
+          );
+          
+          if (migrationSuccess) {
+            console.log("Temp customer data migrated successfully on session restore!");
+            // Refresh profile after migration to get updated data
+            profileData = await fetchProfile(session.user.id);
+          }
+        }
+        
         setProfile(profileData);
         
         const isComplete = checkProfileCompleteness(profileData);
