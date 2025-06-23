@@ -43,7 +43,8 @@ export const Navbar = () => {
         description: "You have been successfully signed out",
       });
       
-      window.location.href = "/";
+      // Use navigate instead of window.location.href to avoid conflicts
+      navigate("/", { replace: true });
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
