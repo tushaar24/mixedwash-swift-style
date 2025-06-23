@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -118,8 +117,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     console.log("📋 Profile data fetched:", {
       hasProfile: !!profileData,
       username: profileData?.username,
-      mobile_number: profileData?.mobile_number,
-      email: profileData?.email
+      mobile_number: profileData?.mobile_number
     });
     
     const isComplete = checkProfileCompleteness(profileData);
