@@ -265,27 +265,102 @@ export type Database = {
           created_at: string
           id: string
           name: string
-          phone_number: number
-          salary: number
+          phone_number: string
+          salary: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
-          phone_number: number
-          salary: number
+          phone_number: string
+          salary: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
-          phone_number?: number
-          salary?: number
+          phone_number?: string
+          salary?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      driver_tasks: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          driver_id: string | null
+          id: string
+          order_id: string | null
+          status: string
+          task_priority: number | null
+          temp_customer_id: string | null
+          temp_order_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          driver_id?: string | null
+          id?: string
+          order_id?: string | null
+          status: string
+          task_priority?: number | null
+          temp_customer_id?: string | null
+          temp_order_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          driver_id?: string | null
+          id?: string
+          order_id?: string | null
+          status?: string
+          task_priority?: number | null
+          temp_customer_id?: string | null
+          temp_order_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_tasks_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_tasks_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "driver"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_tasks_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_tasks_temp_customer_id_fkey"
+            columns: ["temp_customer_id"]
+            isOneToOne: false
+            referencedRelation: "temp_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_tasks_temp_order_id_fkey"
+            columns: ["temp_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_temp"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_dry_cleaning_items: {
         Row: {

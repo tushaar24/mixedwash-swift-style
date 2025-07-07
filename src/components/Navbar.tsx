@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { LogOut, Menu, X, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { VersionSwitcher } from "@/components/VersionSwitcher";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,6 +79,9 @@ export const Navbar = () => {
               </>
             )}
             
+            {/* Version Switcher - only show on homepage */}
+            {isHomePage && <VersionSwitcher />}
+            
             {user ? (
               <div className="flex items-center space-x-4">
                 {!isSchedulePage && (
@@ -141,6 +144,11 @@ export const Navbar = () => {
                 <a href="#why-choose-us" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Why Us</a>
                 <a href="#how-it-works" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>How It Works</a>
                 <a href="#faq" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>FAQ</a>
+                
+                {/* Version Switcher for mobile */}
+                <div className="px-3 py-2">
+                  <VersionSwitcher />
+                </div>
               </>
             )}
             
