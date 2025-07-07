@@ -5,7 +5,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
 
@@ -14,6 +14,8 @@ export const Services = () => {
   const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showDiscountAlert, setShowDiscountAlert] = useState(true);
   const { user, profile } = useAuth();
+  const sectionRef = useRef<HTMLElement>(null);
+  const hasTrackedScrollRef = useRef(false);
   
   const getCurrentTime = () => {
     const now = new Date();
@@ -29,6 +31,43 @@ export const Services = () => {
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
   } : undefined;
+  
+  // Scroll tracking effect
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasTrackedScrollRef.current) {
+            hasTrackedScrollRef.current = true;
+            
+            const userInfo = getUserInfo();
+            
+            console.log('Quick Services Overview section viewed');
+            trackEvent('quick_services_overview_viewed', {
+              'customer name': userInfo?.name || 'Anonymous',
+              'customer id': userInfo?.user_id || 'Anonymous',
+              'current_time': getCurrentTime(),
+              'section': 'Quick Services Overview'
+            });
+          }
+        });
+      },
+      {
+        threshold: 0.3, // Trigger when 30% of the section is visible
+        rootMargin: '0px 0px -50px 0px' // Adjust root margin for better triggering
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, [user, profile]);
   
   // Auto-hide discount alert after 1 second - only if user is eligible and alert is showing
   useEffect(() => {
@@ -132,7 +171,7 @@ export const Services = () => {
   };
 
   return (
-    <section id="services" className="bg-gray-50">
+    <section id="services" className="bg-gray-50" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold">Quick Services Overview</h2>
