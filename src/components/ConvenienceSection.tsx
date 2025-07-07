@@ -26,17 +26,28 @@ export const ConvenienceSection = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Scroll tracking effect
+  // Scroll tracking effect with debugging
   useEffect(() => {
+    console.log('ConvenienceSection: Setting up Intersection Observer');
+    
     const observer = new IntersectionObserver(
       (entries) => {
+        console.log('ConvenienceSection: Intersection Observer callback triggered', entries);
         entries.forEach((entry) => {
+          console.log('ConvenienceSection: Entry details', {
+            isIntersecting: entry.isIntersecting,
+            intersectionRatio: entry.intersectionRatio,
+            hasTracked: hasTrackedScrollRef.current,
+            target: entry.target,
+            boundingClientRect: entry.boundingClientRect
+          });
+          
           if (entry.isIntersecting && !hasTrackedScrollRef.current) {
             hasTrackedScrollRef.current = true;
             
             const userInfo = getUserInfo();
             
-            console.log('Laundry Service that works around your schedule section viewed');
+            console.log('ConvenienceSection: EVENT TRIGGERED - Laundry Service that works around your schedule section viewed');
             trackEvent('laundry_service_schedule_viewed', {
               'customer name': userInfo?.name || 'Anonymous',
               'customer id': userInfo?.user_id || 'Anonymous',
@@ -47,16 +58,20 @@ export const ConvenienceSection = () => {
         });
       },
       {
-        threshold: 0.3,
-        rootMargin: '0px 0px -50px 0px'
+        threshold: 0.25,
+        rootMargin: '0px 0px -30px 0px'
       }
     );
 
     if (sectionRef.current) {
+      console.log('ConvenienceSection: Observing element:', sectionRef.current);
       observer.observe(sectionRef.current);
+    } else {
+      console.log('ConvenienceSection: No element to observe');
     }
 
     return () => {
+      console.log('ConvenienceSection: Cleaning up Intersection Observer');
       if (sectionRef.current) {
         observer.unobserve(sectionRef.current);
       }
