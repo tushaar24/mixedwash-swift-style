@@ -28,22 +28,11 @@ export const WhyChooseUs = () => {
     hasTrackedScrollRef.current = false;
   }, []);
 
-  // Scroll tracking effect with debugging
+  // Scroll tracking effect
   useEffect(() => {
-    console.log('WhyChooseUs: Setting up Intersection Observer');
-    
     const observer = new IntersectionObserver(
       (entries) => {
-        console.log('WhyChooseUs: Intersection Observer callback triggered', entries);
         entries.forEach((entry) => {
-          console.log('WhyChooseUs: Entry details', {
-            isIntersecting: entry.isIntersecting,
-            intersectionRatio: entry.intersectionRatio,
-            hasTracked: hasTrackedScrollRef.current,
-            target: entry.target,
-            boundingClientRect: entry.boundingClientRect
-          });
-          
           if (entry.isIntersecting && !hasTrackedScrollRef.current) {
             hasTrackedScrollRef.current = true;
             
@@ -60,20 +49,16 @@ export const WhyChooseUs = () => {
         });
       },
       {
-        threshold: 0.25,
-        rootMargin: '0px 0px -30px 0px'
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
       }
     );
 
     if (sectionRef.current) {
-      console.log('WhyChooseUs: Observing element:', sectionRef.current);
       observer.observe(sectionRef.current);
-    } else {
-      console.log('WhyChooseUs: No element to observe');
     }
 
     return () => {
-      console.log('WhyChooseUs: Cleaning up Intersection Observer');
       if (sectionRef.current) {
         observer.unobserve(sectionRef.current);
       }
