@@ -23,17 +23,28 @@ export const WhyChooseUs = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Scroll tracking effect
+  // Scroll tracking effect with debugging
   useEffect(() => {
+    console.log('WhyChooseUs: Setting up Intersection Observer');
+    
     const observer = new IntersectionObserver(
       (entries) => {
+        console.log('WhyChooseUs: Intersection Observer callback triggered', entries);
         entries.forEach((entry) => {
+          console.log('WhyChooseUs: Entry details', {
+            isIntersecting: entry.isIntersecting,
+            intersectionRatio: entry.intersectionRatio,
+            hasTracked: hasTrackedScrollRef.current,
+            target: entry.target,
+            boundingClientRect: entry.boundingClientRect
+          });
+          
           if (entry.isIntersecting && !hasTrackedScrollRef.current) {
             hasTrackedScrollRef.current = true;
             
             const userInfo = getUserInfo();
             
-            console.log('Why Choose MixedWash section viewed');
+            console.log('WhyChooseUs: EVENT TRIGGERED - Why Choose MixedWash section viewed');
             trackEvent('why_choose_mixedwash_viewed', {
               'customer name': userInfo?.name || 'Anonymous',
               'customer id': userInfo?.user_id || 'Anonymous',
@@ -50,10 +61,14 @@ export const WhyChooseUs = () => {
     );
 
     if (sectionRef.current) {
+      console.log('WhyChooseUs: Observing element:', sectionRef.current);
       observer.observe(sectionRef.current);
+    } else {
+      console.log('WhyChooseUs: No element to observe');
     }
 
     return () => {
+      console.log('WhyChooseUs: Cleaning up Intersection Observer');
       if (sectionRef.current) {
         observer.unobserve(sectionRef.current);
       }
