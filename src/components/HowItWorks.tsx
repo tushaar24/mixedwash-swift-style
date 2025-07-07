@@ -24,6 +24,11 @@ export const HowItWorks = () => {
     phone: profile?.mobile_number
   } : undefined;
 
+  // Reset tracking flag when component mounts
+  useEffect(() => {
+    hasTrackedScrollRef.current = false;
+  }, []);
+
   // Scroll tracking effect with debugging
   useEffect(() => {
     console.log('HowItWorks: Setting up Intersection Observer');
