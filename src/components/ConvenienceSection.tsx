@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Clock, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -53,7 +52,7 @@ export const ConvenienceSection = () => {
         });
       },
       {
-        threshold: 0.1,
+        threshold: 0.3,
         rootMargin: '0px 0px -100px 0px'
       }
     );
