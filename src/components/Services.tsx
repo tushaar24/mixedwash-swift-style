@@ -41,7 +41,7 @@ export const Services = () => {
       route: "wash-fold",
       minimumOrder: 4,
       deliveryTime: "24h",
-      gradient: "from-purple-500 to-pink-500"
+      gradient: "from-white to-gray-300"
     },
     {
       title: "Wash & Iron",
@@ -54,7 +54,7 @@ export const Services = () => {
       route: "wash-iron",
       minimumOrder: 3,
       deliveryTime: "24h",
-      gradient: "from-blue-500 to-cyan-500"
+      gradient: "from-gray-300 to-white"
     },
     {
       title: "Heavy Wash",
@@ -67,7 +67,7 @@ export const Services = () => {
       route: "heavy-wash",
       minimumOrder: null,
       deliveryTime: "24-48h",
-      gradient: "from-green-500 to-emerald-500"
+      gradient: "from-white to-gray-400"
     },
     {
       title: "Dry Cleaning",
@@ -81,7 +81,7 @@ export const Services = () => {
       minimumOrder: null,
       deliveryTime: "24-48h",
       serviceCharge: "₹50 service fee on orders under ₹250",
-      gradient: "from-orange-500 to-red-500"
+      gradient: "from-gray-400 to-white"
     }
   ];
 
@@ -99,22 +99,22 @@ export const Services = () => {
   };
 
   return (
-    <section id="services" className="relative bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 py-24 overflow-hidden">
+    <section id="services" className="relative bg-gradient-to-br from-black via-gray-900 to-black py-24 overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-32 right-32 w-80 h-80 bg-blue-500/15 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '8s' }}></div>
+        <div className="absolute top-20 left-20 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-32 right-32 w-80 h-80 bg-gray-500/15 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '8s' }}></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
         <div className="text-center mb-20">
           <div className="relative inline-block mb-8">
-            <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/30 to-pink-600/30 rounded-2xl blur-xl"></div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-white/30 to-gray-300/30 rounded-2xl blur-xl"></div>
             <div className="relative bg-white/5 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-6">
               <h2 className="text-4xl md:text-6xl font-black text-white mb-4">
-                Our <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Services</span>
-                <Sparkles className="inline-block ml-4 h-10 w-10 text-yellow-400 animate-spin" style={{ animationDuration: '3s' }} />
+                Our <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Services</span>
+                <Sparkles className="inline-block ml-4 h-10 w-10 text-white animate-spin" style={{ animationDuration: '3s' }} />
               </h2>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto">
                 Choose the perfect laundry solution for your needs
@@ -125,9 +125,9 @@ export const Services = () => {
           {/* Alert banners */}
           {!loading && isEligibleForDiscount && (
             <div className="mb-8">
-              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-full px-6 py-3">
-                <Zap className="h-5 w-5 text-yellow-400 animate-pulse" />
-                <span className="text-yellow-300 font-bold">🎉 20% OFF First Order!</span>
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-white/20 to-gray-300/20 backdrop-blur-sm border border-white/30 rounded-full px-6 py-3">
+                <Zap className="h-5 w-5 text-white animate-pulse" />
+                <span className="text-white font-bold">🎉 20% OFF First Order!</span>
               </div>
             </div>
           )}
@@ -156,13 +156,13 @@ export const Services = () => {
                 </Badge>
                 
                 {/* Floating star */}
-                <Star className="absolute top-4 left-4 h-5 w-5 text-yellow-400 animate-pulse" />
+                <Star className="absolute top-4 left-4 h-5 w-5 text-white animate-pulse" />
                 
                 <CardHeader className="pb-4 relative z-10">
                   <div className="text-6xl pb-6 transform group-hover:scale-110 transition-transform duration-500 text-center">
                     {typeof service.icon === 'string' ? service.icon : service.icon}
                   </div>
-                  <CardTitle className="text-2xl font-black text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 group-hover:bg-clip-text transition-all duration-500 text-center">
+                  <CardTitle className="text-2xl font-black text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 group-hover:bg-clip-text transition-all duration-500 text-center">
                     {service.title}
                   </CardTitle>
                 </CardHeader>
@@ -174,10 +174,10 @@ export const Services = () => {
                   {!loading && service.discount > 0 && isEligibleForDiscount ? (
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center justify-center gap-3">
-                        <span className="font-black text-2xl text-green-400">{service.newPrice}</span>
+                        <span className="font-black text-2xl text-white">{service.newPrice}</span>
                         <HoverCard>
                           <HoverCardTrigger>
-                            <span className="bg-gradient-to-r from-green-400 to-emerald-400 text-black text-xs px-3 py-1 rounded-full font-black">
+                            <span className="bg-gradient-to-r from-white to-gray-300 text-black text-xs px-3 py-1 rounded-full font-black">
                               SAVE 20%!
                             </span>
                           </HoverCardTrigger>
@@ -198,20 +198,20 @@ export const Services = () => {
                   
                   {/* Features */}
                   <div className="space-y-3 mb-6">
-                    <div className="text-xs text-blue-300 flex items-center justify-center gap-2">
+                    <div className="text-xs text-gray-300 flex items-center justify-center gap-2">
                       <Truck className="h-4 w-4" />
                       <span className="font-semibold">FREE Pickup & Delivery</span>
                     </div>
                     
                     {service.minimumOrder && (
-                      <div className="text-xs text-orange-300 flex items-center justify-center gap-2">
+                      <div className="text-xs text-gray-300 flex items-center justify-center gap-2">
                         <Info className="h-4 w-4" />
                         <span>Min: {service.minimumOrder}kg</span>
                       </div>
                     )}
                     
                     {service.serviceCharge && (
-                      <div className="text-xs text-red-300 flex items-center justify-center gap-2">
+                      <div className="text-xs text-gray-400 flex items-center justify-center gap-2">
                         <Info className="h-4 w-4" />
                         <span>{service.serviceCharge}</span>
                       </div>
@@ -221,7 +221,7 @@ export const Services = () => {
                   {/* Arrow indicator */}
                   <div className="mt-auto flex justify-center">
                     <div className="bg-white/10 backdrop-blur-sm rounded-full p-3 group-hover:bg-white/20 transition-all duration-300">
-                      <ArrowRight className="h-6 w-6 text-white group-hover:translate-x-2 group-hover:text-purple-400 transition-all duration-300" />
+                      <ArrowRight className="h-6 w-6 text-white group-hover:translate-x-2 group-hover:text-gray-300 transition-all duration-300" />
                     </div>
                   </div>
                 </CardContent>

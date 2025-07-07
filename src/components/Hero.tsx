@@ -54,13 +54,13 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
+    <section className="relative min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0">
         {/* Moving gradient orbs */}
-        <div className="absolute top-20 left-20 w-72 h-72 bg-purple-500/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-32 right-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '6s' }}></div>
-        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-pink-500/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-32 right-32 w-96 h-96 bg-gray-500/20 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '6s' }}></div>
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-white/5 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }}></div>
         
         {/* Grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:50px_50px] opacity-20"></div>
@@ -70,24 +70,24 @@ export const Hero = () => {
         <div className="text-center">
           {/* Floating icons */}
           <div className="absolute top-20 left-1/4 animate-bounce" style={{ animationDelay: '0s' }}>
-            <Sparkles className="h-8 w-8 text-purple-400" />
+            <Sparkles className="h-8 w-8 text-white" />
           </div>
           <div className="absolute top-32 right-1/4 animate-bounce" style={{ animationDelay: '1s' }}>
-            <Zap className="h-8 w-8 text-blue-400" />
+            <Zap className="h-8 w-8 text-gray-300" />
           </div>
           <div className="absolute top-40 left-1/3 animate-bounce" style={{ animationDelay: '2s' }}>
-            <Star className="h-6 w-6 text-pink-400" />
+            <Star className="h-6 w-6 text-white" />
           </div>
 
           {/* Main heading */}
           <div className="relative mb-8">
             <h1 className="text-6xl md:text-8xl font-black tracking-tight text-white mb-6 relative">
-              <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-pulse">
+              <span className="block bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent animate-pulse">
                 LAUNDRY
               </span>
               <span className="block relative">
                 REVOLUTION
-                <Rocket className="absolute -top-4 -right-12 h-12 w-12 text-yellow-400 animate-spin" style={{ animationDuration: '3s' }} />
+                <Rocket className="absolute -top-4 -right-12 h-12 w-12 text-white animate-spin" style={{ animationDuration: '3s' }} />
               </span>
             </h1>
             
@@ -104,7 +104,7 @@ export const Hero = () => {
 
           {/* Description */}
           <div className="mb-12 relative">
-            <div className="absolute -inset-6 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-3xl blur-2xl"></div>
+            <div className="absolute -inset-6 bg-gradient-to-r from-white/20 to-gray-300/20 rounded-3xl blur-2xl"></div>
             <div className="relative bg-black/20 backdrop-blur-sm border border-white/10 rounded-3xl p-8 mx-auto max-w-3xl">
               <p className="text-xl md:text-2xl text-gray-200 leading-relaxed">
                 Transform your laundry experience with our premium service. We don't just wash clothes – we deliver perfection to your doorstep.
@@ -115,9 +115,9 @@ export const Hero = () => {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
             <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-2xl blur opacity-70 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-white via-gray-300 to-white rounded-2xl blur opacity-70 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
               <Button 
-                className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 hover:from-purple-700 hover:via-pink-700 hover:to-blue-700 text-white px-12 py-6 text-xl font-bold transform hover:scale-110 transition-all duration-300 rounded-2xl"
+                className="relative bg-gradient-to-r from-gray-900 via-black to-gray-900 hover:from-gray-800 hover:via-gray-900 hover:to-gray-800 text-white px-12 py-6 text-xl font-bold transform hover:scale-110 transition-all duration-300 rounded-2xl border border-white/20"
                 onClick={handleScheduleClick}
               >
                 <Sparkles className="mr-3 h-6 w-6 animate-spin" style={{ animationDuration: '2s' }} />
@@ -137,7 +137,7 @@ export const Hero = () => {
 
           {/* Hero Image with effects */}
           <div className="relative max-w-4xl mx-auto">
-            <div className="absolute -inset-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 rounded-3xl blur-2xl opacity-30 animate-pulse"></div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-white via-gray-300 to-white rounded-3xl blur-2xl opacity-30 animate-pulse"></div>
             <div className="relative bg-white/5 backdrop-blur-sm border border-white/20 rounded-3xl p-4 shadow-2xl">
               <div className="relative overflow-hidden rounded-2xl">
                 <img 
@@ -145,14 +145,14 @@ export const Hero = () => {
                   alt="Clean, folded laundry" 
                   className="w-full h-80 md:h-96 object-cover transform hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 via-transparent to-blue-900/40"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-gray-900/40"></div>
                 
                 {/* Floating badges */}
-                <div className="absolute top-6 left-6 bg-green-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 animate-bounce">
+                <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm text-black px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 animate-bounce">
                   <Zap className="h-4 w-4" />
                   24h Delivery
                 </div>
-                <div className="absolute bottom-6 right-6 bg-purple-500/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-bold animate-pulse">
+                <div className="absolute bottom-6 right-6 bg-black/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-bold animate-pulse">
                   100% Reliable
                 </div>
               </div>
@@ -164,7 +164,7 @@ export const Hero = () => {
             <div className="inline-flex items-center gap-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full px-8 py-4">
               <div className="flex -space-x-2">
                 {[1,2,3,4,5].map(i => (
-                  <div key={i} className={`w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-white animate-pulse`} style={{ animationDelay: `${i * 0.2}s` }}></div>
+                  <div key={i} className={`w-8 h-8 rounded-full bg-gradient-to-br from-white to-gray-300 border-2 border-black animate-pulse`} style={{ animationDelay: `${i * 0.2}s` }}></div>
                 ))}
               </div>
               <span className="text-white font-semibold">Join 1000+ satisfied customers ⭐⭐⭐⭐⭐</span>
