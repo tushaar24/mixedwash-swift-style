@@ -2,14 +2,14 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { HeroV2 } from "@/components/v2/HeroV2";
-import { ServicesV2 } from "@/components/v2/ServicesV2";
+import { Hero } from "@/components/Hero";
+import { Services } from "@/components/Services";
 import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { ConvenienceSection } from "@/components/ConvenienceSection";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Testimonials } from "@/components/Testimonials";
 import { FAQ } from "@/components/FAQ";
-import { CallToActionV2 } from "@/components/v2/CallToActionV2";
+import { CallToAction } from "@/components/CallToAction";
 import { Footer } from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { useSEO } from "@/hooks/useSEO";
@@ -33,14 +33,14 @@ const Index = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
       <main>
-        <HeroV2 />
-        <ServicesV2 />
+        <Hero />
+        <Services />
         <WhyChooseUs />
         <ConvenienceSection />
         <HowItWorks />
         <Testimonials />
         <FAQ />
-        <CallToActionV2 />
+        <CallToAction />
       </main>
       <Footer />
     </div>
