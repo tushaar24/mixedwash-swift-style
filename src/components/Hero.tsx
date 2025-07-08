@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -76,7 +77,7 @@ export const Hero = () => {
             Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
           </p>
           <div className="pt-6 flex flex-col space-y-3">
-            <Button className="bg-white hover:bg-gray-100 text-black px-6 py-4 text-lg h-auto group w-full sm:w-auto font-semibold" onClick={handleScheduleClick}>
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-4 text-lg h-auto group w-full sm:w-auto font-semibold" onClick={handleScheduleClick}>
               Schedule Your Laundry Pickup
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
