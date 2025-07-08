@@ -78,7 +78,7 @@ export const Hero = () => {
           <p className="text-xl text-gray-600 max-w-lg mt-6">
             Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
           </p>
-          <div className="pt-8 flex flex-col space-y-4">
+          <div className="pt-8 pb-8 flex flex-col space-y-4">
             <Button 
               className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-4 text-lg h-auto group w-full sm:w-auto font-semibold" 
               onClick={handleScheduleClick}
