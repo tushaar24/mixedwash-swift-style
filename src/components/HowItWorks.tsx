@@ -3,7 +3,6 @@ import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
-
 export const HowItWorks = () => {
   const {
     user,
@@ -12,7 +11,6 @@ export const HowItWorks = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const hasTrackedScrollRef = useRef(false);
-
   const getCurrentTime = () => {
     const now = new Date();
     return now.toLocaleTimeString('en-US', {
@@ -21,7 +19,6 @@ export const HowItWorks = () => {
       minute: '2-digit'
     });
   };
-
   const getUserInfo = () => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
@@ -62,7 +59,6 @@ export const HowItWorks = () => {
       }
     };
   }, [user, profile]);
-
   const steps = [{
     number: "1",
     label: "FLEXIBLE",
@@ -120,7 +116,6 @@ export const HowItWorks = () => {
     image: "https://readdy.ai/api/search-image?query=modern%20minimalist%20illustration%20of%20a%20person%20using%20mobile%20app%20to%20track%20laundry%20service%20status%2C%20clean%20design%20with%20soft%20colors&width=600&height=400&seq=4&orientation=landscape",
     hasButton: true
   }];
-
   return <section id="how-it-works" ref={sectionRef} className="bg-gray-50 py-16 md:py-[9px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
@@ -150,7 +145,7 @@ export const HowItWorks = () => {
                           <span className="text-gray-700">{feature.text}</span>
                         </div>)}
                     </div>
-                    {step.hasButton && <button onClick={() => navigate("/contact")} className="mt-8 bg-black text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                    {step.hasButton && <button onClick={() => navigate("/contact")} className="mt-8 bg-black text-white px-8 rounded-lg font-medium hover:bg-gray-800 transition-colors py-[12px]">
                         Schedule your pickup
                       </button>}
                   </div>

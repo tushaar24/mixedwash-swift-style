@@ -1,16 +1,16 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { trackEvent } from "@/utils/clevertap";
-
 export const ProfessionalLaundryService = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
-  const { user, profile } = useAuth();
-
+  const {
+    user,
+    profile
+  } = useAuth();
   const getCurrentTime = () => {
     const now = new Date();
     return now.toLocaleTimeString('en-US', {
@@ -19,13 +19,11 @@ export const ProfessionalLaundryService = () => {
       minute: '2-digit'
     });
   };
-
   const getUserInfo = () => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
   } : undefined;
-
   const handleScheduleClick = () => {
     const userInfo = getUserInfo();
 
@@ -41,11 +39,13 @@ export const ProfessionalLaundryService = () => {
     if (!user) {
       navigate("/auth");
     } else {
-      navigate("/schedule", { state: { fromCTA: true } });
+      navigate("/schedule", {
+        state: {
+          fromCTA: true
+        }
+      });
     }
   };
-
-
   const features = [{
     title: "Flexible Scheduling",
     description: "Select from our range of convenient time slots for pickup and delivery, perfectly aligned with your daily routine.",
@@ -57,13 +57,12 @@ export const ProfessionalLaundryService = () => {
   }, {
     title: "Real-Time Updates",
     description: "Stay informed with precise delivery tracking and instant notifications throughout the service process.",
-  image:"https://readdy.ai/api/search-image?query=modern%20minimalist%20map%20interface%20showing%20a%20clear%20delivery%20route%20marked%20with%20a%20bright%20blue%20line%2C%20prominent%20start%20point%20marked%20with%20green%20pin%20and%20destination%20with%20red%20pin%2C%20clean%20white%20map%20background%20with%20subtle%20street%20details%2C%20professional%20navigation%20screen%20design%2C%20high%20contrast%20route%20visualization%2C%20elegant%20mobile%20app%20interface&width=800&height=600&seq=3&orientation=landscape"
+    image: "https://readdy.ai/api/search-image?query=modern%20minimalist%20map%20interface%20showing%20a%20clear%20delivery%20route%20marked%20with%20a%20bright%20blue%20line%2C%20prominent%20start%20point%20marked%20with%20green%20pin%20and%20destination%20with%20red%20pin%2C%20clean%20white%20map%20background%20with%20subtle%20street%20details%2C%20professional%20navigation%20screen%20design%2C%20high%20contrast%20route%20visualization%2C%20elegant%20mobile%20app%20interface&width=800&height=600&seq=3&orientation=landscape"
   }, {
     title: "Premium Support",
     description: "Access to dedicated customer service professionals ready to assist you at any time, ensuring a seamless experience.",
     image: "https://readdy.ai/api/search-image?query=professional%20Indian%20customer%20service%20representative%20wearing%20traditional%20Indian%20attire%20with%20headset%20in%20modern%20office%20environment%2C%20helping%20customers%2C%20warm%20and%20friendly%20expression%2C%20clean%20corporate%20setting%20with%20Indian%20decor%20elements%2C%20soft%20ambient%20lighting%2C%20high-end%20photography&width=800&height=600&seq=4&orientation=landscape"
   }];
-
   return <section ref={sectionRef} className="bg-white py-16 md:py-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
@@ -99,7 +98,7 @@ export const ProfessionalLaundryService = () => {
 
         {/* CTA Section */}
         <div className="text-center">
-          <Button className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 py-6 h-auto text-base font-medium tracking-wide transition-all duration-300 group" onClick={handleScheduleClick}>
+          <Button onClick={handleScheduleClick} className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 h-auto text-base font-medium tracking-wide transition-all duration-300 group py-[16px]">
             <span>Schedule Pickup Now</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
