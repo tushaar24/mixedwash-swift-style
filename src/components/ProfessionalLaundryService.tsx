@@ -72,8 +72,8 @@ export const ProfessionalLaundryService = () => {
     description: "Access to dedicated customer service professionals ready to assist you at any time, ensuring a seamless experience.",
     image: "https://readdy.ai/api/search-image?query=professional%20customer%20service%20representative%20with%20headset%20in%20modern%20office%20environment%2C%20helping%20customers%2C%20warm%20and%20friendly%20expression%2C%20clean%20corporate%20setting%2C%20soft%20lighting&width=800&height=600&seq=4&orientation=landscape"
   }];
-  return <section ref={sectionRef} className="bg-white py-[9px]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  return <section ref={sectionRef} className="bg-white py-[9px] my-px">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 my-[60px]">
         {/* Header Section */}
         <div className="text-center mb-20">
           <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 tracking-tight">
