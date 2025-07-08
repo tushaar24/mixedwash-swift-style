@@ -1,12 +1,13 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { trackEvent } from "@/utils/clevertap";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Hero = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const {
     user,
     profile
@@ -55,11 +56,14 @@ export const Hero = () => {
     });
     navigate("/contact");
   };
-  return <div className="relative min-h-screen md:bg-cover md:bg-no-repeat" style={{
-    backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
-    backgroundPosition: 'right center',
-    backgroundSize: 'contain'
-  }}>
+  return <div 
+    className="relative min-h-screen md:bg-cover md:bg-no-repeat" 
+    style={!isMobile ? {
+      backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
+      backgroundPosition: 'right center',
+      backgroundSize: 'contain'
+    } : {}}
+  >
       {/* Clean white gradient overlay like in reference - hidden on mobile */}
       <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-white via-white/95 to-transparent"></div>
       
