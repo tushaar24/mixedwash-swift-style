@@ -1,4 +1,3 @@
-
 import { Computer, ShoppingBag, Bell, Clock } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
@@ -104,7 +103,7 @@ export const HowItWorks = () => {
       number: "4",
       label: "CONVENIENT",
       title: "Relax while we take care of your laundry",
-      description: "Your local partner facility will clean your items with utmost care. Our drivers will then deliver them back to you wherever you like. You're in control of your laundry, we just make it easier to get it done at home.",
+      description: "Our facility will clean your items with utmost care. Our drivers will then deliver them back to you wherever you like. You're in control of your laundry, we just make it easier to get it done at home.",
       features: [
         { icon: <Clock className="h-5 w-5 text-blue-600" />, text: "24h turnaround time" },
         { icon: <Bell className="h-5 w-5 text-blue-600" />, text: "Real-time order status" },
