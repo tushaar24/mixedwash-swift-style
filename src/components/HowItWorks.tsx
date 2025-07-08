@@ -1,3 +1,4 @@
+
 import { Computer, ShoppingBag, Bell, Clock } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
@@ -75,24 +76,24 @@ export const HowItWorks = () => {
         { icon: <Computer className="h-5 w-5 text-blue-600" />, text: "Book easily through our website" },
         { icon: <Clock className="h-5 w-5 text-blue-600" />, text: "Weekend and evening slots available" }
       ],
-      image: "https://readdy.ai/api/search-image?query=modern%20minimalist%203D%20illustration%20of%20a%20laptop%20displaying%20a%20clean%20and%20professional%20website%20scheduling%20interface%20with%20calendar%20and%20time%20slots%2C%20floating%20in%20space%20with%20soft%20gradient%20background%2C%20elegant%20design%20with%20muted%20pastel%20colors%20and%20subtle%20shadows%2C%20showing%20an%20open%20browser%20window&width=600&height=400&seq=1&orientation=landscape"
+      image: "https://readdy.ai/api/search-image?query=professional%20photograph%20of%20a%20person%20sitting%20at%20a%20modern%20desk%20using%20laptop%20to%20place%20an%20order%20online%2C%20soft%20natural%20lighting%2C%20minimalist%20home%20office%20setting%20with%20clean%20workspace%2C%20focus%20on%20the%20persons%20hands%20typing%20on%20keyboard%2C%20warm%20and%20inviting%20atmosphere%20with%20neutral%20color%20palette%2C%20high-end%20lifestyle%20photography&width=600&height=400&seq=1&orientation=landscape"
     },
     {
       number: "2",
       label: "QUICK & EASY",
-      title: "Pack your laundry",
-      description: "Pack your items in a designated bag. Use one bag per service. Our driver will transfer them to reusable MixedWash bags which you can keep for your next order.",
+      title: "Keep your laundry ready",
+      description: "Don't need to keep your laundry in any bag. Our driver will transfer them to reusable MixedWash bags.",
       features: [
-        { icon: <ShoppingBag className="h-5 w-5 text-blue-600" />, text: "Pack one bag per service" },
+        { icon: <ShoppingBag className="h-5 w-5 text-blue-600" />, text: "No bags needed" },
         { icon: <Bell className="h-5 w-5 text-blue-600" />, text: "No need to count or weigh your items" }
       ],
-      image: "https://readdy.ai/api/search-image?query=modern%20minimalist%20illustration%20of%20a%20person%20packing%20clothes%20into%20a%20branded%20laundry%20bag%2C%20clean%20design%20with%20soft%20colors&width=600&height=400&seq=2&orientation=landscape"
+      image: "https://readdy.ai/api/search-image?query=modern%20minimalist%203D%20illustration%20of%20neatly%20folded%20clothes%20and%20garments%20arranged%20in%20an%20organized%20pile%2C%20ready%20for%20laundry%20service%2C%20with%20soft%20ambient%20lighting%20and%20clean%20minimalist%20background%2C%20professional%20photography%20style%20with%20subtle%20shadows%20and%20highlights&width=600&height=400&seq=2&orientation=landscape"
     },
     {
       number: "3",
       label: "TRANSPARENT",
-      title: "Wait for our driver",
-      description: "You'll receive a confirmation when our driver is nearby. They will collect your bags and take them to your local cleaning facility.",
+      title: "Our Driver will collect your laundry",
+      description: "You'll receive a confirmation when our driver is nearby. They will collect your bags and weight your laundry in front of you.",
       features: [
         { icon: <Bell className="h-5 w-5 text-blue-600" />, text: "Regular order updates" },
         { icon: <Computer className="h-5 w-5 text-blue-600" />, text: "Live driver tracking" }
