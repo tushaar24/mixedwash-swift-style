@@ -50,8 +50,8 @@ export const ProfessionalLaundryService = () => {
     description: "Select from our range of convenient time slots for pickup and delivery, perfectly aligned with your daily routine.",
     image: "https://readdy.ai/api/search-image?query=modern%20digital%20calendar%20interface%20showing%20scheduling%20options%2C%20person%20using%20tablet%20to%20select%20laundry%20service%20time%20slots%2C%20clean%20minimal%20design%20with%20soft%20blue%20accents%2C%20professional%20workspace%20environment%2C%20natural%20lighting%2C%20high-end%20technology%20lifestyle%20photography&width=800&height=600&seq=1&orientation=landscape"
   }, {
-    title: "Digital Convenience",
-    description: "Manage your bookings effortlessly. We work according to your schedule.",
+    title: "24hr Delivery Service",
+    description: "Affordable 24-Hour Laundry, Delivered Fast. We respect your time—enjoy reliable next-day delivery at unbeatable prices.",
     image: "https://readdy.ai/api/search-image?query=person%20using%20modern%20smartphone%20app%20for%20laundry%20service%20scheduling%2C%20clean%20minimal%20interface%20design%2C%20soft%20ambient%20lighting%2C%20professional%20lifestyle%20photography%2C%20muted%20tones&width=800&height=600&seq=2&orientation=landscape"
   }, {
     title: "Real-Time Updates",
