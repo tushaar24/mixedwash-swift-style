@@ -93,7 +93,7 @@ export const HowItWorks = () => {
     number: "3",
     label: "TRANSPARENT",
     title: "Our Driver will collect your laundry",
-    description: "You'll receive a confirmation when our driver is nearby. They will collect your bags and weight your laundry in front of you.",
+    description: "You'll receive a confirmation when our driver is nearby. They will collect your bags and weigh your laundry in front of you.",
     features: [{
       icon: <Bell className="h-5 w-5 text-blue-600" />,
       text: "Regular order updates"
