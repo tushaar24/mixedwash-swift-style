@@ -91,19 +91,10 @@ export const WhyChooseUs = () => {
   return (
     <section 
       id="why-choose-us" 
-      className="relative bg-slate-800 overflow-hidden" 
+      className="relative bg-slate-800" 
       ref={sectionRef}
-      style={{
-        backgroundImage: `url('/lovable-uploads/a26880bb-647b-4e70-99d7-bc363909309f.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
     >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-slate-800/80"></div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-white">Why Choose MixedWash</h2>
           <p className="mt-4 text-lg text-slate-200 max-w-2xl mx-auto">
