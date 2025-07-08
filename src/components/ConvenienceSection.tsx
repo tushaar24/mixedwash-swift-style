@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MessageSquare } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
@@ -26,6 +26,25 @@ export const ConvenienceSection = () => {
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
   } : undefined;
+
+  const handleScheduleClick = () => {
+    const userInfo = getUserInfo();
+
+    // Track the CTA click event
+    trackEvent('schedule_cta_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'source': 'convenience_section'
+    });
+
+    // Navigate based on authentication status
+    if (!user) {
+      navigate("/auth");
+    } else {
+      navigate("/schedule", { state: { fromCTA: true } });
+    }
+  };
 
   // Reset tracking flag when component mounts
   useEffect(() => {
@@ -73,7 +92,7 @@ export const ConvenienceSection = () => {
     {
       title: "Flexible Scheduling",
       description: "Select from our range of convenient time slots for pickup and delivery, perfectly aligned with your daily routine.",
-      image: "https://readdy.ai/api/search-image?query=modern%20minimalist%20laundry%20service%20delivery%20van%20in%20front%20of%20modern%20apartment%20building%2C%20soft%20morning%20light%2C%20professional%20service%20concept%2C%20clean%20and%20organized%2C%20high-end%20photography%20style%2C%20muted%20colors&width=800&height=600&seq=1&orientation=landscape"
+      image: "https://readdy.ai/api/search-image?query=modern%20laundry%20service%20scheduling%20interface%20showing%20flexible%20time%20slots%20and%20calendar%20view%2C%20professional%20app%20design%20with%20clean%20layout%2C%20person%20selecting%20convenient%20pickup%20time%2C%20soft%20ambient%20lighting%2C%20premium%20digital%20service%20experience%2C%20high-end%20UI%20photography&width=800&height=600&seq=1&orientation=landscape"
     },
     {
       title: "Digital Convenience",
@@ -83,12 +102,12 @@ export const ConvenienceSection = () => {
     {
       title: "Real-Time Updates",
       description: "Stay informed with precise delivery tracking and instant notifications throughout the service process.",
-      image: "https://readdy.ai/api/search-image?query=professional%20laundry%20service%20worker%20in%20uniform%20delivering%20fresh%20clean%20clothes%20to%20customer%20door%2C%20real-time%20delivery%20tracking%20concept%2C%20modern%20apartment%20setting%2C%20soft%20natural%20lighting&width=800&height=600&seq=3&orientation=landscape"
+      image: "https://readdy.ai/api/search-image?query=professional%20Indian%20delivery%20driver%20in%20neat%20uniform%20delivering%20fresh%20laundry%20at%20modern%20apartment%2C%20traditional%20Indian%20features%2C%20well-groomed%20appearance%2C%20holding%20laundry%20bag%2C%20standing%20near%20delivery%20vehicle%2C%20modern%20urban%20Indian%20setting%2C%20soft%20morning%20light%2C%20professional%20service%20photography&width=800&height=600&seq=3&orientation=landscape"
     },
     {
       title: "Premium Support",
       description: "Access to dedicated customer service professionals ready to assist you at any time, ensuring a seamless experience.",
-      image: "https://readdy.ai/api/search-image?query=professional%20customer%20service%20representative%20with%20headset%20in%20modern%20office%20environment%2C%20helping%20customers%2C%20warm%20and%20friendly%20expression%2C%20clean%20corporate%20setting%2C%20soft%20lighting&width=800&height=600&seq=4&orientation=landscape"
+      image: "https://readdy.ai/api/search-image?query=professional%20Indian%20customer%20service%20representative%20wearing%20traditional%20Indian%20attire%20with%20headset%20in%20modern%20office%20environment%2C%20helping%20customers%2C%20warm%20and%20friendly%20expression%2C%20clean%20corporate%20setting%20with%20Indian%20decor%20elements%2C%20soft%20ambient%20lighting%2C%20high-end%20photography&width=800&height=600&seq=4&orientation=landscape"
     }
   ];
   
@@ -97,6 +116,11 @@ export const ConvenienceSection = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gray-50 rounded-md border-b border-gray-100 mb-16">
+            <span className="text-gray-600 text-sm tracking-wide uppercase">
+              Premium Laundry Service
+            </span>
+          </div>
           <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 tracking-tight">
             <span className="text-gray-900">Professional Laundry Service</span><br />
             <span className="text-gray-500">Tailored to Your Schedule</span>
@@ -141,18 +165,11 @@ export const ConvenienceSection = () => {
         <div className="text-center">
           <Button 
             className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 py-6 h-auto text-base font-medium tracking-wide transition-all duration-300 group"
-            onClick={() => navigate("/contact")}  
+            onClick={handleScheduleClick}
           >
-            <span>Schedule a Consultation</span>
+            <span>Schedule Pickup Now</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
-          
-          <div className="mt-12 max-w-md mx-auto">
-            <p className="text-sm text-gray-500 tracking-wide">
-              For inquiries about our premium service or custom requirements,<br />
-              our concierge team is available to assist you.
-            </p>
-          </div>
         </div>
       </div>
     </section>
