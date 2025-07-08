@@ -89,24 +89,39 @@ export const WhyChooseUs = () => {
   ];
 
   return (
-    <section id="why-choose-us" className="bg-white" ref={sectionRef}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <section 
+      id="why-choose-us" 
+      className="relative bg-slate-800 overflow-hidden" 
+      ref={sectionRef}
+      style={{
+        backgroundImage: `url('/lovable-uploads/a26880bb-647b-4e70-99d7-bc363909309f.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-slate-800/80"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold">Why Choose MixedWash</h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-white">Why Choose MixedWash</h2>
+          <p className="mt-4 text-lg text-slate-200 max-w-2xl mx-auto">
             We're not just another laundry service. Here's what makes us different.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
           {benefits.map((benefit, index) => (
-            <div key={index} className="flex items-start space-x-4">
-              <div className="bg-gray-50 p-3 rounded-xl">
-                {benefit.icon}
-              </div>
-              <div>
-                <h3 className="font-bold text-xl">{benefit.title}</h3>
-                <p className="mt-2 text-gray-600">{benefit.description}</p>
+            <div key={index} className="bg-white p-8 rounded-2xl shadow-lg">
+              <div className="flex items-start space-x-4">
+                <div className="bg-slate-100 p-3 rounded-xl flex-shrink-0">
+                  {benefit.icon}
+                </div>
+                <div>
+                  <h3 className="font-bold text-xl text-slate-900 mb-2">{benefit.title}</h3>
+                  <p className="text-slate-600 leading-relaxed">{benefit.description}</p>
+                </div>
               </div>
             </div>
           ))}
