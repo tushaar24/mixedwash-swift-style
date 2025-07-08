@@ -97,10 +97,6 @@ export const ConvenienceSection = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gray-50 rounded-md border-b border-gray-100 mb-16">
-            <span className="text-gray-600 text-sm tracking-wide uppercase">Premium Laundry Service</span>
-          </div>
-          
           <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 tracking-tight">
             <span className="text-gray-900">Professional Laundry Service</span><br />
             <span className="text-gray-500">Tailored to Your Schedule</span>
