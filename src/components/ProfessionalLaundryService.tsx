@@ -115,7 +115,7 @@ export const ProfessionalLaundryService = () => {
           </Button>
           
           <div className="mt-12 max-w-md mx-auto">
-            <p className="text-sm text-gray-500 tracking-wide">
+            <p className="text-sm text-gray-500 tracking-wide py-0">
               For inquiries about our premium service or custom requirements,<br />
               our concierge team is available to assist you.
             </p>
