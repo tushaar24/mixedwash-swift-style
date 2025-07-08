@@ -54,6 +54,30 @@ const getServiceRoute = (serviceName: string): string => {
   return 'wash-fold'; // Default fallback
 };
 
+// Helper function to sort services in the desired order
+const sortServices = (services: Service[]): Service[] => {
+  const serviceOrder = [
+    'wash & fold',
+    'wash & iron', 
+    'dry cleaning',
+    'heavy wash'
+  ];
+  
+  return services.sort((a, b) => {
+    const aName = a.name.toLowerCase();
+    const bName = b.name.toLowerCase();
+    
+    let aIndex = serviceOrder.findIndex(order => aName.includes(order));
+    let bIndex = serviceOrder.findIndex(order => bName.includes(order));
+    
+    // If service not found in order array, put it at the end
+    if (aIndex === -1) aIndex = serviceOrder.length;
+    if (bIndex === -1) bIndex = serviceOrder.length;
+    
+    return aIndex - bIndex;
+  });
+};
+
 export const ServiceSelection = ({ orderData, updateOrderData, onNext }: ServiceSelectionProps) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,14 +93,15 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
       try {
         const { data, error } = await supabase
           .from("services")
-          .select("*")
-          .order("name");
+          .select("*");
           
         if (error) {
           throw error;
         }
         
-        setServices(data || []);
+        // Sort services in the desired order
+        const sortedServices = sortServices(data || []);
+        setServices(sortedServices);
       } catch (error: any) {
         toast({
           title: "Error fetching services",
