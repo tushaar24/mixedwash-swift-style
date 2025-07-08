@@ -70,7 +70,7 @@ export const Hero = () => {
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 md:pt-0 md:pb-0 min-h-screen flex items-center">
         <div className="max-w-2xl">
-          <div className="py-12">
+          <div className="py-2">
   <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
     <span className="block mb-2">Laundry and</span>
     <span className="block mb-2">Dry Cleaning</span>
