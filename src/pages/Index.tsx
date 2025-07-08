@@ -3,9 +3,8 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { ProfessionalLaundryService } from "@/components/ProfessionalLaundryService";
-import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { Services } from "@/components/Services";
+import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { ConvenienceSection } from "@/components/ConvenienceSection";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Testimonials } from "@/components/Testimonials";
@@ -35,9 +34,8 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
-        <ProfessionalLaundryService />
-        <WhyChooseUs />
         <Services />
+        <WhyChooseUs />
         <ConvenienceSection />
         <HowItWorks />
         <Testimonials />
