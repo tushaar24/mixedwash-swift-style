@@ -2,6 +2,7 @@ import { Check, Clock, Shield, Shirt } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
+import laundryBackground from "@/assets/laundry-background.jpg";
 
 export const WhyChooseUs = () => {
   const { user, profile } = useAuth();
@@ -91,10 +92,19 @@ export const WhyChooseUs = () => {
   return (
     <section 
       id="why-choose-us" 
-      className="relative bg-slate-800" 
+      className="relative bg-slate-900 overflow-hidden" 
       ref={sectionRef}
+      style={{
+        backgroundImage: `url(${laundryBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      {/* Dark overlay for better text readability */}
+      <div className="absolute inset-0 bg-slate-900/75"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-white">Why Choose MixedWash</h2>
           <p className="mt-4 text-lg text-slate-200 max-w-2xl mx-auto">
