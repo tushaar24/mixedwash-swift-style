@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info, X, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -203,11 +202,13 @@ export const Services = () => {
                 handleServiceClick(service.route, service.title);
               }}
             >
-              {/* Delivery time badge */}
-              <Badge variant="outline" className="absolute top-3 right-3 bg-gray-100 text-gray-800 border border-gray-300 flex items-center gap-1 px-2 py-1 z-10">
-                <Clock className="h-3 w-3" />
-                <span className="text-xs">{service.deliveryTime} delivery</span>
-              </Badge>
+              {/* Enhanced delivery time badge - more prominent */}
+              <div className="absolute top-2 right-2 z-20">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-full shadow-lg border-2 border-white flex items-center gap-1.5 text-sm font-bold animate-pulse">
+                  <Clock className="h-4 w-4" />
+                  <span>{service.deliveryTime}</span>
+                </div>
+              </div>
               
               {/* Mobile-only clickable icon button */}
               <div className="md:hidden absolute bottom-3 right-3 z-10">
