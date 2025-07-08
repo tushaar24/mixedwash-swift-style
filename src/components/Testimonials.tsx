@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
@@ -87,16 +88,16 @@ export const Testimonials = () => {
   ];
 
   return (
-    <section className="bg-white" ref={sectionRef}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <section className="bg-white py-16 md:py-20" ref={sectionRef}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold">What Our Customers Say</h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Customers Say</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Don't just take our word for it—hear from the people who use MixedWash.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {testimonials.map((testimonial, index) => (
             <Card key={index} className="border-none shadow-md hover:shadow-lg transition-shadow">
               <CardContent className="pt-8">

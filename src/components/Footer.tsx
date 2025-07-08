@@ -3,8 +3,8 @@ export const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="bg-white border-t" itemScope itemType="https://schema.org/Organization">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-white border-t py-12" itemScope itemType="https://schema.org/Organization">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <span className="text-xl font-bold" itemProp="name">MixedWash</span>
           <p className="mt-2 text-sm text-gray-600" itemProp="description">
