@@ -58,23 +58,21 @@ export const Hero = () => {
   };
   return <div className="relative min-h-screen bg-cover bg-no-repeat" style={{
     backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
-    backgroundPosition: 'calc(50% + 100px) center'
+    backgroundPosition: 'right center',
+    backgroundSize: 'contain'
   }}>
-      {/* Much lighter white gradient fade overlay - more subtle like in second image */}
-      <div className="absolute inset-0 bg-gradient-to-r from-white/80 from-0% via-white/30 via-50% to-transparent to-80%"></div>
-      
-      {/* Very light gradient overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-black/10 to-transparent"></div>
+      {/* Clean white gradient overlay like in reference */}
+      <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent"></div>
       
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-screen flex items-center md:py-16">
         <div className="max-w-2xl">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
             <span className="block mb-2">Laundry and</span>
             <span className="block mb-2">Dry Cleaning</span>
-            <span className="text-3xl md:text-4xl lg:text-5xl text-gray-700">with Next Day Delivery</span>
+            <span className="text-3xl md:text-4xl lg:text-5xl text-gray-600">with Next Day Delivery</span>
           </h1>
-          <p className="text-xl text-gray-700 max-w-lg mt-6">
+          <p className="text-xl text-gray-600 max-w-lg mt-6">
             Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
           </p>
           <div className="pt-6 flex flex-col space-y-3">
@@ -83,7 +81,7 @@ export const Hero = () => {
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             
-            <Button variant="outline" className="border-gray-400 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-gray-800 border-2 px-6 py-4 h-auto text-lg w-full sm:w-auto" onClick={handleContactClick}>
+            <Button variant="outline" className="border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-gray-900 border-2 px-6 py-4 h-auto text-lg w-full sm:w-auto" onClick={handleContactClick}>
               <MessageSquare className="mr-2 h-5 w-5" />
               Contact Us
             </Button>
