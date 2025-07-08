@@ -58,11 +58,11 @@ export const Hero = () => {
     backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
     backgroundPosition: 'calc(50% + 100px) center'
   }}>
-      {/* White gradient fade overlay from left to right - starts from complete white */}
-      <div className="absolute inset-0 bg-gradient-to-r from-white via-white/40 to-transparent"></div>
+      {/* White gradient fade overlay from left to right - starts from complete white and extends further */}
+      <div className="absolute inset-0 bg-gradient-to-r from-white from-0% via-white/70 via-40% to-transparent to-70%"></div>
       
       {/* Gradient overlay - darker on left, lighter on right */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent"></div>
       
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-screen flex items-center md:py-16">
