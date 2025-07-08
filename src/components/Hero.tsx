@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -57,16 +56,8 @@ export const Hero = () => {
   };
   return <div className="relative min-h-screen bg-cover bg-no-repeat" style={{
     backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
-    backgroundPosition: 'calc(50% + 500px) center'
+    backgroundPosition: 'calc(50% + 100px) center'
   }}>
-      {/* White fade overlay - maximum white on left, fading to transparent over 250px */}
-      <div 
-        className="absolute inset-0" 
-        style={{
-          background: 'linear-gradient(to right, rgba(255, 255, 255, 0.9) 0px, rgba(255, 255, 255, 0.6) 100px, rgba(255, 255, 255, 0.3) 200px, transparent 250px)'
-        }}
-      ></div>
-      
       {/* Gradient overlay - darker on left, lighter on right */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
       
