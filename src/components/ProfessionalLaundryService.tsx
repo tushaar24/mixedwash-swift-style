@@ -1,12 +1,48 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { trackEvent } from "@/utils/clevertap";
 
 export const ProfessionalLaundryService = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
+  const { user, profile } = useAuth();
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getUserInfo = () => user ? {
+    user_id: user.id,
+    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
+    phone: profile?.mobile_number
+  } : undefined;
+
+  const handleScheduleClick = () => {
+    const userInfo = getUserInfo();
+
+    // Track the CTA click event
+    trackEvent('schedule_cta_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'source': 'professional_service_section'
+    });
+
+    // Navigate based on authentication status
+    if (!user) {
+      navigate("/auth");
+    } else {
+      navigate("/schedule", { state: { fromCTA: true } });
+    }
+  };
 
   const features = [{
     title: "Flexible Scheduling",
@@ -61,7 +97,7 @@ export const ProfessionalLaundryService = () => {
 
         {/* CTA Section */}
         <div className="text-center">
-          <Button className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 py-6 h-auto text-base font-medium tracking-wide transition-all duration-300 group" onClick={() => navigate("/contact")}>
+          <Button className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 py-6 h-auto text-base font-medium tracking-wide transition-all duration-300 group" onClick={handleScheduleClick}>
             <span>Schedule Pickup Now</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
