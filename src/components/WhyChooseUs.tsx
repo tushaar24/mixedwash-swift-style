@@ -92,17 +92,18 @@ export const WhyChooseUs = () => {
   return (
     <section 
       id="why-choose-us" 
-      className="relative bg-slate-900 overflow-hidden" 
+      className="relative overflow-hidden" 
       ref={sectionRef}
       style={{
-        backgroundImage: `url(${laundryBackground})`,
+        backgroundImage: `url('/lovable-uploads/b363074d-039c-40be-ab13-8ca122bed6d0.png')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundRepeat: 'no-repeat',
+        minHeight: '600px'
       }}
     >
-      {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-slate-900/75"></div>
+      {/* Gradient overlay - dark on left, transparent on right */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-transparent"></div>
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
