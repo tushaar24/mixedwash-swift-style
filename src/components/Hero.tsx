@@ -3,6 +3,7 @@ import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { trackEvent } from "@/utils/clevertap";
+
 export const Hero = () => {
   const navigate = useNavigate();
   const {
@@ -54,13 +55,13 @@ export const Hero = () => {
     navigate("/contact");
   };
   return <div className="relative min-h-screen bg-cover bg-center bg-no-repeat" style={{
-    backgroundImage: `url('https://images.unsplash.com/photo-1627048675165-7b8e7e40ec5e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`
+    backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`
   }}>
       {/* Gradient overlay - darker on left, lighter on right */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
       
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 min-h-screen flex items-center md:py-[100px]">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-screen flex items-center md:py-16">
         <div className="max-w-2xl">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
             <span className="block mb-2">Laundry and</span>
@@ -70,7 +71,7 @@ export const Hero = () => {
           <p className="text-xl text-gray-200 max-w-lg mt-6">
             Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
           </p>
-          <div className="pt-8 flex flex-col space-y-4">
+          <div className="pt-6 flex flex-col space-y-3">
             <Button className="bg-white hover:bg-gray-100 text-black px-6 py-4 text-lg h-auto group w-full sm:w-auto font-semibold" onClick={handleScheduleClick}>
               Schedule Your Laundry Pickup
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
