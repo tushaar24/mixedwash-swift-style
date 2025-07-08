@@ -56,32 +56,21 @@ export const Hero = () => {
   };
 
   return (
-    <div 
-      className="relative overflow-hidden"
-      style={{
-        backgroundImage: `url(/lovable-uploads/5611fc1e-0657-405d-bd70-882686523d48.png)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      {/* Gradient overlay - dark on left for text visibility, transparent on right for image */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+    <div className="bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div className="space-y-6">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
               <span className="block mb-2">Laundry and</span>
               <span className="block mb-2">Dry Cleaning</span>
-              <span className="text-3xl md:text-4xl lg:text-5xl text-gray-200">with Next Day Delivery</span>
+              <span className="text-3xl md:text-4xl lg:text-5xl text-gray-700">with Next Day Delivery</span>
             </h1>
-            <p className="text-xl text-gray-200 max-w-lg">
+            <p className="text-xl text-gray-600 max-w-lg">
               Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
             </p>
             <div className="pt-2 flex flex-col space-y-4">
               <Button 
-                className="bg-white hover:bg-gray-100 text-black px-6 py-4 text-lg h-auto group w-full sm:w-auto font-semibold"
+                className="bg-black hover:bg-gray-800 text-white px-6 py-4 text-lg h-auto group w-full sm:w-auto"
                 onClick={handleScheduleClick}
               >
                 Schedule Your Laundry Pickup
@@ -90,7 +79,7 @@ export const Hero = () => {
               
               <Button 
                 variant="outline" 
-                className="border-white text-white hover:bg-white hover:text-black px-6 py-4 h-auto text-lg w-full sm:w-auto"
+                className="border-gray-300 hover:bg-gray-100 px-6 py-4 h-auto text-lg w-full sm:w-auto"
                 onClick={handleContactClick}
               >
                 <MessageSquare className="mr-2 h-5 w-5" />
@@ -99,8 +88,15 @@ export const Hero = () => {
             </div>
           </div>
           
-          {/* Empty column to maintain layout but let background image show on the right */}
-          <div className="hidden md:block"></div>
+          <div className="flex justify-center items-center">
+            <div className="bg-gray-100 rounded-xl overflow-hidden shadow-md w-full">
+              <img 
+                src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" 
+                alt="Clean, folded laundry" 
+                className="w-full h-64 md:h-80 object-cover"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
