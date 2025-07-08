@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Clock, MessageSquare } from "lucide-react";
+import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
@@ -68,55 +69,93 @@ export const ConvenienceSection = () => {
     };
   }, [user, profile]);
   
+  const features = [
+    {
+      title: "Flexible Scheduling",
+      description: "Select from our range of convenient time slots for pickup and delivery, perfectly aligned with your daily routine.",
+      image: "https://readdy.ai/api/search-image?query=modern%20minimalist%20laundry%20service%20delivery%20van%20in%20front%20of%20modern%20apartment%20building%2C%20soft%20morning%20light%2C%20professional%20service%20concept%2C%20clean%20and%20organized%2C%20high-end%20photography%20style%2C%20muted%20colors&width=800&height=600&seq=1&orientation=landscape"
+    },
+    {
+      title: "Digital Convenience",
+      description: "Manage your appointments effortlessly through our intuitive digital platform, available on both mobile and desktop.",
+      image: "https://readdy.ai/api/search-image?query=person%20using%20modern%20smartphone%20app%20for%20laundry%20service%20scheduling%2C%20clean%20minimal%20interface%20design%2C%20soft%20ambient%20lighting%2C%20professional%20lifestyle%20photography%2C%20muted%20tones&width=800&height=600&seq=2&orientation=landscape"
+    },
+    {
+      title: "Real-Time Updates",
+      description: "Stay informed with precise delivery tracking and instant notifications throughout the service process.",
+      image: "https://readdy.ai/api/search-image?query=professional%20laundry%20service%20worker%20in%20uniform%20delivering%20fresh%20clean%20clothes%20to%20customer%20door%2C%20real-time%20delivery%20tracking%20concept%2C%20modern%20apartment%20setting%2C%20soft%20natural%20lighting&width=800&height=600&seq=3&orientation=landscape"
+    },
+    {
+      title: "Premium Support",
+      description: "Access to dedicated customer service professionals ready to assist you at any time, ensuring a seamless experience.",
+      image: "https://readdy.ai/api/search-image?query=professional%20customer%20service%20representative%20with%20headset%20in%20modern%20office%20environment%2C%20helping%20customers%2C%20warm%20and%20friendly%20expression%2C%20clean%20corporate%20setting%2C%20soft%20lighting&width=800&height=600&seq=4&orientation=landscape"
+    }
+  ];
+  
   return (
-    <section className="py-20 bg-white" ref={sectionRef}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center">
-          {/* Content Column - Centered */}
-          <div className="space-y-8 max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full text-gray-800 border border-gray-300 mx-auto">
-              <Clock className="h-4 w-4" />
-              <span className="text-sm font-semibold">Your convenience is our priority</span>
-            </div>
-            
-            <h2 className="text-3xl md:text-4xl font-bold">Laundry Service That Works Around <span className="text-gray-600">Your Schedule</span></h2>
-            
-            <p className="text-lg text-gray-600">
-              We understand your time is valuable. That's why we've designed our service to fit perfectly into your busy life. Schedule pickups and deliveries when it works for you - morning, afternoon, or evening.
+    <section className="py-24 bg-white" ref={sectionRef}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gray-50 rounded-md border-b border-gray-100 mb-16">
+            <span className="text-gray-600 text-sm tracking-wide uppercase">Premium Laundry Service</span>
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 tracking-tight">
+            <span className="text-gray-900">Professional Laundry Service</span><br />
+            <span className="text-gray-500">Tailored to Your Schedule</span>
+          </h1>
+          
+          <div className="max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 leading-relaxed">
+              Experience the convenience of our premium laundry service, meticulously designed to accommodate your schedule. From flexible pickup times to precise delivery windows, we ensure your laundry needs are met with professional excellence.
             </p>
-            
-            <div className="grid grid-cols-1 gap-4 max-w-xl mx-auto">
-              {[
-                "Flexible pickup and delivery windows",
-                "Easy rescheduling through our app or website",
-                "Real-time notifications when we're on our way",
-                "24/7 customer support for any questions"
-              ].map((item, index) => (
-                <div key={index} className="flex items-center bg-gray-50 p-4 rounded-lg shadow-sm">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center mr-4">
-                    <svg className="h-4 w-4 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span className="text-gray-800 font-medium">{item}</span>
-                </div>
-              ))}
-            </div>
-            
-            <div className="pt-6">
-              <Button 
-                className="bg-black hover:bg-gray-800 text-white px-6 py-6 h-auto group"
-                onClick={() => navigate("/contact")}  
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="max-w-5xl mx-auto mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="group bg-white rounded-xl p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300"
               >
-                <MessageSquare className="mr-2 h-5 w-5" />
-                Have Questions? Contact Us
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <p className="mt-3 text-sm text-gray-600">
-                Need help with scheduling or have special requirements?
-                <br />Our friendly team is ready to assist you.
-              </p>
-            </div>
+                <div className="w-full aspect-[4/3] rounded-lg overflow-hidden mb-8 transform transition-transform duration-500 group-hover:scale-[1.02]">
+                  <img
+                    src={feature.image}
+                    alt={feature.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 text-lg leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="text-center">
+          <Button 
+            className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 py-6 h-auto text-base font-medium tracking-wide transition-all duration-300 group"
+            onClick={() => navigate("/contact")}  
+          >
+            <span>Schedule a Consultation</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+          </Button>
+          
+          <div className="mt-12 max-w-md mx-auto">
+            <p className="text-sm text-gray-500 tracking-wide">
+              For inquiries about our premium service or custom requirements,<br />
+              our concierge team is available to assist you.
+            </p>
           </div>
         </div>
       </div>
