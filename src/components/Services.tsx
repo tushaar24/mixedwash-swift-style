@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info, X, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -118,7 +119,7 @@ export const Services = () => {
       discount: 20,
       route: "heavy-wash",
       minimumOrder: null,
-      deliveryTime: "24h"
+      deliveryTime: "24-48h"
     },
     {
       title: "Dry Cleaning",
@@ -130,7 +131,7 @@ export const Services = () => {
       discount: 0,
       route: "dry-cleaning",
       minimumOrder: null,
-      deliveryTime: "24h",
+      deliveryTime: "24-48h",
       serviceCharge: "₹50 service fee on orders under ₹250"
     }
   ];
@@ -191,7 +192,7 @@ export const Services = () => {
               <div className="absolute top-2 right-2 z-20">
                 <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-full shadow-lg border-2 border-white flex items-center gap-1.5 text-sm font-bold animate-pulse">
                   <Clock className="h-4 w-4" />
-                  <span>24h Delivery</span>
+                  <span>{service.deliveryTime} Delivery</span>
                 </div>
               </div>
               
