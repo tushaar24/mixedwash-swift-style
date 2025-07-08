@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info, X, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -149,21 +148,6 @@ export const Services = () => {
     navigate(`/service/${route}`);
   };
 
-  const handleScheduleClick = () => {
-    const userInfo = getUserInfo();
-
-    // Track the CTA click event FIRST
-    trackEvent('schedule_cta_clicked', {
-      'customer name': userInfo?.name || 'Anonymous',
-      'customer id': userInfo?.user_id || 'Anonymous',
-      'current_time': getCurrentTime(),
-      'source': 'services_section'
-    });
-
-    // Then navigate with a flag to indicate this came from CTA
-    navigate("/schedule", { state: { fromCTA: true } });
-  };
-
   return (
     <section id="services" className="bg-gray-50 py-16 md:py-20" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -287,16 +271,6 @@ export const Services = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
-        
-        <div className="mt-12 text-center">
-          <Button 
-            className="bg-black hover:bg-gray-800 text-white group px-6 py-5 h-auto text-base" 
-            onClick={handleScheduleClick}
-          >
-            Schedule a Pickup
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
         </div>
       </div>
     </section>
