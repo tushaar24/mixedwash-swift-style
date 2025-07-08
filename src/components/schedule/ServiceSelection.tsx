@@ -9,7 +9,6 @@ import { ScheduleOrderData, SelectedService, DryCleaningItem } from "@/pages/Sch
 import { DryCleaningItemsDialog } from "./DryCleaningItemsDialog";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 import { useNavigate } from "react-router-dom";
-
 interface Service {
   id: string;
   name: string;
@@ -18,7 +17,6 @@ interface Service {
   discount_price: number | null;
   icon: string;
 }
-
 interface ServiceSelectionProps {
   orderData: ScheduleOrderData;
   updateOrderData: (data: Partial<ScheduleOrderData>) => void;
@@ -56,49 +54,45 @@ const getServiceRoute = (serviceName: string): string => {
 
 // Helper function to sort services in the desired order
 const sortServices = (services: Service[]): Service[] => {
-  const serviceOrder = [
-    'wash & fold',
-    'wash & iron', 
-    'dry cleaning',
-    'heavy wash'
-  ];
-  
+  const serviceOrder = ['wash & fold', 'wash & iron', 'dry cleaning', 'heavy wash'];
   return services.sort((a, b) => {
     const aName = a.name.toLowerCase();
     const bName = b.name.toLowerCase();
-    
     let aIndex = serviceOrder.findIndex(order => aName.includes(order));
     let bIndex = serviceOrder.findIndex(order => bName.includes(order));
-    
+
     // If service not found in order array, put it at the end
     if (aIndex === -1) aIndex = serviceOrder.length;
     if (bIndex === -1) bIndex = serviceOrder.length;
-    
     return aIndex - bIndex;
   });
 };
-
-export const ServiceSelection = ({ orderData, updateOrderData, onNext }: ServiceSelectionProps) => {
+export const ServiceSelection = ({
+  orderData,
+  updateOrderData,
+  onNext
+}: ServiceSelectionProps) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(
-    new Set(orderData.services.map(service => service.id))
-  );
-  const { isEligibleForDiscount, loading: discountLoading } = useDiscountEligibility();
+  const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(new Set(orderData.services.map(service => service.id)));
+  const {
+    isEligibleForDiscount,
+    loading: discountLoading
+  } = useDiscountEligibility();
   const navigate = useNavigate();
 
   // Fetch services from Supabase
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const { data, error } = await supabase
-          .from("services")
-          .select("*");
-          
+        const {
+          data,
+          error
+        } = await supabase.from("services").select("*");
         if (error) {
           throw error;
         }
-        
+
         // Sort services in the desired order
         const sortedServices = sortServices(data || []);
         setServices(sortedServices);
@@ -106,27 +100,25 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
         toast({
           title: "Error fetching services",
           description: error.message,
-          variant: "destructive",
+          variant: "destructive"
         });
       } finally {
         setLoading(false);
       }
     };
-    
     fetchServices();
   }, []);
 
   // Check if dry cleaning service is selected
   const isDryCleaningSelected = () => {
-    return services.some(service => 
-      selectedServiceIds.has(service.id) && 
-      service.name.toLowerCase().includes('dry cleaning')
-    );
+    return services.some(service => selectedServiceIds.has(service.id) && service.name.toLowerCase().includes('dry cleaning'));
   };
 
   // Handle dry cleaning items change
   const handleDryCleaningItemsChange = (items: DryCleaningItem[]) => {
-    updateOrderData({ dryCleaningItems: items });
+    updateOrderData({
+      dryCleaningItems: items
+    });
   };
 
   // Handle view details click
@@ -139,34 +131,31 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
   // Toggle service selection
   const toggleServiceSelection = (service: Service) => {
     const newSelectedServiceIds = new Set(selectedServiceIds);
-    
     if (newSelectedServiceIds.has(service.id)) {
       newSelectedServiceIds.delete(service.id);
-      
+
       // If removing dry cleaning service, clear dry cleaning items
       if (service.name.toLowerCase().includes('dry cleaning')) {
-        updateOrderData({ dryCleaningItems: [] });
+        updateOrderData({
+          dryCleaningItems: []
+        });
       }
     } else {
       newSelectedServiceIds.add(service.id);
     }
-    
     setSelectedServiceIds(newSelectedServiceIds);
-    
+
     // Update selected services in order data
-    const selectedServices = services
-      .filter(s => newSelectedServiceIds.has(s.id))
-      .map(s => ({
-        id: s.id,
-        name: s.name,
-        price: (!discountLoading && isEligibleForDiscount && s.discount_price !== null) ? s.discount_price : s.price,
-      }));
-    
+    const selectedServices = services.filter(s => newSelectedServiceIds.has(s.id)).map(s => ({
+      id: s.id,
+      name: s.name,
+      price: !discountLoading && isEligibleForDiscount && s.discount_price !== null ? s.discount_price : s.price
+    }));
     updateOrderData({
       services: selectedServices
     });
   };
-  
+
   // Continue to next step with dry cleaning validation
   const handleContinue = () => {
     if (selectedServiceIds.size === 0) {
@@ -187,60 +176,36 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
       });
       return;
     }
-    
     onNext();
   };
 
   // Loading state
   if (loading) {
-    return (
-      <div className="flex justify-center py-12">
+    return <div className="flex justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6 pb-24">
+  return <div className="space-y-6 pb-24">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold">Select Services</h1>
         <p className="text-gray-600 mt-2">Choose one or more laundry services you need</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {services.map((service) => {
-          const minimumKg = getMinimumKg(service.name);
-          const deliveryTime = getDeliveryTime(service.name);
-          
-          return (
-            <Card 
-              key={service.id}
-              className={`transition-all cursor-pointer hover:shadow-md ${
-                selectedServiceIds.has(service.id) 
-                  ? "ring-2 ring-black shadow-md" 
-                  : "hover:scale-[1.01] border-gray-200"
-              }`}
-              onClick={() => toggleServiceSelection(service)}
-            >
+        {services.map(service => {
+        const minimumKg = getMinimumKg(service.name);
+        const deliveryTime = getDeliveryTime(service.name);
+        return <Card key={service.id} className={`transition-all cursor-pointer hover:shadow-md ${selectedServiceIds.has(service.id) ? "ring-2 ring-black shadow-md" : "hover:scale-[1.01] border-gray-200"}`} onClick={() => toggleServiceSelection(service)}>
               <CardContent className="p-4">
                 <div className="flex items-start">
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      checked={selectedServiceIds.has(service.id)} 
-                      onCheckedChange={() => toggleServiceSelection(service)}
-                      className="data-[state=checked]:bg-black data-[state=checked]:border-black"
-                    />
+                    <Checkbox checked={selectedServiceIds.has(service.id)} onCheckedChange={() => toggleServiceSelection(service)} className="data-[state=checked]:bg-black data-[state=checked]:border-black" />
                     <div className="text-4xl mr-2">{service.icon}</div>
                   </div>
                   <div className="flex-1 ml-2">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-bold text-lg">{service.name}</h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => handleViewDetails(service, e)}
-                        className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 h-auto"
-                      >
+                      <Button variant="ghost" size="sm" onClick={e => handleViewDetails(service, e)} className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 h-auto">
                         <Eye className="h-3 w-3 mr-1" />
                         View Details
                       </Button>
@@ -257,8 +222,7 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
                     <p className="text-sm text-gray-600 mb-3">{service.description}</p>
                     
                     <div className="mb-3">
-                      {!discountLoading && service.discount_price !== null && isEligibleForDiscount ? (
-                        <div className="space-y-1">
+                      {!discountLoading && service.discount_price !== null && isEligibleForDiscount ? <div className="space-y-1">
                           <div className="flex items-center">
                             <span className="font-bold text-green-700">₹{service.discount_price}/kg</span>
                             <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium ml-2 flex items-center">
@@ -270,67 +234,44 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
                             <span className="line-through">₹{service.price}/kg</span>
                             <span className="ml-1 text-xs">regular price</span>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="font-bold">
-                          {service.name.toLowerCase().includes('dry cleaning')
-                            ? `From ₹${service.price}`
-                            : `₹${service.price}/kg`
-                          }
-                        </div>
-                      )}
+                        </div> : <div className="font-bold">
+                          {service.name.toLowerCase().includes('dry cleaning') ? `From ₹${service.price}` : `₹${service.price}/kg`}
+                        </div>}
                       
                       {/* Add minimum kg requirement */}
-                      {minimumKg && (
-                        <div className="text-xs text-gray-500 mt-1">
+                      {minimumKg && <div className="text-xs text-gray-500 mt-1">
                           Min {minimumKg}kg
-                        </div>
-                      )}
+                        </div>}
                     </div>
                     
                     {/* Add Items button for dry cleaning */}
-                    {selectedServiceIds.has(service.id) && service.name.toLowerCase().includes('dry cleaning') && (
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <DryCleaningItemsDialog
-                          selectedItems={orderData.dryCleaningItems}
-                          onItemsChange={handleDryCleaningItemsChange}
-                        />
-                      </div>
-                    )}
+                    {selectedServiceIds.has(service.id) && service.name.toLowerCase().includes('dry cleaning') && <div onClick={e => e.stopPropagation()}>
+                        <DryCleaningItemsDialog selectedItems={orderData.dryCleaningItems} onItemsChange={handleDryCleaningItemsChange} />
+                      </div>}
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          );
-        })}
+            </Card>;
+      })}
       </div>
       
       {/* Selected services summary */}
-      {orderData.services.length > 0 && (
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+      {orderData.services.length > 0 && <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h3 className="font-medium mb-2">Selected Services ({orderData.services.length})</h3>
           <ul className="space-y-2">
-            {orderData.services.map((service) => (
-              <li key={service.id} className="flex justify-between items-center">
+            {orderData.services.map(service => <li key={service.id} className="flex justify-between items-center">
                 <span>{service.name}</span>
                 <span className="font-medium">₹{service.price}{!service.name.toLowerCase().includes('dry cleaning') ? '/kg' : ''}</span>
-              </li>
-            ))}
+              </li>)}
           </ul>
-        </div>
-      )}
+        </div>}
       
       {/* Sticky Continue button at bottom center */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center z-10">
-        <Button 
-          onClick={handleContinue}
-          className="bg-black hover:bg-gray-800 text-white px-8 py-6 h-auto text-base group min-w-48"
-          disabled={selectedServiceIds.size === 0}
-        >
+        <Button onClick={handleContinue} disabled={selectedServiceIds.size === 0} className="bg-black hover:bg-gray-800 text-white h-auto text-base group min-w-48 py-[12px] px-[48px]">
           Continue to Address
           <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 };
