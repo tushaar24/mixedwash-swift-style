@@ -67,7 +67,7 @@ export const WhyChooseUs = () => {
 
   const benefits = [
     {
-      title: "Next-Day Delivery",
+      title: "24 Hours Delivery",
       description: "Quick turnaround without the extra cost.",
       icon: <Clock className="h-10 w-10" />
     },
