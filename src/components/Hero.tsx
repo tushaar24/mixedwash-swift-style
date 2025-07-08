@@ -1,8 +1,10 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { trackEvent } from "@/utils/clevertap";
+
 export const Hero = () => {
   const navigate = useNavigate();
   const {
@@ -55,7 +57,7 @@ export const Hero = () => {
   };
   return <div className="relative min-h-screen bg-cover bg-no-repeat" style={{
     backgroundImage: `url('https://readdy.ai/api/search-image?query=modern%20minimalist%20laundry%20room%20interior%20with%20white%20walls%20and%20soft%20turquoise%20accents%2C%20clean%20and%20bright%20atmosphere%20with%20natural%20light%2C%20featuring%20a%20sleek%20washing%20machine%20and%20neatly%20folded%20clothes%2C%20professional%20photography%20style%20with%20soft%20shadows&width=1920&height=1080&seq=1&orientation=landscape')`,
-    backgroundPosition: 'right center',
+    backgroundPosition: 'right top',
     backgroundSize: 'contain'
   }}>
       {/* Clean white gradient overlay like in reference */}
