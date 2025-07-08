@@ -1,14 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { ArrowRight, BadgePercent, Loader2 } from "lucide-react";
+import { ArrowRight, BadgePercent, Loader2, Clock, Eye } from "lucide-react";
 import { ScheduleOrderData, SelectedService, DryCleaningItem } from "@/pages/Schedule";
 import { DryCleaningItemsDialog } from "./DryCleaningItemsDialog";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
+import { useNavigate } from "react-router-dom";
 
 interface Service {
   id: string;
@@ -34,6 +34,26 @@ const getMinimumKg = (serviceName: string): number | null => {
   return null; // For dry cleaning or other services
 };
 
+// Helper function to get delivery time for each service
+const getDeliveryTime = (serviceName: string): string => {
+  const name = serviceName.toLowerCase();
+  if (name.includes('wash & fold') || name.includes('wash fold')) return '24h';
+  if (name.includes('wash & iron') || name.includes('wash iron')) return '24h';
+  if (name.includes('heavy wash')) return '24-48h';
+  if (name.includes('dry cleaning')) return '24-48h';
+  return '24h'; // Default
+};
+
+// Helper function to get service route for navigation
+const getServiceRoute = (serviceName: string): string => {
+  const name = serviceName.toLowerCase();
+  if (name.includes('wash & fold') || name.includes('wash fold')) return 'wash-fold';
+  if (name.includes('wash & iron') || name.includes('wash iron')) return 'wash-iron';
+  if (name.includes('heavy wash')) return 'heavy-wash';
+  if (name.includes('dry cleaning')) return 'dry-cleaning';
+  return 'wash-fold'; // Default fallback
+};
+
 export const ServiceSelection = ({ orderData, updateOrderData, onNext }: ServiceSelectionProps) => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +61,7 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
     new Set(orderData.services.map(service => service.id))
   );
   const { isEligibleForDiscount, loading: discountLoading } = useDiscountEligibility();
+  const navigate = useNavigate();
 
   // Fetch services from Supabase
   useEffect(() => {
@@ -81,6 +102,13 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
   // Handle dry cleaning items change
   const handleDryCleaningItemsChange = (items: DryCleaningItem[]) => {
     updateOrderData({ dryCleaningItems: items });
+  };
+
+  // Handle view details click
+  const handleViewDetails = (service: Service, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card selection
+    const route = getServiceRoute(service.name);
+    navigate(`/service/${route}`);
   };
 
   // Toggle service selection
@@ -157,6 +185,7 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {services.map((service) => {
           const minimumKg = getMinimumKg(service.name);
+          const deliveryTime = getDeliveryTime(service.name);
           
           return (
             <Card 
@@ -179,10 +208,30 @@ export const ServiceSelection = ({ orderData, updateOrderData, onNext }: Service
                     <div className="text-4xl mr-2">{service.icon}</div>
                   </div>
                   <div className="flex-1 ml-2">
-                    <h3 className="font-bold text-lg">{service.name}</h3>
-                    <p className="text-sm text-gray-600">{service.description}</p>
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-bold text-lg">{service.name}</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleViewDetails(service, e)}
+                        className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 h-auto"
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View Details
+                      </Button>
+                    </div>
                     
-                    <div className="mt-2">
+                    {/* Prominent delivery time badge */}
+                    <div className="mb-3">
+                      <div className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-sm font-semibold border border-green-200">
+                        <Clock className="h-4 w-4" />
+                        <span>{deliveryTime} delivery</span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-3">{service.description}</p>
+                    
+                    <div className="mb-3">
                       {!discountLoading && service.discount_price !== null && isEligibleForDiscount ? (
                         <div className="space-y-1">
                           <div className="flex items-center">
