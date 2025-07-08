@@ -101,13 +101,6 @@ export const ProfessionalLaundryService = () => {
             <span>Schedule Pickup Now</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
-          
-          <div className="mt-8 max-w-md mx-auto">
-            <p className="text-sm text-gray-500 tracking-wide">
-              For inquiries about our premium service or custom requirements,<br />
-              our concierge team is available to assist you.
-            </p>
-          </div>
         </div>
       </div>
     </section>;
