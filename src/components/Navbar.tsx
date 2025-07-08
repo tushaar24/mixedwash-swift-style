@@ -23,10 +23,12 @@ export const Navbar = () => {
     } else {
       navigate("/schedule");
     }
+    setIsOpen(false);
   };
 
   const handleProfileClick = () => {
     navigate("/profile");
+    setIsOpen(false);
   };
 
   const handleSignOut = async () => {
@@ -43,8 +45,8 @@ export const Navbar = () => {
         description: "You have been successfully signed out",
       });
       
-      // Use navigate instead of window.location.href to avoid conflicts
       navigate("/", { replace: true });
+      setIsOpen(false);
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
@@ -56,7 +58,7 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="border-b border-gray-100">
+    <nav className="border-b border-gray-100 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -119,8 +121,10 @@ export const Navbar = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-black focus:outline-none"
+              className="inline-flex items-center justify-center p-2 rounded-md text-black hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black transition-colors"
+              aria-expanded="false"
             >
+              <span className="sr-only">Open main menu</span>
               {isOpen ? (
                 <X className="block h-6 w-6" aria-hidden="true" />
               ) : (
@@ -133,27 +137,48 @@ export const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white shadow-lg absolute w-full z-10">
+        <div className="md:hidden absolute top-full left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-lg">
+          <div className="px-4 pt-2 pb-3 space-y-1">
             {isHomePage && (
               <>
-                <a href="#services" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Services</a>
-                <a href="#why-choose-us" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Why Us</a>
-                <a href="#how-it-works" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>How It Works</a>
-                <a href="#faq" className="block px-3 py-2 text-black hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>FAQ</a>
+                <a 
+                  href="#services" 
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" 
+                  onClick={() => setIsOpen(false)}
+                >
+                  Services
+                </a>
+                <a 
+                  href="#why-choose-us" 
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" 
+                  onClick={() => setIsOpen(false)}
+                >
+                  Why Us
+                </a>
+                <a 
+                  href="#how-it-works" 
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" 
+                  onClick={() => setIsOpen(false)}
+                >
+                  How It Works
+                </a>
+                <a 
+                  href="#faq" 
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" 
+                  onClick={() => setIsOpen(false)}
+                >
+                  FAQ
+                </a>
               </>
             )}
             
             {user ? (
-              <>
+              <div className="border-t border-gray-200 pt-4 mt-4">
                 {!isSchedulePage && (
                   <div className="px-3 py-2">
                     <Button 
                       className="w-full bg-black text-white hover:bg-gray-800"
-                      onClick={() => {
-                        handleScheduleClick();
-                        setIsOpen(false);
-                      }}
+                      onClick={handleScheduleClick}
                     >
                       Schedule Pickup
                     </Button>
@@ -163,10 +188,7 @@ export const Navbar = () => {
                   <Button 
                     variant="outline" 
                     className="w-full flex items-center justify-center space-x-2"
-                    onClick={() => {
-                      handleProfileClick();
-                      setIsOpen(false);
-                    }}
+                    onClick={handleProfileClick}
                   >
                     <User className="w-4 h-4" />
                     <span>Profile</span>
@@ -176,28 +198,24 @@ export const Navbar = () => {
                   <Button 
                     variant="outline" 
                     className="w-full flex items-center justify-center space-x-2"
-                    onClick={() => {
-                      handleSignOut();
-                      setIsOpen(false);
-                    }}
+                    onClick={handleSignOut}
                   >
                     <LogOut className="w-4 h-4" />
                     <span>Sign Out</span>
                   </Button>
                 </div>
-              </>
+              </div>
             ) : (
               !isSchedulePage && (
-                <div className="px-3 py-2">
-                  <Button 
-                    className="w-full bg-black text-white hover:bg-gray-800"
-                    onClick={() => {
-                      handleScheduleClick();
-                      setIsOpen(false);
-                    }}
-                  >
-                    Schedule Pickup
-                  </Button>
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <div className="px-3 py-2">
+                    <Button 
+                      className="w-full bg-black text-white hover:bg-gray-800"
+                      onClick={handleScheduleClick}
+                    >
+                      Schedule Pickup
+                    </Button>
+                  </div>
                 </div>
               )
             )}
