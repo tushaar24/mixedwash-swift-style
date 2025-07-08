@@ -1,5 +1,4 @@
 
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -57,15 +56,15 @@ export const Hero = () => {
     navigate("/contact");
   };
   return <div className="relative min-h-screen bg-cover bg-no-repeat" style={{
-    backgroundImage: `url('https://readdy.ai/api/search-image?query=modern%20minimalist%20laundry%20room%20interior%20with%20white%20walls%20and%20soft%20turquoise%20accents%2C%20clean%20and%20bright%20atmosphere%20with%20natural%20light%2C%20featuring%20a%20sleek%20washing%20machine%20and%20neatly%20folded%20clothes%2C%20professional%20photography%20style%20with%20soft%20shadows&width=1920&height=1080&seq=1&orientation=landscape')`,
-    backgroundPosition: 'right top',
+    backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
+    backgroundPosition: 'right center',
     backgroundSize: 'contain'
   }}>
       {/* Clean white gradient overlay like in reference */}
       <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent"></div>
       
-      {/* Content - positioned at top instead of center */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-screen flex items-start pt-20 pb-12">
+      {/* Content */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-screen flex items-center md:py-16">
         <div className="max-w-2xl">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
             <span className="block mb-2">Laundry and</span>
@@ -90,4 +89,3 @@ export const Hero = () => {
       </div>
     </div>;
 };
-
