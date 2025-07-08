@@ -61,7 +61,7 @@ export const ProfessionalLaundryService = () => {
     image: "https://readdy.ai/api/search-image?query=modern%20minimalist%20laundry%20service%20delivery%20van%20in%20front%20of%20modern%20apartment%20building%2C%20soft%20morning%20light%2C%20professional%20service%20concept%2C%20clean%20and%20organized%2C%20high-end%20photography%20style%2C%20muted%20colors&width=800&height=600&seq=1&orientation=landscape"
   }, {
     title: "Digital Convenience",
-    description: "Manage your appointments effortlessly through our intuitive digital platform, available on both mobile and desktop.",
+    description: "Manage your bookings effortlessly. We work according to your schedule.",
     image: "https://readdy.ai/api/search-image?query=person%20using%20modern%20smartphone%20app%20for%20laundry%20service%20scheduling%2C%20clean%20minimal%20interface%20design%2C%20soft%20ambient%20lighting%2C%20professional%20lifestyle%20photography%2C%20muted%20tones&width=800&height=600&seq=2&orientation=landscape"
   }, {
     title: "Real-Time Updates",
