@@ -3,14 +3,13 @@ import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+
 export const HowItWorks = () => {
-  const {
-    user,
-    profile
-  } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const hasTrackedScrollRef = useRef(false);
+
   const getCurrentTime = () => {
     const now = new Date();
     return now.toLocaleTimeString('en-US', {
@@ -19,11 +18,31 @@ export const HowItWorks = () => {
       minute: '2-digit'
     });
   };
+
   const getUserInfo = () => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
   } : undefined;
+
+  const handleScheduleClick = () => {
+    const userInfo = getUserInfo();
+
+    // Track the CTA click event FIRST
+    trackEvent('schedule_cta_clicked', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'source': 'how_it_works_section'
+    });
+
+    // Then navigate with a flag to indicate this came from CTA
+    if (!user) {
+      navigate("/auth");
+    } else {
+      navigate("/schedule", { state: { fromCTA: true } });
+    }
+  };
 
   // Reset tracking flag when component mounts
   useEffect(() => {
@@ -59,6 +78,7 @@ export const HowItWorks = () => {
       }
     };
   }, [user, profile]);
+
   const steps = [{
     number: "1",
     label: "FLEXIBLE",
@@ -116,7 +136,9 @@ export const HowItWorks = () => {
     image: "https://readdy.ai/api/search-image?query=modern%20minimalist%20illustration%20of%20a%20person%20using%20mobile%20app%20to%20track%20laundry%20service%20status%2C%20clean%20design%20with%20soft%20colors&width=600&height=400&seq=4&orientation=landscape",
     hasButton: true
   }];
-  return <section id="how-it-works" ref={sectionRef} className="bg-gray-50 py-16 md:py-[9px]">
+
+  return (
+    <section id="how-it-works" ref={sectionRef} className="bg-gray-50 py-16 md:py-[9px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-16">
@@ -127,7 +149,8 @@ export const HowItWorks = () => {
         <div className="relative">
           {/* Cards Container */}
           <div className="space-y-24 md:space-y-32">
-            {steps.map((step, index) => <div key={index} className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-16`}>
+            {steps.map((step, index) => (
+              <div key={index} className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-8 lg:gap-16`}>
                 <div className="flex-1 max-w-lg">
                   <div className="mb-6">
                     <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
@@ -140,22 +163,31 @@ export const HowItWorks = () => {
                       {step.description}
                     </p>
                     <div className="mt-8 space-y-4">
-                      {step.features.map((feature, featureIndex) => <div key={featureIndex} className="flex items-center gap-3">
+                      {step.features.map((feature, featureIndex) => (
+                        <div key={featureIndex} className="flex items-center gap-3">
                           {feature.icon}
                           <span className="text-gray-700">{feature.text}</span>
-                        </div>)}
+                        </div>
+                      ))}
                     </div>
-                    {step.hasButton && <button onClick={() => navigate("/contact")} className="mt-8 bg-black text-white px-8 rounded-lg font-medium hover:bg-gray-800 transition-colors py-[12px]">
+                    {step.hasButton && (
+                      <button 
+                        onClick={handleScheduleClick}
+                        className="mt-8 bg-black text-white px-8 rounded-lg font-medium hover:bg-gray-800 transition-colors py-[12px]"
+                      >
                         Schedule your pickup
-                      </button>}
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div className="flex-1 max-w-lg">
                   <img src={step.image} alt={step.title} className="w-full rounded-lg shadow-lg" />
                 </div>
-              </div>)}
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
