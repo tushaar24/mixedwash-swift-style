@@ -54,8 +54,9 @@ export const Hero = () => {
     });
     navigate("/contact");
   };
-  return <div className="relative min-h-screen bg-cover bg-center bg-no-repeat" style={{
-    backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`
+  return <div className="relative min-h-screen bg-cover bg-no-repeat" style={{
+    backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
+    backgroundPosition: 'calc(50% + 20px) center'
   }}>
       {/* Gradient overlay - darker on left, lighter on right */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent"></div>
