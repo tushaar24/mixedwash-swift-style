@@ -6,8 +6,8 @@ import { Hero } from "@/components/Hero";
 import { ProfessionalLaundryService } from "@/components/ProfessionalLaundryService";
 import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { Services } from "@/components/Services";
-import { ConvenienceSection } from "@/components/ConvenienceSection";
 import { HowItWorks } from "@/components/HowItWorks";
+import { ConvenienceSection } from "@/components/ConvenienceSection";
 import { Testimonials } from "@/components/Testimonials";
 import { FAQ } from "@/components/FAQ";
 import { CallToAction } from "@/components/CallToAction";
@@ -38,8 +38,8 @@ const Index = () => {
         <ProfessionalLaundryService />
         <WhyChooseUs />
         <Services />
-        <ConvenienceSection />
         <HowItWorks />
+        <ConvenienceSection />
         <Testimonials />
         <FAQ />
         <CallToAction />
