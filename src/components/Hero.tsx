@@ -91,7 +91,7 @@ export const Hero = () => {
           <div className="flex justify-center items-center">
             <div className="bg-gray-100 rounded-xl overflow-hidden shadow-md w-full">
               <img 
-                src="https://images.unsplash.com/photo-1604335399105-a0c585fd81a0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" 
+                src="/lovable-uploads/e34b5c20-8d37-4932-903f-a0e253c90d7c.png" 
                 alt="Professional laundry service with clean, organized clothes" 
                 className="w-full h-64 md:h-80 object-cover"
               />
