@@ -1,60 +1,13 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
-import { trackEvent } from "@/utils/clevertap";
-import { useAuth } from "@/context/AuthContext";
+import { useRef } from "react";
+
 export const ProfessionalLaundryService = () => {
   const navigate = useNavigate();
-  const {
-    user,
-    profile
-  } = useAuth();
   const sectionRef = useRef<HTMLElement>(null);
-  const hasTrackedScrollRef = useRef(false);
-  const getCurrentTime = () => {
-    const now = new Date();
-    return now.toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-  const getUserInfo = () => user ? {
-    user_id: user.id,
-    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
-    phone: profile?.mobile_number
-  } : undefined;
 
-  // Scroll tracking effect
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !hasTrackedScrollRef.current) {
-          hasTrackedScrollRef.current = true;
-          const userInfo = getUserInfo();
-          console.log('Professional Laundry Service section viewed');
-          trackEvent('professional_laundry_service_viewed', {
-            'customer name': userInfo?.name || 'Anonymous',
-            'customer id': userInfo?.user_id || 'Anonymous',
-            'current_time': getCurrentTime(),
-            'section': 'Professional Laundry Service'
-          });
-        }
-      });
-    }, {
-      threshold: 0.3,
-      rootMargin: '0px 0px -50px 0px'
-    });
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, [user, profile]);
   const features = [{
     title: "Flexible Scheduling",
     description: "Select from our range of convenient time slots for pickup and delivery, perfectly aligned with your daily routine.",
@@ -72,6 +25,7 @@ export const ProfessionalLaundryService = () => {
     description: "Access to dedicated customer service professionals ready to assist you at any time, ensuring a seamless experience.",
     image: "https://readdy.ai/api/search-image?query=professional%20customer%20service%20representative%20with%20headset%20in%20modern%20office%20environment%2C%20helping%20customers%2C%20warm%20and%20friendly%20expression%2C%20clean%20corporate%20setting%2C%20soft%20lighting&width=800&height=600&seq=4&orientation=landscape"
   }];
+
   return <section ref={sectionRef} className="bg-white py-16 md:py-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}

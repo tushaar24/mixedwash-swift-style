@@ -42,12 +42,12 @@ export const ConvenienceSection = () => {
             
             const userInfo = getUserInfo();
             
-            console.log('ConvenienceSection: EVENT TRIGGERED - Laundry Service that works around your schedule section viewed');
-            trackEvent('laundry_service_schedule_viewed', {
+            console.log('ConvenienceSection: EVENT TRIGGERED - Professional Laundry Service section viewed');
+            trackEvent('professional_laundry_service_viewed', {
               'customer name': userInfo?.name || 'Anonymous',
               'customer id': userInfo?.user_id || 'Anonymous',
               'current_time': getCurrentTime(),
-              'section': 'Laundry Service that works around your schedule'
+              'section': 'Professional Laundry Service'
             });
           }
         });
