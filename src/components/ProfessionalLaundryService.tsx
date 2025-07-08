@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -47,19 +48,19 @@ export const ProfessionalLaundryService = () => {
   const features = [{
     title: "Flexible Scheduling",
     description: "Select from our range of convenient time slots for pickup and delivery, perfectly aligned with your daily routine.",
-    image: "https://readdy.ai/api/search-image?query=modern%20minimalist%20laundry%20service%20delivery%20van%20in%20front%20of%20modern%20apartment%20building%2C%20soft%20morning%20light%2C%20professional%20service%20concept%2C%20clean%20and%20organized%2C%20high-end%20photography%20style%2C%20muted%20colors&width=800&height=600&seq=1&orientation=landscape"
+    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
   }, {
     title: "Digital Convenience",
     description: "Manage your bookings effortlessly. We work according to your schedule.",
-    image: "https://readdy.ai/api/search-image?query=person%20using%20modern%20smartphone%20app%20for%20laundry%20service%20scheduling%2C%20clean%20minimal%20interface%20design%2C%20soft%20ambient%20lighting%2C%20professional%20lifestyle%20photography%2C%20muted%20tones&width=800&height=600&seq=2&orientation=landscape"
+    image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
   }, {
     title: "Real-Time Updates",
     description: "Stay informed with precise delivery tracking and instant notifications throughout the service process.",
-    image: "https://readdy.ai/api/search-image?query=professional%20laundry%20service%20worker%20in%20uniform%20delivering%20fresh%20clean%20clothes%20to%20customer%20door%2C%20real-time%20delivery%20tracking%20concept%2C%20modern%20apartment%20setting%2C%20soft%20natural%20lighting&width=800&height=600&seq=3&orientation=landscape"
+    image: "https://images.unsplash.com/photo-1578575437130-527eed3abbec?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
   }, {
     title: "Premium Support",
     description: "Access to dedicated customer service professionals ready to assist you at any time, ensuring a seamless experience.",
-    image: "https://readdy.ai/api/search-image?query=professional%20customer%20service%20representative%20with%20headset%20in%20modern%20office%20environment%2C%20helping%20customers%2C%20warm%20and%20friendly%20expression%2C%20clean%20corporate%20setting%2C%20soft%20lighting&width=800&height=600&seq=4&orientation=landscape"
+    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
   }];
 
   return <section ref={sectionRef} className="bg-white py-16 md:py-20">
