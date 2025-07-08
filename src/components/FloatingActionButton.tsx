@@ -17,10 +17,10 @@ export const FloatingActionButton = () => {
   return (
     <Button
       onClick={handleCall}
-      className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl transition-all duration-300 z-50"
+      className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-black hover:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 z-50"
       size="icon"
     >
-      <Phone className="h-6 w-6 text-black" />
+      <Phone className="h-6 w-6 text-white" />
     </Button>
   );
 };
