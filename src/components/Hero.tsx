@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MessageSquare, Star } from "lucide-react";
+import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { trackEvent } from "@/utils/clevertap";
@@ -70,32 +70,13 @@ export const Hero = () => {
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 md:pt-0 md:pb-0 flex items-center">
         <div className="max-w-2xl">
-          {/* TrustPilot Rating */}
-          <div className="flex items-center space-x-2 mb-6">
-            <div className="flex items-center space-x-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star 
-                  key={star} 
-                  className={`h-5 w-5 ${star <= 4 ? 'fill-green-500 text-green-500' : star === 5 ? 'fill-green-500/50 text-green-500' : 'text-gray-300'}`}
-                />
-              ))}
-            </div>
-            <span className="text-lg font-semibold text-gray-900">4.8</span>
-            <span className="text-gray-600">on</span>
-            <img 
-              src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA4MCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTcuNSAzSDEyLjVMMTUgN0wxNy41IDNIMjIuNUwyMCAxMUwyNy41IDE1TDE3LjUgMTlMMTUgMjNMMTIuNSAxOUwyLjUgMTVMMTAgMTFMNy41IDNaIiBmaWxsPSIjMDBCNjc0Ii8+CjxwYXRoIGQ9Ik0zNC41IDNoNXYxNmgtNVYzem0wIDEzaDV2M2gtNXYtM3ptMC01aDV2M2gtNXYtM3ptMC01aDV2M2gtNXYtM3oiIGZpbGw9IiMwMEI2NzQiLz4KPHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCA4MCAyNCIgZmlsbD0ibm9uZSI+CjwvZz4KPC9zdmc+"
-              alt="TrustPilot"
-              className="h-6"
-            />
-          </div>
-
           <h1 className="pt-0 md:pt-32 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
             <span className="block mb-2">Laundry and</span>
             <span className="block mb-2">Dry Cleaning</span>
-            <span className="text-3xl md:text-4xl lg:text-5xl text-gray-600">with 24 Hours Delivery</span>
+            <span className="text-3xl md:text-4xl lg:text-5xl text-gray-600">with Next Day Delivery</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-lg mt-6">
-            Laundry shouldn't slow you down. MixedWash delivers 24-hour laundry at no extra cost, always reliable, always easy.
+            Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
           </p>
           <div className="pt-8 pb-0 md:pb-32 flex flex-col space-y-4">
             <Button 
