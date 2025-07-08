@@ -52,7 +52,7 @@ export const SchedulePickupFooter = ({ onSchedulePickup }: SchedulePickupFooterP
         <Button 
           className="bg-black hover:bg-gray-800 px-8 sm:px-12 py-4 text-base sm:text-lg font-semibold w-full max-w-md"
           size="lg"
-          onClick={onScheduleClick || handleScheduleClick}
+          onClick={onSchedulePickup || handleScheduleClick}
         >
           Schedule Pickup
         </Button>
