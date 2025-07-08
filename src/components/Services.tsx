@@ -8,6 +8,7 @@ import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 import { useState, useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
+import servicesBackground from "@/assets/services-background.jpg";
 
 export const Services = () => {
   const navigate = useNavigate();
@@ -171,8 +172,20 @@ export const Services = () => {
   };
 
   return (
-    <section id="services" className="bg-gray-50" ref={sectionRef}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <section 
+      id="services" 
+      className="relative overflow-hidden" 
+      ref={sectionRef}
+      style={{
+        backgroundImage: `url(${servicesBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Gradient overlay - faded on left, transparent on right */}
+      <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/60 to-transparent"></div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold">Quick Services Overview</h2>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
