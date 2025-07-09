@@ -98,7 +98,7 @@ export const ProfessionalLaundryService = () => {
 
         {/* CTA Section */}
         <div className="text-center">
-          <Button onClick={handleScheduleClick} className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 h-auto text-base font-medium tracking-wide transition-all duration-300 group py-[16px] mb-8">
+          <Button onClick={handleScheduleClick} className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 h-auto text-base font-medium tracking-wide transition-all duration-300 group py-[16px] mb-8 md:mb-0">
             <span>Schedule Pickup Now</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
