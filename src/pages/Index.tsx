@@ -7,7 +7,6 @@ import { ProfessionalLaundryService } from "@/components/ProfessionalLaundryServ
 import { WhyChooseUs } from "@/components/WhyChooseUs";
 import { Services } from "@/components/Services";
 import { HowItWorks } from "@/components/HowItWorks";
-import { Testimonials } from "@/components/Testimonials";
 import { FAQ } from "@/components/FAQ";
 import { CallToAction } from "@/components/CallToAction";
 import { Footer } from "@/components/Footer";
@@ -39,7 +38,6 @@ const Index = () => {
         <WhyChooseUs />
         <Services />
         <HowItWorks />
-        <Testimonials />
         <FAQ />
         <CallToAction />
       </main>
