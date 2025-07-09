@@ -29,19 +29,20 @@ const Contact = () => {
           </div>
           
           <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
-            {/* Email */}
+            {/* WhatsApp */}
             <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center text-center">
               <div className="bg-black p-4 rounded-full mb-6">
-                <Mail className="h-8 w-8 text-white" />
+                <MessageSquare className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Email Us</h3>
-              <p className="text-gray-600 mb-4">Send us an email anytime</p>
-              <a 
-                href="mailto:contact@mixedwash.in" 
-                className="text-lg font-medium text-black hover:underline"
+              <h3 className="text-xl font-semibold mb-2">WhatsApp</h3>
+              <p className="text-gray-600 mb-4">Chat with us on WhatsApp</p>
+              <Button 
+                onClick={handleWhatsAppClick}
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
-                contact@mixedwash.in
-              </a>
+                <MessageSquare className="mr-2 h-5 w-5" />
+                Chat on WhatsApp
+              </Button>
             </div>
             
             {/* Phone */}
@@ -59,20 +60,19 @@ const Contact = () => {
               </a>
             </div>
             
-            {/* WhatsApp */}
+            {/* Email */}
             <div className="bg-white p-8 rounded-xl shadow-md border border-gray-100 flex flex-col items-center text-center">
               <div className="bg-black p-4 rounded-full mb-6">
-                <MessageSquare className="h-8 w-8 text-white" />
+                <Mail className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">WhatsApp</h3>
-              <p className="text-gray-600 mb-4">Chat with us on WhatsApp</p>
-              <Button 
-                onClick={handleWhatsAppClick}
-                className="bg-green-600 hover:bg-green-700 text-white"
+              <h3 className="text-xl font-semibold mb-2">Email Us</h3>
+              <p className="text-gray-600 mb-4">Send us an email anytime</p>
+              <a 
+                href="mailto:contact@mixedwash.in" 
+                className="text-lg font-medium text-black hover:underline"
               >
-                <MessageSquare className="mr-2 h-5 w-5" />
-                Chat on WhatsApp
-              </Button>
+                contact@mixedwash.in
+              </a>
             </div>
           </div>
           
