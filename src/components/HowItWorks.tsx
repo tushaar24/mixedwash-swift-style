@@ -138,7 +138,7 @@ export const HowItWorks = () => {
   }];
 
   return (
-    <section id="how-it-works" ref={sectionRef} className="bg-gray-50 py-16 md:py-[9px]">
+    <section id="how-it-works" ref={sectionRef} className="bg-gray-50 py-8 md:py-[9px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-16">
