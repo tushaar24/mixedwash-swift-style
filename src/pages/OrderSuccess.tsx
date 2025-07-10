@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Calendar, Clock, Home, Truck, ShoppingBag, ArrowRight } from "lucide-react";
+import { CheckCircle, Calendar, Clock, Home, Truck, ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -31,6 +31,7 @@ const OrderSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useSEO({
     title: "Order Confirmed - WashWise",
@@ -39,19 +40,48 @@ const OrderSuccess = () => {
   });
 
   useEffect(() => {
-    // Get order details from location state or localStorage
-    const details = location.state?.orderDetails || 
-                   JSON.parse(localStorage.getItem('lastOrderDetails') || 'null');
-    
-    if (details) {
-      setOrderDetails(details);
-      // Clear from localStorage after retrieving
-      localStorage.removeItem('lastOrderDetails');
-    } else {
-      // If no order details, redirect to home
-      navigate("/");
-    }
+    // Simulate loading delay for better UX
+    const loadOrderDetails = async () => {
+      // Small delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Get order details from location state or localStorage
+      const details = location.state?.orderDetails || 
+                     JSON.parse(localStorage.getItem('lastOrderDetails') || 'null');
+      
+      if (details) {
+        setOrderDetails(details);
+        // Clear from localStorage after retrieving
+        localStorage.removeItem('lastOrderDetails');
+      } else {
+        // If no order details, redirect to home
+        navigate("/");
+      }
+      
+      setIsLoading(false);
+    };
+
+    loadOrderDetails();
   }, [location.state, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center space-y-6">
+            <div className="flex justify-center">
+              <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-semibold text-gray-900">Just a sec—we're finalizing your order!</h2>
+              <p className="text-gray-600">Please wait while we prepare your order confirmation...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (!orderDetails) {
     return (
@@ -59,7 +89,7 @@ const OrderSuccess = () => {
         <Navbar />
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center">
-            <p className="text-gray-600">Loading order details...</p>
+            <p className="text-gray-600">Order details not found. Redirecting...</p>
           </div>
         </main>
       </div>
