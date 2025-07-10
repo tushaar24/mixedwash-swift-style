@@ -230,12 +230,6 @@ const OrderSuccess = () => {
                   <div className="bg-blue-100 rounded-full p-2 mr-4 mt-1">
                     <span className="text-blue-600 font-bold text-sm">2</span>
                   </div>
-        
-                </div>
-                <div className="flex items-start">
-                  <div className="bg-blue-100 rounded-full p-2 mr-4 mt-1">
-                    <span className="text-blue-600 font-bold text-sm">3</span>
-                  </div>
                   <div>
                     <h4 className="font-medium text-gray-900">Professional Care</h4>
                     <p className="text-sm text-gray-600">
@@ -245,7 +239,7 @@ const OrderSuccess = () => {
                 </div>
                 <div className="flex items-start">
                   <div className="bg-blue-100 rounded-full p-2 mr-4 mt-1">
-                    <span className="text-blue-600 font-bold text-sm">4</span>
+                    <span className="text-blue-600 font-bold text-sm">3</span>
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">Delivery</h4>
