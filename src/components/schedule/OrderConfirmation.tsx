@@ -1,4 +1,6 @@
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -22,6 +24,7 @@ interface OrderConfirmationProps {
 
 export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfirmationProps) => {
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
   
   // Submit order to Supabase
   const handleSubmitOrder = async () => {
@@ -297,16 +300,16 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
           specialInstructions: orderData.specialInstructions
         };
         
-        // Store order details for success page
-        localStorage.setItem('lastOrderDetails', JSON.stringify(orderDetails));
-        
         toast({
           title: "Orders placed successfully!",
           description: `${orderData.services.length} laundry services have been scheduled`,
         });
         
-        // Navigate to success page instead of calling onComplete
-        window.location.href = '/order-success';
+        // Navigate to success page using React Router
+        navigate('/order-success', { 
+          state: { orderDetails },
+          replace: true 
+        });
         
       } catch (error: any) {
         console.error("=== ERROR DURING ORDER CREATION ===");
