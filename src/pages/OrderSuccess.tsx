@@ -40,8 +40,14 @@ const OrderSuccess = () => {
   });
 
   useEffect(() => {
-    // Handle browser back button - redirect to home page
-    const handlePopState = () => {
+    // Replace the current history entry to prevent going back to schedule flow
+    window.history.replaceState(null, '', '/order-success');
+    
+    // Handle browser back button - redirect to home page and clear history
+    const handlePopState = (event: PopStateEvent) => {
+      event.preventDefault();
+      // Clear the history stack and go to home
+      window.history.replaceState(null, '', '/');
       navigate("/", { replace: true });
     };
 
@@ -67,7 +73,8 @@ const OrderSuccess = () => {
         // Clear from localStorage after retrieving
         localStorage.removeItem('lastOrderDetails');
       } else {
-        // If no order details, redirect to home
+        // If no order details, redirect to home and clear history
+        window.history.replaceState(null, '', '/');
         navigate("/", { replace: true });
       }
       
@@ -78,10 +85,14 @@ const OrderSuccess = () => {
   }, [location.state, navigate]);
 
   const handleTrackOrder = () => {
+    // Clear history stack and navigate to profile
+    window.history.replaceState(null, '', '/');
     navigate("/profile", { replace: true });
   };
 
   const handleBackToHome = () => {
+    // Clear history stack and navigate to home
+    window.history.replaceState(null, '', '/');
     navigate("/", { replace: true });
   };
 
