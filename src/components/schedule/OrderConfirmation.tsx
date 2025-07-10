@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -286,12 +285,29 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
           console.log("User has already converted before, skipping GTM tracking");
         }
         
+        // Prepare order details for success page
+        const orderDetails = {
+          services: orderData.services,
+          pickupDate: orderData.pickupDate!.toISOString(),
+          pickupSlot: orderData.pickupSlotLabel || '',
+          deliveryDate: orderData.deliveryDate!.toISOString(),
+          deliverySlot: orderData.deliverySlotLabel || '',
+          address: 'Your selected address', // You might want to fetch actual address details
+          dryCleaningItems: orderData.dryCleaningItems,
+          specialInstructions: orderData.specialInstructions
+        };
+        
+        // Store order details for success page
+        localStorage.setItem('lastOrderDetails', JSON.stringify(orderDetails));
+        
         toast({
           title: "Orders placed successfully!",
           description: `${orderData.services.length} laundry services have been scheduled`,
         });
         
-        onComplete();
+        // Navigate to success page instead of calling onComplete
+        window.location.href = '/order-success';
+        
       } catch (error: any) {
         console.error("=== ERROR DURING ORDER CREATION ===");
         console.error("Error details:", error);

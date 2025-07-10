@@ -13,6 +13,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Schedule from "./pages/Schedule";
+import OrderSuccess from "./pages/OrderSuccess";
 import ServiceDetail from "./pages/ServiceDetail";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -67,6 +68,14 @@ function App() {
                   <ProtectedRoute>
                     <Schedule />
                   </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/order-success" 
+                element={
+                  <PageTracker pageName="Order Success">
+                    <OrderSuccess />
+                  </PageTracker>
                 } 
               />
               <Route 
