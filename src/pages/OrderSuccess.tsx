@@ -82,9 +82,6 @@ const OrderSuccess = () => {
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Confirmed!</h1>
-            <p className="text-gray-600">
-              Your laundry pickup has been successfully scheduled. We'll be in touch soon!
-            </p>
           </div>
 
           {/* Order Details Card */}
@@ -222,9 +219,10 @@ const OrderSuccess = () => {
                     <span className="text-blue-600 font-bold text-sm">1</span>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Confirmation Call</h4>
+                    <h4 className="font-medium text-gray-900">Be Ready For Pickup</h4>
                     <p className="text-sm text-gray-600">
-                      We'll call you to confirm your pickup details within the next hour.
+                      Our driver will call you 30 min before pickup. Keep your clothes ready for pickup. 
+                      No need for any bags our driver will carry a bag to collect your clothes.
                     </p>
                   </div>
                 </div>
@@ -232,12 +230,7 @@ const OrderSuccess = () => {
                   <div className="bg-blue-100 rounded-full p-2 mr-4 mt-1">
                     <span className="text-blue-600 font-bold text-sm">2</span>
                   </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900">Pickup</h4>
-                    <p className="text-sm text-gray-600">
-                      Our team will arrive at your scheduled pickup time to collect your laundry.
-                    </p>
-                  </div>
+        
                 </div>
                 <div className="flex items-start">
                   <div className="bg-blue-100 rounded-full p-2 mr-4 mt-1">
