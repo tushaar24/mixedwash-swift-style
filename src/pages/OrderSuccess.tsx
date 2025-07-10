@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Calendar, Clock, Home, Truck, ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle, Calendar, Clock, Home, Truck, ShoppingBag, ArrowRight, Loader2, Package } from "lucide-react";
 import { format } from "date-fns";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -40,6 +40,19 @@ const OrderSuccess = () => {
   });
 
   useEffect(() => {
+    // Handle browser back button - redirect to home page
+    const handlePopState = () => {
+      navigate("/", { replace: true });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [navigate]);
+
+  useEffect(() => {
     // Simulate loading delay for better UX
     const loadOrderDetails = async () => {
       // Small delay to show loading state
@@ -55,7 +68,7 @@ const OrderSuccess = () => {
         localStorage.removeItem('lastOrderDetails');
       } else {
         // If no order details, redirect to home
-        navigate("/");
+        navigate("/", { replace: true });
       }
       
       setIsLoading(false);
@@ -63,6 +76,14 @@ const OrderSuccess = () => {
 
     loadOrderDetails();
   }, [location.state, navigate]);
+
+  const handleTrackOrder = () => {
+    navigate("/profile", { replace: true });
+  };
+
+  const handleBackToHome = () => {
+    navigate("/", { replace: true });
+  };
 
   if (isLoading) {
     return (
@@ -285,18 +306,18 @@ const OrderSuccess = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={() => navigate("/")}
+              onClick={handleBackToHome}
               variant="outline"
               className="px-8 py-3 text-base"
             >
               Back to Home
             </Button>
             <Button 
-              onClick={() => navigate("/schedule")}
+              onClick={handleTrackOrder}
               className="bg-black hover:bg-gray-800 text-white px-8 py-3 text-base"
             >
-              Schedule Another Pickup
-              <ArrowRight className="ml-2 h-4 w-4" />
+              Track Order
+              <Package className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
