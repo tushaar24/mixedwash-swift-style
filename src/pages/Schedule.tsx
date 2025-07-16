@@ -148,17 +148,6 @@ const Schedule = () => {
     }
   }, [currentStep, user, profile, fromCTA, orderData.services, orderData.deliveryDate, orderData.pickupDate, orderData.deliverySlotLabel, orderData.pickupSlotLabel, orderData.addressId]);
 
-  // Check if user is logged in
-  useEffect(() => {
-    if (!isLoading && !user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to schedule a laundry pickup",
-      });
-      navigate("/auth");
-    }
-  }, [user, isLoading, navigate]);
-
   // Handle next step transitions
   const handleNextStep = () => {
     // Log the current state before moving to the next step
@@ -175,6 +164,16 @@ const Schedule = () => {
         'current_time': getCurrentTime(),
         'services_selected': orderData.services.map(s => s.name).join(', ')
       });
+      
+      // Check authentication before proceeding to address selection
+      if (!user) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to continue with your order",
+        });
+        navigate("/auth");
+        return;
+      }
     }
     
     if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
@@ -265,8 +264,8 @@ const Schedule = () => {
     });
   };
 
-  // If still checking authentication, show loading
-  if (isLoading) {
+  // Only show loading for address selection and beyond when auth is required
+  if (isLoading && currentStep > ScheduleStep.SERVICE_SELECTION) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-gray-500" />

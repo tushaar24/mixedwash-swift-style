@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { ScheduleOrderData, SelectedService, DryCleaningItem } from "@/pages/Sch
 import { DryCleaningItemsDialog } from "./DryCleaningItemsDialog";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 interface Service {
   id: string;
@@ -116,6 +116,7 @@ export const ServiceSelection = ({
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(new Set(orderData.services.map(service => service.id)));
+  const { user } = useAuth();
   const {
     isEligibleForDiscount,
     loading: discountLoading
@@ -183,8 +184,9 @@ export const ServiceSelection = ({
     setSelectedServiceIds(newSelectedServiceIds);
 
     // Use the correct pricing based on customer eligibility
+    // For unauthenticated users, show new customer pricing
     const selectedServices = services.filter(s => newSelectedServiceIds.has(s.id)).map(s => {
-      const price = getServicePricing(s, isEligibleForDiscount);
+      const price = user ? getServicePricing(s, isEligibleForDiscount) : getServicePricing(s, false);
       return {
         id: s.id,
         name: s.name,
@@ -240,7 +242,8 @@ export const ServiceSelection = ({
           const deliveryTime = getDeliveryTime(service.name);
           
           // Get the correct display price based on customer eligibility
-          const displayPrice = getServicePricing(service, isEligibleForDiscount);
+          // For unauthenticated users, show new customer pricing
+          const displayPrice = user ? getServicePricing(service, isEligibleForDiscount) : getServicePricing(service, false);
           
           return (
             <Card 

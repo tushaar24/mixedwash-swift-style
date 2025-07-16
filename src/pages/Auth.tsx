@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,11 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isLoading, isProfileComplete } = useAuth();
+
+  // Check if user came from schedule flow
+  const fromSchedule = location.state?.fromSchedule || document.referrer.includes('/schedule');
 
   const getCurrentTime = () => {
     const now = new Date();
@@ -35,20 +39,29 @@ const Auth = () => {
         // Redirect to profile page for incomplete profiles
         navigate("/profile");
       } else {
-        // Redirect to home for users with complete profiles
-        navigate("/");
+        // If coming from schedule flow, redirect back to schedule
+        if (fromSchedule) {
+          navigate("/schedule");
+        } else {
+          // Otherwise redirect to home for users with complete profiles
+          navigate("/");
+        }
       }
     }
-  }, [user, isProfileComplete, isLoading, navigate]);
+  }, [user, isProfileComplete, isLoading, navigate, fromSchedule]);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     
     try {
+      const redirectUrl = fromSchedule ? 
+        `${window.location.origin}/schedule` : 
+        window.location.origin;
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin
+          redirectTo: redirectUrl
         }
       });
       
@@ -109,11 +122,15 @@ const Auth = () => {
     setLoading(true);
     
     try {
+      const redirectUrl = fromSchedule ? 
+        `${window.location.origin}/schedule` : 
+        window.location.origin;
+
       const { error } = await supabase.auth.signUp({ 
         email, 
         password,
         options: {
-          emailRedirectTo: window.location.origin
+          emailRedirectTo: redirectUrl
         }
       });
       
@@ -158,7 +175,7 @@ const Auth = () => {
           MixedWash
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Sign in to schedule your laundry pickup
+          {fromSchedule ? "Sign in to continue with your order" : "Sign in to schedule your laundry pickup"}
         </p>
       </div>
 

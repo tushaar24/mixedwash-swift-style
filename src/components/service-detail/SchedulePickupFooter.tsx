@@ -38,12 +38,8 @@ export const SchedulePickupFooter = ({ onSchedulePickup }: SchedulePickupFooterP
       'source': 'service_detail_footer'
     });
 
-    // Then navigate with a flag to indicate this came from CTA
-    if (!user) {
-      navigate("/auth");
-    } else {
-      navigate("/schedule", { state: { fromCTA: true } });
-    }
+    // Navigate directly to schedule page - authentication will be handled there
+    navigate("/schedule", { state: { fromCTA: true } });
   };
 
   return (
