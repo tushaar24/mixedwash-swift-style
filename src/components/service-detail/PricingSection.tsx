@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -118,13 +119,9 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
                   </div>
                   <div className="sm:text-right">
                     <div className="font-semibold text-xl sm:text-2xl text-gray-800">
-                      {price.amount}
+                      {/* Show old price for old customers, new price for new customers */}
+                      {isEligibleForDiscount ? price.oldPrice : price.amount}
                     </div>
-                    {isEligibleForDiscount && price.oldPrice && price.oldPrice !== price.amount && (
-                      <div className="text-sm text-gray-500 line-through">
-                        {price.oldPrice}
-                      </div>
-                    )}
                   </div>
                 </div>
               </CardContent>

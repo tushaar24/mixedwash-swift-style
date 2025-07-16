@@ -143,10 +143,10 @@ export const ServiceSelection = ({
     }
     setSelectedServiceIds(newSelectedServiceIds);
 
-    // Use regular price for new customers, discount price for old customers if available
+    // For old customers, use discount price if available, otherwise use regular price
+    // For new customers, always use regular price
     const selectedServices = services.filter(s => newSelectedServiceIds.has(s.id)).map(s => {
       let price = s.price;
-      // If old customer and discount price exists, use discount price, otherwise use regular price
       if (isEligibleForDiscount && s.discount_price) {
         price = s.discount_price;
       }
@@ -205,13 +205,11 @@ export const ServiceSelection = ({
           
           // Determine which price to show
           let displayPrice = service.price;
-          let showOldPrice = false;
           
           // For old customers, show discount price if available, otherwise regular price
           // For new customers, always show regular price
           if (isEligibleForDiscount && service.discount_price) {
             displayPrice = service.discount_price;
-            showOldPrice = true;
           }
           
           return (
@@ -263,15 +261,6 @@ export const ServiceSelection = ({
                           ? `From ₹${displayPrice}` 
                           : `₹${displayPrice}/kg`}
                       </div>
-                      
-                      {/* Show old price for old customers */}
-                      {isEligibleForDiscount && showOldPrice && service.price !== displayPrice && (
-                        <div className="text-sm text-gray-500 line-through">
-                          {service.name.toLowerCase().includes('dry cleaning') 
-                            ? `From ₹${service.price}` 
-                            : `₹${service.price}/kg`}
-                        </div>
-                      )}
                       
                       {minimumKg && (
                         <div className="text-xs text-gray-500 mt-1">

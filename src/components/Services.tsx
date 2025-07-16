@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BadgePercent, Clock, Truck, Info, X, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,8 +67,7 @@ export const Services = () => {
     description: "Fresh and folded clothes, ready tomorrow.",
     icon: "👕",
     newPrice: "₹79/kg",
-    oldPrice: "₹99/kg",
-    regularPrice: "₹79/kg",
+    oldPrice: "₹95/kg",
     discount: 0,
     route: "wash-fold",
     minimumOrder: 4,
@@ -77,8 +77,7 @@ export const Services = () => {
     description: "Your outfits, wrinkle-free and crisp.",
     icon: "👔",
     newPrice: "₹119/kg",
-    oldPrice: "₹149/kg",
-    regularPrice: "₹119/kg",
+    oldPrice: "₹150/kg",
     discount: 0,
     route: "wash-iron",
     minimumOrder: 3,
@@ -88,8 +87,7 @@ export const Services = () => {
     description: "Big laundry loads handled with ease.",
     icon: "🧺",
     newPrice: "₹109/kg",
-    oldPrice: "₹129/kg",
-    regularPrice: "₹109/kg",
+    oldPrice: "₹140/kg",
     discount: 0,
     route: "heavy-wash",
     minimumOrder: null,
@@ -99,8 +97,7 @@ export const Services = () => {
     description: "Delicate care, speedy turnaround.",
     icon: <img src="/lovable-uploads/c458f6b0-88cf-4b84-8d9a-10526e393e2d.png" alt="Blazer" className="h-10 w-10" />,
     newPrice: "starts at ₹100",
-    oldPrice: "",
-    regularPrice: "starts at ₹100",
+    oldPrice: "starts at ₹100",
     discount: 0,
     route: "dry-cleaning",
     minimumOrder: null,
@@ -178,12 +175,8 @@ export const Services = () => {
                 <p className="text-gray-600 mb-4">{service.description}</p>
                 
                 <div className="font-semibold text-xl text-gray-800">
-                  {service.regularPrice}
-                  {isEligibleForDiscount && service.oldPrice && service.oldPrice !== service.regularPrice && (
-                    <div className="text-sm text-gray-500 line-through mt-1">
-                      {service.oldPrice}
-                    </div>
-                  )}
+                  {/* Show old price for old customers, new price for new customers */}
+                  {isEligibleForDiscount ? service.oldPrice : service.newPrice}
                 </div>
                 
                 <div className="mt-3 text-xs text-blue-700 flex items-center gap-1">
