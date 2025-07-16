@@ -61,13 +61,11 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-              {/* Schedule page WITHOUT PageTracker to avoid duplicate events */}
+              {/* Schedule page allows unauthenticated access for service selection */}
               <Route 
                 path="/schedule" 
                 element={
-                  <ProtectedRoute>
-                    <Schedule />
-                  </ProtectedRoute>
+                  <Schedule />
                 } 
               />
               <Route 

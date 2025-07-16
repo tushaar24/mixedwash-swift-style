@@ -38,7 +38,7 @@ export const SchedulePickupFooter = ({ onSchedulePickup }: SchedulePickupFooterP
       'source': 'service_detail_footer'
     });
 
-    // Navigate directly to schedule page - authentication will be handled there
+    // Always navigate to schedule page for service selection first
     navigate("/schedule", { state: { fromCTA: true } });
   };
 

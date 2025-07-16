@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -48,7 +49,7 @@ export interface ScheduleOrderData {
 }
 
 const Schedule = () => {
-  const { user, isLoading, profile } = useAuth();
+  const { user, isLoading, profile, isProfileComplete } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState(ScheduleStep.SERVICE_SELECTION);
@@ -88,6 +89,38 @@ const Schedule = () => {
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
   } : undefined;
+
+  // Handle redirect after authentication
+  useEffect(() => {
+    // If user just authenticated and has services selected, go to address step
+    if (user && !isLoading && orderData.services.length > 0 && currentStep === ScheduleStep.SERVICE_SELECTION) {
+      // Check if profile is complete
+      if (!isProfileComplete) {
+        // Profile incomplete - redirect to profile page
+        navigate("/profile", { 
+          state: { 
+            returnTo: "/schedule",
+            returnStep: ScheduleStep.ADDRESS_SELECTION,
+            orderData: orderData
+          }
+        });
+      } else {
+        // Profile complete - go to address selection
+        setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
+      }
+    }
+  }, [user, isLoading, isProfileComplete, orderData.services.length, currentStep, navigate]);
+
+  // Handle return from profile completion
+  useEffect(() => {
+    const returnState = location.state;
+    if (returnState?.returnTo === "/schedule" && returnState?.returnStep && returnState?.orderData) {
+      setOrderData(returnState.orderData);
+      setCurrentStep(returnState.returnStep);
+      // Clear the state to prevent repeated redirects
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Track step views only on actual step transitions
   useEffect(() => {
@@ -167,11 +200,24 @@ const Schedule = () => {
       
       // Check authentication before proceeding to address selection
       if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to continue with your order",
+        navigate("/auth", { 
+          state: { 
+            fromSchedule: true,
+            orderData: orderData
+          }
         });
-        navigate("/auth");
+        return;
+      }
+      
+      // Check if profile is complete
+      if (!isProfileComplete) {
+        navigate("/profile", { 
+          state: { 
+            returnTo: "/schedule",
+            returnStep: ScheduleStep.ADDRESS_SELECTION,
+            orderData: orderData
+          }
+        });
         return;
       }
     }
@@ -264,8 +310,8 @@ const Schedule = () => {
     });
   };
 
-  // Only show loading for address selection and beyond when auth is required
-  if (isLoading && currentStep > ScheduleStep.SERVICE_SELECTION) {
+  // Show loading only when we need authentication for address selection and beyond
+  if (isLoading && currentStep > ScheduleStep.SERVICE_SELECTION && user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-gray-500" />

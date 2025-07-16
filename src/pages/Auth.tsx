@@ -17,8 +17,9 @@ const Auth = () => {
   const location = useLocation();
   const { user, isLoading, isProfileComplete } = useAuth();
 
-  // Check if user came from schedule flow
-  const fromSchedule = location.state?.fromSchedule || document.referrer.includes('/schedule');
+  // Check if user came from schedule flow and extract order data
+  const fromSchedule = location.state?.fromSchedule;
+  const orderData = location.state?.orderData;
 
   const getCurrentTime = () => {
     const now = new Date();
@@ -35,28 +36,47 @@ const Auth = () => {
     
     // Check if user is already logged in
     if (user) {
-      if (!isProfileComplete) {
+      if (fromSchedule && orderData) {
+        // Coming from schedule with order data
+        if (!isProfileComplete) {
+          // Redirect to profile page for incomplete profiles
+          navigate("/profile", { 
+            state: { 
+              returnTo: "/schedule",
+              returnStep: 1, // ADDRESS_SELECTION = 1
+              orderData: orderData
+            }
+          });
+        } else {
+          // Redirect back to schedule with order data
+          navigate("/schedule", { 
+            state: { 
+              fromAuth: true,
+              orderData: orderData,
+              currentStep: 1 // ADDRESS_SELECTION = 1
+            }
+          });
+        }
+      } else if (!isProfileComplete) {
         // Redirect to profile page for incomplete profiles
         navigate("/profile");
       } else {
-        // If coming from schedule flow, redirect back to schedule
-        if (fromSchedule) {
-          navigate("/schedule");
-        } else {
-          // Otherwise redirect to home for users with complete profiles
-          navigate("/");
-        }
+        // Otherwise redirect to home for users with complete profiles
+        navigate("/");
       }
     }
-  }, [user, isProfileComplete, isLoading, navigate, fromSchedule]);
+  }, [user, isProfileComplete, isLoading, navigate, fromSchedule, orderData]);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     
     try {
-      const redirectUrl = fromSchedule ? 
-        `${window.location.origin}/schedule` : 
-        window.location.origin;
+      let redirectUrl = window.location.origin;
+      
+      // If coming from schedule with order data, include it in the redirect
+      if (fromSchedule && orderData) {
+        redirectUrl = `${window.location.origin}/schedule?fromAuth=true`;
+      }
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -122,9 +142,12 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      const redirectUrl = fromSchedule ? 
-        `${window.location.origin}/schedule` : 
-        window.location.origin;
+      let redirectUrl = window.location.origin;
+      
+      // If coming from schedule with order data, include it in the redirect
+      if (fromSchedule && orderData) {
+        redirectUrl = `${window.location.origin}/schedule?fromAuth=true`;
+      }
 
       const { error } = await supabase.auth.signUp({ 
         email, 
