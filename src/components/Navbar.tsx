@@ -18,11 +18,8 @@ export const Navbar = () => {
   const isSchedulePage = location.pathname === "/schedule";
 
   const handleScheduleClick = () => {
-    if (!user) {
-      navigate("/auth");
-    } else {
-      navigate("/schedule");
-    }
+    // Always navigate to schedule page for service selection first
+    navigate("/schedule", { state: { fromCTA: true } });
     setIsOpen(false);
   };
 

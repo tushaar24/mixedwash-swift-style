@@ -1,9 +1,11 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { trackEvent } from "@/utils/clevertap";
+
 export const ProfessionalLaundryService = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
@@ -11,6 +13,7 @@ export const ProfessionalLaundryService = () => {
     user,
     profile
   } = useAuth();
+  
   const getCurrentTime = () => {
     const now = new Date();
     return now.toLocaleTimeString('en-US', {
@@ -19,11 +22,13 @@ export const ProfessionalLaundryService = () => {
       minute: '2-digit'
     });
   };
+  
   const getUserInfo = () => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
   } : undefined;
+  
   const handleScheduleClick = () => {
     const userInfo = getUserInfo();
 
@@ -35,17 +40,10 @@ export const ProfessionalLaundryService = () => {
       'source': 'professional_service_section'
     });
 
-    // Navigate based on authentication status
-    if (!user) {
-      navigate("/auth");
-    } else {
-      navigate("/schedule", {
-        state: {
-          fromCTA: true
-        }
-      });
-    }
+    // Always navigate to schedule page for service selection first
+    navigate("/schedule", { state: { fromCTA: true } });
   };
+  
   const features = [{
     title: "Flexible Scheduling",
     description: "Select from our range of convenient time slots for pickup and delivery, perfectly aligned with your daily routine.",
@@ -63,6 +61,7 @@ export const ProfessionalLaundryService = () => {
     description: "Access to dedicated customer service professionals ready to assist you at any time, ensuring a seamless experience.",
     image: "https://readdy.ai/api/search-image?query=professional%20Indian%20customer%20service%20representative%20wearing%20traditional%20Indian%20attire%20with%20headset%20in%20modern%20office%20environment%2C%20helping%20customers%2C%20warm%20and%20friendly%20expression%2C%20clean%20corporate%20setting%20with%20Indian%20decor%20elements%2C%20soft%20ambient%20lighting%2C%20high-end%20photography&width=800&height=600&seq=4&orientation=landscape"
   }];
+  
   return <section ref={sectionRef} className="bg-white py-8 md:py-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}

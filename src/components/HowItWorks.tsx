@@ -36,12 +36,8 @@ export const HowItWorks = () => {
       'source': 'how_it_works_section'
     });
 
-    // Then navigate with a flag to indicate this came from CTA
-    if (!user) {
-      navigate("/auth");
-    } else {
-      navigate("/schedule", { state: { fromCTA: true } });
-    }
+    // Always navigate to schedule page for service selection first
+    navigate("/schedule", { state: { fromCTA: true } });
   };
 
   // Reset tracking flag when component mounts
