@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,44 @@ const getServiceRoute = (serviceName: string): string => {
   if (name.includes('heavy wash')) return 'heavy-wash';
   if (name.includes('dry cleaning')) return 'dry-cleaning';
   return 'wash-fold';
+};
+
+// Helper function to get correct pricing based on customer eligibility and service name
+const getServicePricing = (service: Service, isEligibleForDiscount: boolean) => {
+  const serviceName = service.name.toLowerCase();
+  
+  if (isEligibleForDiscount) {
+    // Old customers see old pricing
+    if (serviceName.includes('wash & fold') || serviceName.includes('wash fold')) {
+      return 95;
+    }
+    if (serviceName.includes('wash & iron') || serviceName.includes('wash iron')) {
+      return 150;
+    }
+    if (serviceName.includes('heavy wash')) {
+      return 140;
+    }
+    if (serviceName.includes('dry cleaning')) {
+      return service.price; // Keep original price for dry cleaning
+    }
+  } else {
+    // New customers see new pricing
+    if (serviceName.includes('wash & fold') || serviceName.includes('wash fold')) {
+      return 79;
+    }
+    if (serviceName.includes('wash & iron') || serviceName.includes('wash iron')) {
+      return 119;
+    }
+    if (serviceName.includes('heavy wash')) {
+      return 109;
+    }
+    if (serviceName.includes('dry cleaning')) {
+      return service.price; // Keep original price for dry cleaning
+    }
+  }
+  
+  // Fallback to service price
+  return service.price;
 };
 
 // Helper function to sort services in the desired order
@@ -143,19 +182,16 @@ export const ServiceSelection = ({
     }
     setSelectedServiceIds(newSelectedServiceIds);
 
-    // For old customers, use discount price if available, otherwise use regular price
-    // For new customers, always use regular price
+    // Use the correct pricing based on customer eligibility
     const selectedServices = services.filter(s => newSelectedServiceIds.has(s.id)).map(s => {
-      let price = s.price;
-      if (isEligibleForDiscount && s.discount_price) {
-        price = s.discount_price;
-      }
+      const price = getServicePricing(s, isEligibleForDiscount);
       return {
         id: s.id,
         name: s.name,
         price: price
       };
     });
+    
     updateOrderData({
       services: selectedServices
     });
@@ -203,14 +239,8 @@ export const ServiceSelection = ({
           const minimumKg = getMinimumKg(service.name);
           const deliveryTime = getDeliveryTime(service.name);
           
-          // Determine which price to show
-          let displayPrice = service.price;
-          
-          // For old customers, show discount price if available, otherwise regular price
-          // For new customers, always show regular price
-          if (isEligibleForDiscount && service.discount_price) {
-            displayPrice = service.discount_price;
-          }
+          // Get the correct display price based on customer eligibility
+          const displayPrice = getServicePricing(service, isEligibleForDiscount);
           
           return (
             <Card 
