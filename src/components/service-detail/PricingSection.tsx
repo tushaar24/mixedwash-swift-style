@@ -39,7 +39,6 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
       
       <div className="space-y-6 sm:space-y-8">
         {serviceId === 'dry-cleaning' ? (
-          // Dry Cleaning specific price display with tables and tabs
           <Card className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
             <Tabs defaultValue="men" className="w-full" onValueChange={(value) => setActiveTab(value)}>
               <TabsList className="grid grid-cols-2 w-full">
@@ -99,7 +98,6 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
             </Tabs>
           </Card>
         ) : (
-          // Regular services pricing display
           service.prices.map((price: any, index: number) => (
             <Card key={index} className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
               <CardContent className="p-4 sm:p-6">
@@ -119,31 +117,9 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
                     )}
                   </div>
                   <div className="sm:text-right">
-                    {!loading && service.discount > 0 && isEligibleForDiscount ? (
-                      <div className="space-y-1 sm:space-y-2">
-                        <div className="flex items-center sm:justify-end gap-2">
-                          <span className="font-bold text-xl sm:text-2xl text-green-700">{price.amount}</span>
-                          <HoverCard>
-                            <HoverCardTrigger>
-                              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium inline-block">
-                                Save {service.discount}% on first order
-                              </span>
-                            </HoverCardTrigger>
-                            <HoverCardContent className="p-2 text-xs w-48">
-                              Discount applied for first-time customers! Regular price is {price.oldPrice}.
-                            </HoverCardContent>
-                          </HoverCard>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          <span className="line-through">{price.oldPrice}</span>
-                          <span className="ml-1 text-xs">regular price</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="font-semibold text-xl sm:text-2xl text-gray-800">
-                        {price.oldPrice}
-                      </div>
-                    )}
+                    <div className="font-semibold text-xl sm:text-2xl text-gray-800">
+                      {price.amount}
+                    </div>
                   </div>
                 </div>
               </CardContent>

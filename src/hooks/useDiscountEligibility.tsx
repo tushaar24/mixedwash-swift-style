@@ -10,51 +10,9 @@ export const useDiscountEligibility = () => {
 
   useEffect(() => {
     const checkDiscountEligibility = async () => {
-      // If user is not logged in, show discounts
-      if (!user) {
-        setIsEligibleForDiscount(true);
-        setLoading(false);
-        return;
-      }
-
-      // If user is logged in but doesn't have mobile number, don't show discounts
-      if (!profile?.mobile_number) {
-        setIsEligibleForDiscount(false);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      
-      try {
-        // Check if the user's phone number is in the phone_numbers table
-        const { data, error } = await supabase
-          .from("phone_numbers")
-          .select("phone")
-          .eq("phone", profile.mobile_number)
-          .maybeSingle();
-
-        if (error) {
-          console.error("Error checking discount eligibility:", error);
-          // On error, default to not showing discounts
-          setIsEligibleForDiscount(false);
-          return;
-        }
-
-        // If phone number found in the table, user is NOT eligible for discounts
-        if (data) {
-          setIsEligibleForDiscount(false);
-        } else {
-          // Phone number not found, user is eligible for discounts
-          setIsEligibleForDiscount(true);
-        }
-      } catch (error) {
-        console.error("Error in discount eligibility check:", error);
-        // On error, default to not showing discounts
-        setIsEligibleForDiscount(false);
-      } finally {
-        setLoading(false);
-      }
+      // New customers don't get discounted pricing anymore - they get new pricing
+      setIsEligibleForDiscount(false);
+      setLoading(false);
     };
 
     checkDiscountEligibility();

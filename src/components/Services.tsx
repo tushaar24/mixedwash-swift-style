@@ -14,7 +14,7 @@ export const Services = () => {
     isEligibleForDiscount,
     loading
   } = useDiscountEligibility();
-  const [showDiscountAlert, setShowDiscountAlert] = useState(true);
+  const [showDiscountAlert, setShowDiscountAlert] = useState(false); // Changed to false since no discounts
   const {
     user,
     profile
@@ -35,7 +35,6 @@ export const Services = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Scroll tracking effect
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -65,33 +64,14 @@ export const Services = () => {
     };
   }, [user, profile]);
 
-  // Auto-hide discount alert after 1 second - only if user is eligible and alert is showing
-  useEffect(() => {
-    console.log('Services useEffect triggered:', {
-      loading,
-      isEligibleForDiscount,
-      showDiscountAlert
-    });
-    if (!loading && isEligibleForDiscount && showDiscountAlert) {
-      console.log('Starting discount alert timer for 1 second');
-      const timer = setTimeout(() => {
-        console.log('Auto-dismissing discount alert');
-        setShowDiscountAlert(false);
-      }, 1000);
-      return () => {
-        console.log('Cleaning up discount alert timer');
-        clearTimeout(timer);
-      };
-    }
-  }, [loading, isEligibleForDiscount, showDiscountAlert]);
   const services = [{
     title: "Wash & Fold",
     description: "Fresh and folded clothes, ready tomorrow.",
     icon: "👕",
-    newPrice: "₹76/kg",
-    oldPrice: "₹95/kg",
-    regularPrice: "₹95/kg",
-    discount: 20,
+    newPrice: "₹79/kg",
+    oldPrice: "₹79/kg",
+    regularPrice: "₹79/kg",
+    discount: 0,
     route: "wash-fold",
     minimumOrder: 4,
     deliveryTime: "24h"
@@ -99,10 +79,10 @@ export const Services = () => {
     title: "Wash & Iron",
     description: "Your outfits, wrinkle-free and crisp.",
     icon: "👔",
-    newPrice: "₹120/kg",
-    oldPrice: "₹150/kg",
-    regularPrice: "₹150/kg",
-    discount: 20,
+    newPrice: "₹119/kg",
+    oldPrice: "₹119/kg",
+    regularPrice: "₹119/kg",
+    discount: 0,
     route: "wash-iron",
     minimumOrder: 3,
     deliveryTime: "24h"
@@ -110,10 +90,10 @@ export const Services = () => {
     title: "Heavy Wash",
     description: "Big laundry loads handled with ease.",
     icon: "🧺",
-    newPrice: "₹112/kg",
-    oldPrice: "₹140/kg",
-    regularPrice: "₹140/kg",
-    discount: 20,
+    newPrice: "₹109/kg",
+    oldPrice: "₹109/kg",
+    regularPrice: "₹109/kg",
+    discount: 0,
     route: "heavy-wash",
     minimumOrder: null,
     deliveryTime: "24-48h"
@@ -153,13 +133,6 @@ export const Services = () => {
             We offer a variety of services to meet all your laundry needs, with next-day delivery standard.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
-            {!loading && isEligibleForDiscount && showDiscountAlert && <div className="inline-flex items-center gap-2 bg-amber-100 px-4 py-2 rounded-full text-amber-800 border border-amber-300 relative pr-10">
-                <BadgePercent className="h-4 w-4" />
-                <span className="text-sm font-semibold">20% OFF on your first order!</span>
-                <button onClick={() => setShowDiscountAlert(false)} className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-amber-200 rounded-full p-1.5 transition-colors hover:bg-amber-300" aria-label="Dismiss discount alert">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>}
             <div className="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full text-blue-800 border border-blue-300">
               <Truck className="h-4 w-4" />
               <span className="text-sm font-semibold">Free pickup & delivery on all orders!</span>
@@ -199,27 +172,9 @@ export const Services = () => {
               <CardContent className="flex flex-col h-full">
                 <p className="text-gray-600 mb-4">{service.description}</p>
                 
-                {!loading && service.discount > 0 && isEligibleForDiscount ? <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-lg text-green-700">{service.newPrice}</span>
-                      <HoverCard>
-                        <HoverCardTrigger>
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
-                            Save 20% on first order
-                          </span>
-                        </HoverCardTrigger>
-                        <HoverCardContent className="p-2 text-xs w-48">
-                          Discount applied for first-time customers! Regular price is {service.oldPrice}.
-                        </HoverCardContent>
-                      </HoverCard>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      <span className="line-through">{service.oldPrice}</span>
-                      <span className="ml-1 text-xs">regular price</span>
-                    </div>
-                  </div> : <div className="font-semibold text-gray-800">
-                    {service.regularPrice}
-                  </div>}
+                <div className="font-semibold text-xl text-gray-800">
+                  {service.regularPrice}
+                </div>
                 
                 <div className="mt-3 text-xs text-blue-700 flex items-center gap-1">
                   <Truck className="h-3 w-3" />

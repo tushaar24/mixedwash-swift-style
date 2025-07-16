@@ -9,6 +9,7 @@ import { ScheduleOrderData, SelectedService, DryCleaningItem } from "@/pages/Sch
 import { DryCleaningItemsDialog } from "./DryCleaningItemsDialog";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 import { useNavigate } from "react-router-dom";
+
 interface Service {
   id: string;
   name: string;
@@ -17,6 +18,7 @@ interface Service {
   discount_price: number | null;
   icon: string;
 }
+
 interface ServiceSelectionProps {
   orderData: ScheduleOrderData;
   updateOrderData: (data: Partial<ScheduleOrderData>) => void;
@@ -67,6 +69,7 @@ const sortServices = (services: Service[]): Service[] => {
     return aIndex - bIndex;
   });
 };
+
 export const ServiceSelection = ({
   orderData,
   updateOrderData,
@@ -145,11 +148,11 @@ export const ServiceSelection = ({
     }
     setSelectedServiceIds(newSelectedServiceIds);
 
-    // Update selected services in order data
+    // Update selected services in order data - no discount pricing
     const selectedServices = services.filter(s => newSelectedServiceIds.has(s.id)).map(s => ({
       id: s.id,
       name: s.name,
-      price: !discountLoading && isEligibleForDiscount && s.discount_price !== null ? s.discount_price : s.price
+      price: s.price // Always use regular price, no discounts
     }));
     updateOrderData({
       services: selectedServices
@@ -222,21 +225,9 @@ export const ServiceSelection = ({
                     <p className="text-sm text-gray-600 mb-3">{service.description}</p>
                     
                     <div className="mb-3">
-                      {!discountLoading && service.discount_price !== null && isEligibleForDiscount ? <div className="space-y-1">
-                          <div className="flex items-center">
-                            <span className="font-bold text-green-700">₹{service.discount_price}/kg</span>
-                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium ml-2 flex items-center">
-                              <BadgePercent className="h-3 w-3 mr-1" />
-                              Save {Math.round((1 - service.discount_price / service.price) * 100)}%
-                            </span>
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            <span className="line-through">₹{service.price}/kg</span>
-                            <span className="ml-1 text-xs">regular price</span>
-                          </div>
-                        </div> : <div className="font-bold">
-                          {service.name.toLowerCase().includes('dry cleaning') ? `From ₹${service.price}` : `₹${service.price}/kg`}
-                        </div>}
+                      <div className="font-bold">
+                        {service.name.toLowerCase().includes('dry cleaning') ? `From ₹${service.price}` : `₹${service.price}/kg`}
+                      </div>
                       
                       {/* Add minimum kg requirement */}
                       {minimumKg && <div className="text-xs text-gray-500 mt-1">

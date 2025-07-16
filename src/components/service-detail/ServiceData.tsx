@@ -10,14 +10,14 @@ export const servicesData = {
     color: "bg-blue-50",
     themeColor: "#2563EB", // Added theme color
     description: "For everyday laundry, bedsheets and towels.",
-    discount: 20,
+    discount: 0,
     minimumOrder: null,
     deliveryTime: "24h",
     prices: [
       {
         title: "Regular Wash",
-        amount: "₹76/kg",
-        oldPrice: "₹95/kg",
+        amount: "₹79/kg",
+        oldPrice: "₹79/kg",
         details: "Light and dark clothes washed together at 90°F. You can request 110°F instead.",
         minimumOrder: 4
       }
@@ -30,14 +30,14 @@ export const servicesData = {
     color: "bg-pink-50",
     themeColor: "#EC4899", // Added theme color
     description: "Your outfits, wrinkle-free and crisp.",
-    discount: 20,
+    discount: 0,
     minimumOrder: null,
     deliveryTime: "24h",
     prices: [
       {
         title: "Regular Wash",
-        amount: "₹120/kg",
-        oldPrice: "₹150/kg",
+        amount: "₹119/kg",
+        oldPrice: "₹119/kg",
         details: "Light and dark clothes washed together at 90°F and professionally ironed.",
         minimumOrder: 3
       }
@@ -50,14 +50,14 @@ export const servicesData = {
     color: "bg-teal-50",
     themeColor: "#14B8A6", // Added theme color
     description: "Big laundry loads handled with ease.",
-    discount: 20,
+    discount: 0,
     minimumOrder: null,
     deliveryTime: "24-48h",
     prices: [
       {
         title: "Price per kg",
-        amount: "₹112/kg",
-        oldPrice: "₹140/kg",
+        amount: "₹109/kg",
+        oldPrice: "₹109/kg",
         details: "Perfect for blankets, comforters, heavy jackets, and other bulky items."
       }
     ]
