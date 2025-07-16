@@ -8,19 +8,15 @@ import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 import { useState, useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
+
 export const Services = () => {
   const navigate = useNavigate();
-  const {
-    isEligibleForDiscount,
-    loading
-  } = useDiscountEligibility();
-  const [showDiscountAlert, setShowDiscountAlert] = useState(false); // Changed to false since no discounts
-  const {
-    user,
-    profile
-  } = useAuth();
+  const { isEligibleForDiscount, loading } = useDiscountEligibility();
+  const [showDiscountAlert, setShowDiscountAlert] = useState(false);
+  const { user, profile } = useAuth();
   const sectionRef = useRef<HTMLElement>(null);
   const hasTrackedScrollRef = useRef(false);
+
   const getCurrentTime = () => {
     const now = new Date();
     return now.toLocaleTimeString('en-US', {
@@ -29,6 +25,7 @@ export const Services = () => {
       minute: '2-digit'
     });
   };
+
   const getUserInfo = () => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
@@ -69,7 +66,7 @@ export const Services = () => {
     description: "Fresh and folded clothes, ready tomorrow.",
     icon: "👕",
     newPrice: "₹79/kg",
-    oldPrice: "₹79/kg",
+    oldPrice: "₹99/kg",
     regularPrice: "₹79/kg",
     discount: 0,
     route: "wash-fold",
@@ -80,7 +77,7 @@ export const Services = () => {
     description: "Your outfits, wrinkle-free and crisp.",
     icon: "👔",
     newPrice: "₹119/kg",
-    oldPrice: "₹119/kg",
+    oldPrice: "₹149/kg",
     regularPrice: "₹119/kg",
     discount: 0,
     route: "wash-iron",
@@ -91,7 +88,7 @@ export const Services = () => {
     description: "Big laundry loads handled with ease.",
     icon: "🧺",
     newPrice: "₹109/kg",
-    oldPrice: "₹109/kg",
+    oldPrice: "₹129/kg",
     regularPrice: "₹109/kg",
     discount: 0,
     route: "heavy-wash",
@@ -110,11 +107,9 @@ export const Services = () => {
     deliveryTime: "24-48h",
     serviceCharge: "₹50 service fee on orders under ₹250"
   }];
+
   const handleServiceClick = (route: string, serviceName: string) => {
-    console.log('Service card clicked:', {
-      route,
-      serviceName
-    });
+    console.log('Service card clicked:', { route, serviceName });
     const userInfo = getUserInfo();
     trackEvent('quick_services_cta_clicked', {
       'customer name': userInfo?.name || 'Anonymous',
@@ -125,7 +120,9 @@ export const Services = () => {
     console.log('Navigating to service detail:', `/service/${route}`);
     navigate(`/service/${route}`);
   };
-  return <section id="services" className="bg-gray-50 py-16 md:py-20" ref={sectionRef}>
+
+  return (
+    <section id="services" className="bg-gray-50 py-16 md:py-20" ref={sectionRef}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Quick Services Overview</h2>
@@ -141,11 +138,15 @@ export const Services = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((service, index) => <Card key={index} className="border-none shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative cursor-pointer hover:scale-105 group" onClick={() => {
-          console.log('Card clicked for service:', service.title, 'with route:', service.route);
-          handleServiceClick(service.route, service.title);
-        }}>
-              {/* Enhanced delivery time badge - more prominent */}
+          {services.map((service, index) => (
+            <Card 
+              key={index} 
+              className="border-none shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden relative cursor-pointer hover:scale-105 group" 
+              onClick={() => {
+                console.log('Card clicked for service:', service.title, 'with route:', service.route);
+                handleServiceClick(service.route, service.title);
+              }}
+            >
               <div className="absolute top-2 right-2 z-20">
                 <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-2 rounded-full shadow-lg border-2 border-white flex items-center gap-1.5 text-sm font-bold animate-pulse">
                   <Clock className="h-4 w-4" />
@@ -153,12 +154,16 @@ export const Services = () => {
                 </div>
               </div>
               
-              {/* Mobile-only clickable icon button */}
               <div className="md:hidden absolute bottom-3 right-3 z-10">
-                <Button size="icon" variant="outline" className="h-8 w-8 rounded-full bg-white border-gray-300 hover:bg-gray-50 shadow-sm" onClick={e => {
-              e.stopPropagation();
-              handleServiceClick(service.route, service.title);
-            }}>
+                <Button 
+                  size="icon" 
+                  variant="outline" 
+                  className="h-8 w-8 rounded-full bg-white border-gray-300 hover:bg-gray-50 shadow-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleServiceClick(service.route, service.title);
+                  }}
+                >
                   <ChevronRight className="h-4 w-4 text-gray-600" />
                 </Button>
               </div>
@@ -174,6 +179,11 @@ export const Services = () => {
                 
                 <div className="font-semibold text-xl text-gray-800">
                   {service.regularPrice}
+                  {isEligibleForDiscount && service.oldPrice && service.oldPrice !== service.regularPrice && (
+                    <div className="text-sm text-gray-500 line-through mt-1">
+                      {service.oldPrice}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="mt-3 text-xs text-blue-700 flex items-center gap-1">
@@ -181,23 +191,28 @@ export const Services = () => {
                   <span>Free pickup & delivery included</span>
                 </div>
                 
-                {service.minimumOrder && <div className="mt-2 text-xs text-orange-700 flex items-center gap-1">
+                {service.minimumOrder && (
+                  <div className="mt-2 text-xs text-orange-700 flex items-center gap-1">
                     <Info className="h-3 w-3" />
                     <span>Min. order: {service.minimumOrder}kg</span>
-                  </div>}
+                  </div>
+                )}
                 
-                {service.serviceCharge && <div className="mt-2 text-xs text-red-700 flex items-center gap-1">
+                {service.serviceCharge && (
+                  <div className="mt-2 text-xs text-red-700 flex items-center gap-1">
                     <Info className="h-3 w-3" />
                     <span>{service.serviceCharge}</span>
-                  </div>}
+                  </div>
+                )}
                 
-                {/* Arrow indicator - hidden on mobile to avoid overlap with button */}
                 <div className="mt-auto pt-4 flex justify-end hidden md:block">
                   <ArrowRight className="h-5 w-5 text-black group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </CardContent>
-            </Card>)}
+            </Card>
+          ))}
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };

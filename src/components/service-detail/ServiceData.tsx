@@ -17,7 +17,7 @@ export const servicesData = {
       {
         title: "Regular Wash",
         amount: "₹79/kg",
-        oldPrice: "₹79/kg",
+        oldPrice: "₹99/kg", // Old price for existing customers
         details: "Light and dark clothes washed together at 90°F. You can request 110°F instead.",
         minimumOrder: 4
       }
@@ -37,7 +37,7 @@ export const servicesData = {
       {
         title: "Regular Wash",
         amount: "₹119/kg",
-        oldPrice: "₹119/kg",
+        oldPrice: "₹149/kg", // Old price for existing customers
         details: "Light and dark clothes washed together at 90°F and professionally ironed.",
         minimumOrder: 3
       }
@@ -57,7 +57,7 @@ export const servicesData = {
       {
         title: "Price per kg",
         amount: "₹109/kg",
-        oldPrice: "₹109/kg",
+        oldPrice: "₹129/kg", // Old price for existing customers
         details: "Perfect for blankets, comforters, heavy jackets, and other bulky items."
       }
     ]

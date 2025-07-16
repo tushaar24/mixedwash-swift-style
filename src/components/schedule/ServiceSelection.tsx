@@ -31,7 +31,7 @@ const getMinimumKg = (serviceName: string): number | null => {
   if (name.includes('wash & fold') || name.includes('wash fold')) return 4;
   if (name.includes('wash & iron') || name.includes('wash iron')) return 3;
   if (name.includes('heavy wash')) return 4;
-  return null; // For dry cleaning or other services
+  return null;
 };
 
 // Helper function to get delivery time for each service
@@ -41,7 +41,7 @@ const getDeliveryTime = (serviceName: string): string => {
   if (name.includes('wash & iron') || name.includes('wash iron')) return '24h';
   if (name.includes('heavy wash')) return '24-48h';
   if (name.includes('dry cleaning')) return '24-48h';
-  return '24h'; // Default
+  return '24h';
 };
 
 // Helper function to get service route for navigation
@@ -51,7 +51,7 @@ const getServiceRoute = (serviceName: string): string => {
   if (name.includes('wash & iron') || name.includes('wash iron')) return 'wash-iron';
   if (name.includes('heavy wash')) return 'heavy-wash';
   if (name.includes('dry cleaning')) return 'dry-cleaning';
-  return 'wash-fold'; // Default fallback
+  return 'wash-fold';
 };
 
 // Helper function to sort services in the desired order
@@ -63,7 +63,6 @@ const sortServices = (services: Service[]): Service[] => {
     let aIndex = serviceOrder.findIndex(order => aName.includes(order));
     let bIndex = serviceOrder.findIndex(order => bName.includes(order));
 
-    // If service not found in order array, put it at the end
     if (aIndex === -1) aIndex = serviceOrder.length;
     if (bIndex === -1) bIndex = serviceOrder.length;
     return aIndex - bIndex;
@@ -96,7 +95,6 @@ export const ServiceSelection = ({
           throw error;
         }
 
-        // Sort services in the desired order
         const sortedServices = sortServices(data || []);
         setServices(sortedServices);
       } catch (error: any) {
@@ -137,23 +135,27 @@ export const ServiceSelection = ({
     if (newSelectedServiceIds.has(service.id)) {
       newSelectedServiceIds.delete(service.id);
 
-      // If removing dry cleaning service, clear dry cleaning items
       if (service.name.toLowerCase().includes('dry cleaning')) {
-        updateOrderData({
-          dryCleaningItems: []
-        });
+        updateOrderData({ dryCleaningItems: [] });
       }
     } else {
       newSelectedServiceIds.add(service.id);
     }
     setSelectedServiceIds(newSelectedServiceIds);
 
-    // Update selected services in order data - no discount pricing
-    const selectedServices = services.filter(s => newSelectedServiceIds.has(s.id)).map(s => ({
-      id: s.id,
-      name: s.name,
-      price: s.price // Always use regular price, no discounts
-    }));
+    // Use regular price for new customers, discount price for old customers if available
+    const selectedServices = services.filter(s => newSelectedServiceIds.has(s.id)).map(s => {
+      let price = s.price;
+      // If old customer and discount price exists, use discount price, otherwise use regular price
+      if (isEligibleForDiscount && s.discount_price) {
+        price = s.discount_price;
+      }
+      return {
+        id: s.id,
+        name: s.name,
+        price: price
+      };
+    });
     updateOrderData({
       services: selectedServices
     });
@@ -170,7 +172,6 @@ export const ServiceSelection = ({
       return;
     }
 
-    // Check if dry cleaning is selected without any items
     if (isDryCleaningSelected() && orderData.dryCleaningItems.length === 0) {
       toast({
         title: "Dry cleaning items required",
@@ -182,13 +183,16 @@ export const ServiceSelection = ({
     onNext();
   };
 
-  // Loading state
   if (loading) {
-    return <div className="flex justify-center py-12">
+    return (
+      <div className="flex justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-      </div>;
+      </div>
+    );
   }
-  return <div className="space-y-6 pb-24">
+
+  return (
+    <div className="space-y-6 pb-24">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold">Select Services</h1>
         <p className="text-gray-600 mt-2">Choose one or more laundry services you need</p>
@@ -196,25 +200,54 @@ export const ServiceSelection = ({
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {services.map(service => {
-        const minimumKg = getMinimumKg(service.name);
-        const deliveryTime = getDeliveryTime(service.name);
-        return <Card key={service.id} className={`transition-all cursor-pointer hover:shadow-md ${selectedServiceIds.has(service.id) ? "ring-2 ring-black shadow-md" : "hover:scale-[1.01] border-gray-200"}`} onClick={() => toggleServiceSelection(service)}>
+          const minimumKg = getMinimumKg(service.name);
+          const deliveryTime = getDeliveryTime(service.name);
+          
+          // Determine which price to show
+          let displayPrice = service.price;
+          let showOldPrice = false;
+          
+          // For old customers, show discount price if available, otherwise regular price
+          // For new customers, always show regular price
+          if (isEligibleForDiscount && service.discount_price) {
+            displayPrice = service.discount_price;
+            showOldPrice = true;
+          }
+          
+          return (
+            <Card 
+              key={service.id} 
+              className={`transition-all cursor-pointer hover:shadow-md ${
+                selectedServiceIds.has(service.id) 
+                  ? "ring-2 ring-black shadow-md" 
+                  : "hover:scale-[1.01] border-gray-200"
+              }`} 
+              onClick={() => toggleServiceSelection(service)}
+            >
               <CardContent className="p-4">
                 <div className="flex items-start">
                   <div className="flex items-center space-x-2">
-                    <Checkbox checked={selectedServiceIds.has(service.id)} onCheckedChange={() => toggleServiceSelection(service)} className="data-[state=checked]:bg-black data-[state=checked]:border-black" />
+                    <Checkbox 
+                      checked={selectedServiceIds.has(service.id)} 
+                      onCheckedChange={() => toggleServiceSelection(service)} 
+                      className="data-[state=checked]:bg-black data-[state=checked]:border-black" 
+                    />
                     <div className="text-4xl mr-2">{service.icon}</div>
                   </div>
                   <div className="flex-1 ml-2">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-bold text-lg">{service.name}</h3>
-                      <Button variant="ghost" size="sm" onClick={e => handleViewDetails(service, e)} className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 h-auto">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={(e) => handleViewDetails(service, e)} 
+                        className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 h-auto"
+                      >
                         <Eye className="h-3 w-3 mr-1" />
                         View Details
                       </Button>
                     </div>
                     
-                    {/* Prominent delivery time badge */}
                     <div className="mb-3">
                       <div className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-sm font-semibold border border-green-200">
                         <Clock className="h-4 w-4" />
@@ -226,43 +259,69 @@ export const ServiceSelection = ({
                     
                     <div className="mb-3">
                       <div className="font-bold">
-                        {service.name.toLowerCase().includes('dry cleaning') ? `From ₹${service.price}` : `₹${service.price}/kg`}
+                        {service.name.toLowerCase().includes('dry cleaning') 
+                          ? `From ₹${displayPrice}` 
+                          : `₹${displayPrice}/kg`}
                       </div>
                       
-                      {/* Add minimum kg requirement */}
-                      {minimumKg && <div className="text-xs text-gray-500 mt-1">
+                      {/* Show old price for old customers */}
+                      {isEligibleForDiscount && showOldPrice && service.price !== displayPrice && (
+                        <div className="text-sm text-gray-500 line-through">
+                          {service.name.toLowerCase().includes('dry cleaning') 
+                            ? `From ₹${service.price}` 
+                            : `₹${service.price}/kg`}
+                        </div>
+                      )}
+                      
+                      {minimumKg && (
+                        <div className="text-xs text-gray-500 mt-1">
                           Min {minimumKg}kg
-                        </div>}
+                        </div>
+                      )}
                     </div>
                     
-                    {/* Add Items button for dry cleaning */}
-                    {selectedServiceIds.has(service.id) && service.name.toLowerCase().includes('dry cleaning') && <div onClick={e => e.stopPropagation()}>
-                        <DryCleaningItemsDialog selectedItems={orderData.dryCleaningItems} onItemsChange={handleDryCleaningItemsChange} />
-                      </div>}
+                    {selectedServiceIds.has(service.id) && service.name.toLowerCase().includes('dry cleaning') && (
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <DryCleaningItemsDialog 
+                          selectedItems={orderData.dryCleaningItems} 
+                          onItemsChange={handleDryCleaningItemsChange} 
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
-            </Card>;
-      })}
+            </Card>
+          );
+        })}
       </div>
       
       {/* Selected services summary */}
-      {orderData.services.length > 0 && <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+      {orderData.services.length > 0 && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h3 className="font-medium mb-2">Selected Services ({orderData.services.length})</h3>
           <ul className="space-y-2">
-            {orderData.services.map(service => <li key={service.id} className="flex justify-between items-center">
+            {orderData.services.map(service => (
+              <li key={service.id} className="flex justify-between items-center">
                 <span>{service.name}</span>
                 <span className="font-medium">₹{service.price}{!service.name.toLowerCase().includes('dry cleaning') ? '/kg' : ''}</span>
-              </li>)}
+              </li>
+            ))}
           </ul>
-        </div>}
+        </div>
+      )}
       
       {/* Sticky Continue button at bottom center */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center z-10">
-        <Button onClick={handleContinue} disabled={selectedServiceIds.size === 0} className="bg-black hover:bg-gray-800 text-white h-auto text-base group min-w-48 py-[12px] px-[48px]">
+        <Button 
+          onClick={handleContinue} 
+          disabled={selectedServiceIds.size === 0} 
+          className="bg-black hover:bg-gray-800 text-white h-auto text-base group min-w-48 py-[12px] px-[48px]"
+        >
           Continue to Address
           <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
         </Button>
       </div>
-    </div>;
+    </div>
+  );
 };

@@ -120,6 +120,11 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
                     <div className="font-semibold text-xl sm:text-2xl text-gray-800">
                       {price.amount}
                     </div>
+                    {isEligibleForDiscount && price.oldPrice && price.oldPrice !== price.amount && (
+                      <div className="text-sm text-gray-500 line-through">
+                        {price.oldPrice}
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
