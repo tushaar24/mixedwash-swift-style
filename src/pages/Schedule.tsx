@@ -98,13 +98,26 @@ const Schedule = () => {
     const returnState = location.state;
     
     // Handle return from auth with URL parameter (for OAuth flows)
-    if (fromAuth === 'true' && user && !isLoading) {
+    if (fromAuth === 'true') {
       console.log("=== GOOGLE AUTH RETURN DETECTED ===");
       console.log("fromAuth:", fromAuth);
       console.log("user:", user?.id);
       console.log("isLoading:", isLoading);
       console.log("isProfileComplete:", isProfileComplete);
       console.log("orderDataParam:", orderDataParam);
+      
+      // If still loading auth, wait for it to complete
+      if (isLoading) {
+        console.log("Auth still loading, waiting...");
+        return;
+      }
+      
+      // If no user after auth completed, something went wrong
+      if (!user) {
+        console.log("No user found after auth, redirecting to auth page");
+        navigate("/auth", { replace: true });
+        return;
+      }
       
       // Get order data from URL parameter if available
       let authOrderData = null;
@@ -122,6 +135,7 @@ const Schedule = () => {
       
       if (dataToUse.services && dataToUse.services.length > 0) {
         if (!isProfileComplete) {
+          console.log("Profile incomplete, redirecting to profile page");
           navigate("/profile", { 
             state: { 
               returnTo: "/schedule",
@@ -156,9 +170,11 @@ const Schedule = () => {
             );
             
             setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
+            console.log("Set current step to ADDRESS_SELECTION");
           }, 0);
         }
       } else {
+        console.log("No services in order data, starting from service selection");
         // No order data, clear URL parameters and start fresh
         window.history.replaceState(null, '', '/schedule');
         setCurrentStep(ScheduleStep.SERVICE_SELECTION);
