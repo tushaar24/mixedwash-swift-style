@@ -218,6 +218,19 @@ export const ServiceSelection = ({
       });
       return;
     }
+
+    // Check authentication before proceeding
+    if (!user) {
+      navigate("/auth", { 
+        state: { 
+          fromSchedule: true,
+          orderData: orderData
+        }
+      });
+      return;
+    }
+
+    // If authenticated, proceed to next step
     onNext();
   };
 

@@ -78,7 +78,7 @@ const Auth = () => {
       
       // If coming from schedule with order data, include it in the redirect
       if (fromSchedule && orderData) {
-        redirectUrl = `${window.location.origin}/schedule?fromAuth=true`;
+        redirectUrl = `${window.location.origin}/schedule?fromAuth=true&orderData=${encodeURIComponent(JSON.stringify(orderData))}`;
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
@@ -149,7 +149,7 @@ const Auth = () => {
       
       // If coming from schedule with order data, include it in the redirect
       if (fromSchedule && orderData) {
-        redirectUrl = `${window.location.origin}/schedule?fromAuth=true`;
+        redirectUrl = `${window.location.origin}/schedule?fromAuth=true&orderData=${encodeURIComponent(JSON.stringify(orderData))}`;
       }
 
       const { error } = await supabase.auth.signUp({ 

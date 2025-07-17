@@ -94,25 +94,43 @@ const Schedule = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const fromAuth = urlParams.get('fromAuth');
+    const orderDataParam = urlParams.get('orderData');
     const returnState = location.state;
     
     // Handle return from auth with URL parameter (for OAuth flows)
     if (fromAuth === 'true' && user && !isLoading) {
       console.log("Returning from auth via URL parameter");
-      if (orderData.services.length > 0) {
+      
+      // Get order data from URL parameter if available
+      let authOrderData = null;
+      if (orderDataParam) {
+        try {
+          authOrderData = JSON.parse(decodeURIComponent(orderDataParam));
+        } catch (e) {
+          console.error("Failed to parse order data from URL:", e);
+        }
+      }
+      
+      // Use order data from URL parameter or existing order data
+      const dataToUse = authOrderData || orderData;
+      
+      if (dataToUse.services.length > 0) {
         if (!isProfileComplete) {
           navigate("/profile", { 
             state: { 
               returnTo: "/schedule",
               returnStep: ScheduleStep.ADDRESS_SELECTION,
-              orderData: orderData
+              orderData: dataToUse
             },
             replace: true
           });
         } else {
           console.log("Moving directly to address selection after auth");
+          if (authOrderData) {
+            setOrderData(authOrderData);
+          }
           setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
-          // Clean up URL parameter
+          // Clean up URL parameters
           window.history.replaceState({}, document.title, window.location.pathname);
         }
       }
@@ -150,7 +168,7 @@ const Schedule = () => {
       window.history.replaceState({}, document.title);
       return;
     }
-  }, [user, isLoading, isProfileComplete, location.search, location.state, navigate, orderData.services.length]);
+  }, [user, isLoading, isProfileComplete, location.search, location.state, navigate]);
 
   // Track step views only on actual step transitions
   useEffect(() => {
@@ -228,29 +246,8 @@ const Schedule = () => {
         'services_selected': orderData.services.map(s => s.name).join(', ')
       });
       
-      // Check authentication before proceeding to address selection
-      if (!user) {
-        navigate("/auth", { 
-          state: { 
-            fromSchedule: true,
-            orderData: orderData
-          }
-        });
-        return;
-      }
-      
-      // Check if profile is complete
-      if (!isProfileComplete) {
-        navigate("/profile", { 
-          state: { 
-            returnTo: "/schedule",
-            returnStep: ScheduleStep.ADDRESS_SELECTION,
-            orderData: orderData
-          },
-          replace: true // Remove current page from backstack
-        });
-        return;
-      }
+      // Auth check is now done in ServiceSelection component
+      // If we reach here, user is authenticated and profile is complete
     }
     
     if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
