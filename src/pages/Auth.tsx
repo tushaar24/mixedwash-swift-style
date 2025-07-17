@@ -38,30 +38,18 @@ const Auth = () => {
     // Check if user is already logged in
     if (user) {
       if (fromSchedule && orderData) {
-        // Coming from schedule with order data
-        if (!isProfileComplete) {
-          // Redirect to profile page for incomplete profiles
-          navigate("/profile", { 
-            state: { 
-              returnTo: "/schedule",
-              returnStep: 1, // ADDRESS_SELECTION = 1
-              orderData: orderData
-            },
-            replace: true // Replace auth page in history
-          });
-        } else {
-          // Navigate directly to schedule with address selection step
-          navigate("/schedule", { 
-            state: { 
-              fromAuth: true,
-              orderData: orderData,
-              currentStep: 1 // ADDRESS_SELECTION = 1
-            },
-            replace: true // Replace auth page in history
-          });
-        }
+        // Coming from schedule with order data - always go to address selection
+        // Profile completion can happen later if needed
+        navigate("/schedule", { 
+          state: { 
+            fromAuth: true,
+            orderData: orderData,
+            currentStep: 1 // ADDRESS_SELECTION = 1
+          },
+          replace: true // Replace auth page in history
+        });
       } else if (!isProfileComplete) {
-        // Redirect to profile page for incomplete profiles
+        // Only redirect to profile page if NOT coming from schedule
         navigate("/profile", { replace: true });
       } else {
         // Otherwise redirect to home for users with complete profiles
