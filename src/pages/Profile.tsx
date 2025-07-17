@@ -143,9 +143,9 @@ const Profile = () => {
       console.log("Profile is complete and came from schedule, redirecting to address selection");
       navigate("/schedule", { 
         state: { 
-          fromAuth: true,
-          orderData: orderData,
-          currentStep: 1 // ADDRESS_SELECTION = 1
+          returnTo: "/schedule",
+          returnStep: 1, // ADDRESS_SELECTION = 1
+          orderData: orderData
         },
         replace: true
       });
@@ -327,9 +327,9 @@ const Profile = () => {
         // Redirect to schedule flow to continue with order
         navigate("/schedule", { 
           state: { 
-            fromAuth: true,
-            orderData: orderData,
-            currentStep: 1 // ADDRESS_SELECTION = 1
+            returnTo: "/schedule",
+            returnStep: 1, // ADDRESS_SELECTION = 1
+            orderData: orderData
           },
           replace: true
         });
