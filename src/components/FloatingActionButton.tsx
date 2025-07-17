@@ -2,15 +2,40 @@
 import { Phone, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { trackEvent } from "@/utils/clevertap";
+import { useAuth } from "@/context/AuthContext";
 
 export const FloatingActionButton = () => {
   const isMobile = useIsMobile();
+  const { user, profile } = useAuth();
 
   const handleCall = () => {
+    const userInfo = user ? {
+      user_id: user.id,
+      name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username
+    } : undefined;
+
+    trackEvent('floating_call_button_clicked', {
+      source: 'homepage',
+      action_type: 'call',
+      phone_number: '+916362290686'
+    }, userInfo);
+
     window.location.href = "tel:+916362290686";
   };
 
   const handleWhatsApp = () => {
+    const userInfo = user ? {
+      user_id: user.id,
+      name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username
+    } : undefined;
+
+    trackEvent('floating_whatsapp_button_clicked', {
+      source: 'homepage',
+      action_type: 'whatsapp',
+      phone_number: '+916362290686'
+    }, userInfo);
+
     window.open("https://wa.me/916362290686", "_blank");
   };
 
