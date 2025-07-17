@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -56,7 +56,13 @@ const Profile = () => {
   const [error, setError] = useState<string | null>(null);
   const { user, isFirstLogin, isProfileComplete, refreshProfile, profile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Extract schedule flow data from location state
+  const fromSchedule = location.state?.fromSchedule;
+  const orderData = location.state?.orderData;
+  
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editProfileDialogOpen, setEditProfileDialogOpen] = useState(false);
   const [profileUpdateLoading, setProfileUpdateLoading] = useState(false);
@@ -298,8 +304,21 @@ const Profile = () => {
         description: "Your profile has been successfully completed.",
       });
       
-      // Redirect to home page after completing first-time profile
-      navigate("/");
+      // Check if user came from schedule flow
+      if (fromSchedule && orderData) {
+        // Redirect to schedule flow to continue with order
+        navigate("/schedule", { 
+          state: { 
+            fromAuth: true,
+            orderData: orderData,
+            currentStep: 1 // ADDRESS_SELECTION = 1
+          },
+          replace: true
+        });
+      } else {
+        // Normal flow - redirect to home page
+        navigate("/");
+      }
     } catch (error: any) {
       toast({
         title: "Error",
