@@ -106,6 +106,7 @@ const Schedule = () => {
       if (orderDataParam) {
         try {
           authOrderData = JSON.parse(decodeURIComponent(orderDataParam));
+          console.log("Parsed order data from Google auth redirect:", authOrderData);
         } catch (e) {
           console.error("Failed to parse order data from URL:", e);
         }
@@ -114,7 +115,7 @@ const Schedule = () => {
       // Use order data from URL parameter or existing order data
       const dataToUse = authOrderData || orderData;
       
-      if (dataToUse.services.length > 0) {
+      if (dataToUse.services && dataToUse.services.length > 0) {
         if (!isProfileComplete) {
           navigate("/profile", { 
             state: { 
@@ -125,26 +126,26 @@ const Schedule = () => {
             replace: true
           });
         } else {
-          console.log("Moving directly to address selection after auth");
-          if (authOrderData) {
-            setOrderData(authOrderData);
-          }
+          console.log("Moving directly to address selection after Google auth");
+          
+          // Set the order data immediately
+          setOrderData(authOrderData || dataToUse);
           
           // Clear URL parameters and setup proper navigation history
-          navigate(location.pathname, { replace: true });
+          window.history.replaceState(null, '', '/schedule');
           
           // Setup navigation history for proper back button behavior
           setTimeout(() => {
             // Push service selection to history first
             window.history.pushState(
-              { step: ScheduleStep.SERVICE_SELECTION, orderData: dataToUse },
+              { step: ScheduleStep.SERVICE_SELECTION, orderData: authOrderData || dataToUse },
               'Service Selection',
               '/schedule'
             );
             
             // Then push address selection
             window.history.pushState(
-              { step: ScheduleStep.ADDRESS_SELECTION, orderData: dataToUse },
+              { step: ScheduleStep.ADDRESS_SELECTION, orderData: authOrderData || dataToUse },
               'Address Selection', 
               '/schedule'
             );
@@ -154,7 +155,8 @@ const Schedule = () => {
         }
       } else {
         // No order data, clear URL parameters and start fresh
-        navigate(location.pathname, { replace: true });
+        window.history.replaceState(null, '', '/schedule');
+        setCurrentStep(ScheduleStep.SERVICE_SELECTION);
       }
     }
     
