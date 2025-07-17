@@ -90,47 +90,67 @@ const Schedule = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Handle redirect after authentication - automatically move to address selection
+  // Handle return from auth - this should handle direct navigation to address selection
   useEffect(() => {
-    // If user just authenticated and has services selected, go to address step
-    if (user && !isLoading && orderData.services.length > 0 && currentStep === ScheduleStep.SERVICE_SELECTION) {
-      // Check if profile is complete
+    const urlParams = new URLSearchParams(location.search);
+    const fromAuth = urlParams.get('fromAuth');
+    const returnState = location.state;
+    
+    // Handle return from auth with URL parameter (for OAuth flows)
+    if (fromAuth === 'true' && user && !isLoading) {
+      console.log("Returning from auth via URL parameter");
+      if (orderData.services.length > 0) {
+        if (!isProfileComplete) {
+          navigate("/profile", { 
+            state: { 
+              returnTo: "/schedule",
+              returnStep: ScheduleStep.ADDRESS_SELECTION,
+              orderData: orderData
+            },
+            replace: true
+          });
+        } else {
+          console.log("Moving directly to address selection after auth");
+          setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
+          // Clean up URL parameter
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+      return;
+    }
+    
+    // Handle return from auth with state (for email/password flows)
+    if (returnState?.fromAuth && returnState?.orderData && user && !isLoading) {
+      console.log("Returning from auth via state");
+      setOrderData(returnState.orderData);
       if (!isProfileComplete) {
-        // Profile incomplete - redirect to profile page
         navigate("/profile", { 
           state: { 
             returnTo: "/schedule",
             returnStep: ScheduleStep.ADDRESS_SELECTION,
-            orderData: orderData
+            orderData: returnState.orderData
           },
-          replace: true // Remove auth from backstack
+          replace: true
         });
       } else {
-        // Profile complete - go to address selection automatically
-        console.log("User authenticated with complete profile, moving to address selection");
+        console.log("Moving directly to address selection after auth");
         setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
+        // Clear the state
+        window.history.replaceState({}, document.title);
       }
-    }
-  }, [user, isLoading, isProfileComplete, orderData.services.length, currentStep, navigate]);
-
-  // Handle return from profile completion or auth
-  useEffect(() => {
-    const returnState = location.state;
-    if (returnState?.returnTo === "/schedule" && returnState?.returnStep && returnState?.orderData) {
-      setOrderData(returnState.orderData);
-      setCurrentStep(returnState.returnStep);
-      // Clear the state to prevent repeated redirects and remove auth from backstack
-      window.history.replaceState({}, document.title);
+      return;
     }
     
-    // Handle direct return from auth with services already selected
-    if (returnState?.fromAuth && returnState?.orderData && user && isProfileComplete) {
+    // Handle return from profile completion
+    if (returnState?.returnTo === "/schedule" && returnState?.returnStep && returnState?.orderData) {
+      console.log("Returning from profile completion");
       setOrderData(returnState.orderData);
-      setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
-      // Clear the state and remove auth from backstack
+      setCurrentStep(returnState.returnStep);
+      // Clear the state
       window.history.replaceState({}, document.title);
+      return;
     }
-  }, [location.state, user, isProfileComplete]);
+  }, [user, isLoading, isProfileComplete, location.search, location.state, navigate, orderData.services.length]);
 
   // Track step views only on actual step transitions
   useEffect(() => {

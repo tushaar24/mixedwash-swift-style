@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +38,7 @@ const Auth = () => {
     // Check if user is already logged in
     if (user) {
       if (fromSchedule && orderData) {
-        // Coming from schedule with order data
+        // Coming from schedule with order data - navigate directly to address selection
         if (!isProfileComplete) {
           // Redirect to profile page for incomplete profiles
           navigate("/profile", { 
@@ -49,7 +50,7 @@ const Auth = () => {
             replace: true // Replace auth page in history
           });
         } else {
-          // Redirect back to schedule with order data for address selection
+          // Navigate directly to schedule with address selection step
           navigate("/schedule", { 
             state: { 
               fromAuth: true,
