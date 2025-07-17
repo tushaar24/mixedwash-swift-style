@@ -72,7 +72,9 @@ const Auth = () => {
       
       // If coming from schedule with order data, include it in the redirect
       if (fromSchedule && orderData) {
-        redirectUrl = `${window.location.origin}/schedule?fromAuth=true&orderData=${encodeURIComponent(JSON.stringify(orderData))}`;
+        const encodedOrderData = encodeURIComponent(JSON.stringify(orderData));
+        redirectUrl = `${window.location.origin}/schedule?fromAuth=true&orderData=${encodedOrderData}`;
+        console.log('Google auth redirect URL with order data:', redirectUrl);
       }
 
       const { error } = await supabase.auth.signInWithOAuth({

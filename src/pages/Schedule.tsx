@@ -99,7 +99,12 @@ const Schedule = () => {
     
     // Handle return from auth with URL parameter (for OAuth flows)
     if (fromAuth === 'true' && user && !isLoading) {
-      console.log("Returning from auth via URL parameter");
+      console.log("=== GOOGLE AUTH RETURN DETECTED ===");
+      console.log("fromAuth:", fromAuth);
+      console.log("user:", user?.id);
+      console.log("isLoading:", isLoading);
+      console.log("isProfileComplete:", isProfileComplete);
+      console.log("orderDataParam:", orderDataParam);
       
       // Get order data from URL parameter if available
       let authOrderData = null;
