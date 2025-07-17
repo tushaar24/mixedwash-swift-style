@@ -129,13 +129,42 @@ const Schedule = () => {
           if (authOrderData) {
             setOrderData(authOrderData);
           }
-          setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
-          // Clean up URL parameters and replace current entry to remove auth from history
+          
+          // Clear the entire history stack and create a clean navigation state
+          // This removes all auth-related pages from browser history
+          const cleanUrl = window.location.pathname;
           window.history.replaceState(
-            { fromAuth: true, orderData: dataToUse },
+            { 
+              step: ScheduleStep.ADDRESS_SELECTION,
+              fromAuth: true,
+              orderData: dataToUse,
+              cleanHistory: true
+            },
             document.title, 
-            window.location.pathname
+            cleanUrl
           );
+          
+          // Push a service selection state so back button works correctly
+          window.history.pushState(
+            { 
+              step: ScheduleStep.SERVICE_SELECTION,
+              orderData: dataToUse 
+            },
+            'Service Selection',
+            cleanUrl
+          );
+          
+          // Then navigate to address selection
+          window.history.pushState(
+            { 
+              step: ScheduleStep.ADDRESS_SELECTION,
+              orderData: dataToUse 
+            },
+            'Address Selection',
+            cleanUrl
+          );
+          
+          setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
         }
       }
       return;
@@ -156,13 +185,41 @@ const Schedule = () => {
         });
       } else {
         console.log("Moving directly to address selection after auth");
-        setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
-        // Replace the current history entry to remove auth from backstack
+        
+        // Clear the entire history stack and create a clean navigation state
+        const cleanUrl = window.location.pathname;
         window.history.replaceState(
-          { fromAuth: true, orderData: returnState.orderData },
-          document.title,
-          window.location.pathname
+          { 
+            step: ScheduleStep.ADDRESS_SELECTION,
+            fromAuth: true,
+            orderData: returnState.orderData,
+            cleanHistory: true
+          },
+          document.title, 
+          cleanUrl
         );
+        
+        // Push a service selection state so back button works correctly
+        window.history.pushState(
+          { 
+            step: ScheduleStep.SERVICE_SELECTION,
+            orderData: returnState.orderData 
+          },
+          'Service Selection',
+          cleanUrl
+        );
+        
+        // Then navigate to address selection
+        window.history.pushState(
+          { 
+            step: ScheduleStep.ADDRESS_SELECTION,
+            orderData: returnState.orderData 
+          },
+          'Address Selection',
+          cleanUrl
+        );
+        
+        setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
       }
       return;
     }
@@ -171,16 +228,69 @@ const Schedule = () => {
     if (returnState?.returnTo === "/schedule" && returnState?.returnStep && returnState?.orderData) {
       console.log("Returning from profile completion");
       setOrderData(returnState.orderData);
-      setCurrentStep(returnState.returnStep);
-      // Replace the current history entry to remove profile from backstack
+      
+      // Clean history and set up proper navigation
+      const cleanUrl = window.location.pathname;
       window.history.replaceState(
-        { fromAuth: true, orderData: returnState.orderData },
-        document.title,
-        window.location.pathname
+        { 
+          step: returnState.returnStep,
+          fromProfile: true,
+          orderData: returnState.orderData,
+          cleanHistory: true
+        },
+        document.title, 
+        cleanUrl
       );
+      
+      // Push a service selection state so back button works correctly
+      window.history.pushState(
+        { 
+          step: ScheduleStep.SERVICE_SELECTION,
+          orderData: returnState.orderData 
+        },
+        'Service Selection',
+        cleanUrl
+      );
+      
+      // Then navigate to the target step
+      if (returnState.returnStep === ScheduleStep.ADDRESS_SELECTION) {
+        window.history.pushState(
+          { 
+            step: ScheduleStep.ADDRESS_SELECTION,
+            orderData: returnState.orderData 
+          },
+          'Address Selection',
+          cleanUrl
+        );
+      }
+      
+      setCurrentStep(returnState.returnStep);
       return;
     }
   }, [user, isLoading, isProfileComplete, location.search, location.state, navigate]);
+
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state) {
+        const { step } = event.state;
+        if (typeof step === 'number') {
+          console.log("Browser back button pressed, navigating to step:", step);
+          setCurrentStep(step);
+          return;
+        }
+      }
+      
+      // If no valid state, go to service selection if we're on address selection
+      if (currentStep === ScheduleStep.ADDRESS_SELECTION) {
+        console.log("Browser back button pressed from address selection, going to service selection");
+        setCurrentStep(ScheduleStep.SERVICE_SELECTION);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [currentStep]);
 
   // Track step views only on actual step transitions
   useEffect(() => {
