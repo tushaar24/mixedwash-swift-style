@@ -45,24 +45,26 @@ const Auth = () => {
               returnTo: "/schedule",
               returnStep: 1, // ADDRESS_SELECTION = 1
               orderData: orderData
-            }
+            },
+            replace: true // Replace auth page in history
           });
         } else {
-          // Redirect back to schedule with order data
+          // Redirect back to schedule with order data for address selection
           navigate("/schedule", { 
             state: { 
               fromAuth: true,
               orderData: orderData,
               currentStep: 1 // ADDRESS_SELECTION = 1
-            }
+            },
+            replace: true // Replace auth page in history
           });
         }
       } else if (!isProfileComplete) {
         // Redirect to profile page for incomplete profiles
-        navigate("/profile");
+        navigate("/profile", { replace: true });
       } else {
         // Otherwise redirect to home for users with complete profiles
-        navigate("/");
+        navigate("/", { replace: true });
       }
     }
   }, [user, isProfileComplete, isLoading, navigate, fromSchedule, orderData]);

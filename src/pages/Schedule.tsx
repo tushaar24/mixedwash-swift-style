@@ -90,7 +90,7 @@ const Schedule = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Handle redirect after authentication
+  // Handle redirect after authentication - automatically move to address selection
   useEffect(() => {
     // If user just authenticated and has services selected, go to address step
     if (user && !isLoading && orderData.services.length > 0 && currentStep === ScheduleStep.SERVICE_SELECTION) {
@@ -102,25 +102,35 @@ const Schedule = () => {
             returnTo: "/schedule",
             returnStep: ScheduleStep.ADDRESS_SELECTION,
             orderData: orderData
-          }
+          },
+          replace: true // Remove auth from backstack
         });
       } else {
-        // Profile complete - go to address selection
+        // Profile complete - go to address selection automatically
+        console.log("User authenticated with complete profile, moving to address selection");
         setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
       }
     }
   }, [user, isLoading, isProfileComplete, orderData.services.length, currentStep, navigate]);
 
-  // Handle return from profile completion
+  // Handle return from profile completion or auth
   useEffect(() => {
     const returnState = location.state;
     if (returnState?.returnTo === "/schedule" && returnState?.returnStep && returnState?.orderData) {
       setOrderData(returnState.orderData);
       setCurrentStep(returnState.returnStep);
-      // Clear the state to prevent repeated redirects
+      // Clear the state to prevent repeated redirects and remove auth from backstack
       window.history.replaceState({}, document.title);
     }
-  }, [location.state]);
+    
+    // Handle direct return from auth with services already selected
+    if (returnState?.fromAuth && returnState?.orderData && user && isProfileComplete) {
+      setOrderData(returnState.orderData);
+      setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
+      // Clear the state and remove auth from backstack
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, user, isProfileComplete]);
 
   // Track step views only on actual step transitions
   useEffect(() => {
@@ -216,7 +226,8 @@ const Schedule = () => {
             returnTo: "/schedule",
             returnStep: ScheduleStep.ADDRESS_SELECTION,
             orderData: orderData
-          }
+          },
+          replace: true // Remove current page from backstack
         });
         return;
       }
