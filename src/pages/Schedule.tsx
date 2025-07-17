@@ -272,19 +272,27 @@ const Schedule = () => {
   // Handle browser back button
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      if (event.state) {
-        const { step } = event.state;
-        if (typeof step === 'number') {
-          console.log("Browser back button pressed, navigating to step:", step);
-          setCurrentStep(step);
-          return;
+      // Only handle back button for schedule steps, not auth redirects
+      if (window.location.pathname === '/schedule') {
+        event.preventDefault();
+        
+        // Handle back navigation based on current step
+        if (currentStep === ScheduleStep.ADDRESS_SELECTION) {
+          console.log("Browser back button: going from address to service selection");
+          setCurrentStep(ScheduleStep.SERVICE_SELECTION);
+          window.scrollTo(0, 0);
+        } else if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
+          console.log("Browser back button: going from time slot to address selection");
+          setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
+          window.scrollTo(0, 0);
+        } else if (currentStep === ScheduleStep.ORDER_CONFIRMATION) {
+          console.log("Browser back button: going from confirmation to time slot");
+          setCurrentStep(ScheduleStep.TIME_SLOT_SELECTION);
+          window.scrollTo(0, 0);
+        } else {
+          // If on service selection, let normal navigation happen (go to home)
+          window.history.back();
         }
-      }
-      
-      // If no valid state, go to service selection if we're on address selection
-      if (currentStep === ScheduleStep.ADDRESS_SELECTION) {
-        console.log("Browser back button pressed from address selection, going to service selection");
-        setCurrentStep(ScheduleStep.SERVICE_SELECTION);
       }
     };
 
