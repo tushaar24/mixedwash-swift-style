@@ -134,6 +134,24 @@ const Profile = () => {
     }
   }, [isProfileComplete, user]);
 
+  // Handle redirection to schedule flow when profile becomes complete
+  useEffect(() => {
+    console.log("=== CHECKING SCHEDULE FLOW REDIRECT ===");
+    console.log("User:", user?.id, "IsProfileComplete:", isProfileComplete, "FromSchedule:", fromSchedule, "OrderData:", !!orderData);
+    
+    if (user && isProfileComplete && fromSchedule && orderData) {
+      console.log("Profile is complete and came from schedule, redirecting to address selection");
+      navigate("/schedule", { 
+        state: { 
+          fromAuth: true,
+          orderData: orderData,
+          currentStep: 1 // ADDRESS_SELECTION = 1
+        },
+        replace: true
+      });
+    }
+  }, [user, isProfileComplete, fromSchedule, orderData, navigate]);
+
   useEffect(() => {
     console.log("=== PROFILE PAGE MAIN EFFECT ===");
     console.log("User:", user?.id, "IsProfileComplete:", isProfileComplete);
