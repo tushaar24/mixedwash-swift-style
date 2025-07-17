@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { trackEvent } from "@/utils/clevertap";
@@ -234,6 +235,16 @@ const Auth = () => {
               </svg>
               <span>{googleLoading ? "Signing in..." : "Continue with Google"}</span>
             </Button>
+            
+            {/* Progress bar for Google auth */}
+            {googleLoading && (
+              <div className="mt-4">
+                <div className="text-center text-sm text-gray-600 mb-2">
+                  Redirecting to Google...
+                </div>
+                <Progress value={100} className="w-full h-2" />
+              </div>
+            )}
           </div>
 
           {/* Divider */}
