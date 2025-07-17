@@ -37,22 +37,38 @@ const Auth = () => {
     
     // Check if user is already logged in
     if (user) {
+      // Check for stored order data from Google OAuth
+      const storedOrderData = sessionStorage.getItem('pendingOrderData');
+      const storedFromSchedule = sessionStorage.getItem('fromSchedule');
+      
+      let finalOrderData = orderData;
+      let finalFromSchedule = fromSchedule;
+      
+      if (storedOrderData && storedFromSchedule) {
+        finalOrderData = JSON.parse(storedOrderData);
+        finalFromSchedule = true;
+        // Clear from session storage
+        sessionStorage.removeItem('pendingOrderData');
+        sessionStorage.removeItem('fromSchedule');
+        console.log('Retrieved order data from sessionStorage after Google auth');
+      }
+      
       // Priority 1: Check profile completion first
       if (!isProfileComplete) {
         // Profile incomplete - go to profile page with order data preserved
         navigate("/profile", { 
-          state: fromSchedule && orderData ? { 
+          state: finalFromSchedule && finalOrderData ? { 
             fromSchedule: true, 
-            orderData: orderData 
+            orderData: finalOrderData 
           } : undefined,
           replace: true 
         });
-      } else if (fromSchedule && orderData) {
+      } else if (finalFromSchedule && finalOrderData) {
         // Profile complete and coming from schedule - go to address selection
         navigate("/schedule", { 
           state: { 
             fromAuth: true,
-            orderData: orderData,
+            orderData: finalOrderData,
             currentStep: 1 // ADDRESS_SELECTION = 1
           },
           replace: true // Replace auth page in history
@@ -68,19 +84,18 @@ const Auth = () => {
     setGoogleLoading(true);
     
     try {
-      let redirectUrl = window.location.origin;
-      
-      // If coming from schedule with order data, include it in the redirect
+      // Always use the base URL for OAuth redirect
+      // Store order data in sessionStorage instead of URL to avoid issues
       if (fromSchedule && orderData) {
-        const encodedOrderData = encodeURIComponent(JSON.stringify(orderData));
-        redirectUrl = `${window.location.origin}/schedule?fromAuth=true&orderData=${encodedOrderData}`;
-        console.log('Google auth redirect URL with order data:', redirectUrl);
+        sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
+        sessionStorage.setItem('fromSchedule', 'true');
+        console.log('Stored order data in sessionStorage for Google auth');
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl
+          redirectTo: `${window.location.origin}/auth`
         }
       });
       
