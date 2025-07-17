@@ -417,7 +417,20 @@ const Schedule = () => {
       // (This should already be handled by TimeSlotSelection component)
     }
     
-    setCurrentStep((prev) => prev + 1);
+    const nextStep = currentStep + 1;
+    
+    // Push new state to browser history for forward navigation
+    window.history.pushState(
+      { 
+        step: nextStep,
+        orderData: orderData,
+        navigationType: 'forward'
+      },
+      getStepTitle(nextStep),
+      window.location.pathname
+    );
+    
+    setCurrentStep(nextStep);
     window.scrollTo(0, 0);
   };
 
@@ -433,12 +446,6 @@ const Schedule = () => {
         'current_time': getCurrentTime(),
         'type': 'manual' // This would need to be dynamic based on address type
       });
-      
-      // Always go back to service selection from address selection
-      // This ensures proper navigation regardless of how user got to address selection
-      setCurrentStep(ScheduleStep.SERVICE_SELECTION);
-      window.scrollTo(0, 0);
-      return;
     }
     
     if (currentStep === ScheduleStep.ORDER_CONFIRMATION) {
@@ -453,9 +460,43 @@ const Schedule = () => {
       });
     }
     
-    setCurrentStep((prev) => prev - 1);
-    window.scrollTo(0, 0);
+    // Use browser back instead of manually setting step
+    // This ensures consistency with native back button
+    window.history.back();
   };
+
+  // Helper function to get step titles for browser history
+  const getStepTitle = (step: ScheduleStep): string => {
+    switch (step) {
+      case ScheduleStep.SERVICE_SELECTION:
+        return 'Select Services - MixedWash';
+      case ScheduleStep.ADDRESS_SELECTION:
+        return 'Select Address - MixedWash';
+      case ScheduleStep.TIME_SLOT_SELECTION:
+        return 'Schedule Pickup - MixedWash';
+      case ScheduleStep.ORDER_CONFIRMATION:
+        return 'Confirm Order - MixedWash';
+      default:
+        return 'Schedule Laundry - MixedWash';
+    }
+  };
+
+  // Initialize browser history for the current step
+  useEffect(() => {
+    // Only initialize history if we don't have a clean history already set
+    const currentState = window.history.state;
+    if (!currentState?.step && !currentState?.cleanHistory) {
+      window.history.replaceState(
+        { 
+          step: currentStep,
+          orderData: orderData,
+          navigationType: 'initial'
+        },
+        getStepTitle(currentStep),
+        window.location.pathname
+      );
+    }
+  }, [currentStep, orderData]);
 
   // Update order data
   const updateOrderData = (data: Partial<ScheduleOrderData>) => {
