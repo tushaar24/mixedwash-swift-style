@@ -130,8 +130,12 @@ const Schedule = () => {
             setOrderData(authOrderData);
           }
           setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
-          // Clean up URL parameters
-          window.history.replaceState({}, document.title, window.location.pathname);
+          // Clean up URL parameters and replace current entry to remove auth from history
+          window.history.replaceState(
+            { fromAuth: true, orderData: dataToUse },
+            document.title, 
+            window.location.pathname
+          );
         }
       }
       return;
@@ -153,8 +157,12 @@ const Schedule = () => {
       } else {
         console.log("Moving directly to address selection after auth");
         setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
-        // Clear the state
-        window.history.replaceState({}, document.title);
+        // Replace the current history entry to remove auth from backstack
+        window.history.replaceState(
+          { fromAuth: true, orderData: returnState.orderData },
+          document.title,
+          window.location.pathname
+        );
       }
       return;
     }
@@ -164,8 +172,12 @@ const Schedule = () => {
       console.log("Returning from profile completion");
       setOrderData(returnState.orderData);
       setCurrentStep(returnState.returnStep);
-      // Clear the state
-      window.history.replaceState({}, document.title);
+      // Replace the current history entry to remove profile from backstack
+      window.history.replaceState(
+        { fromAuth: true, orderData: returnState.orderData },
+        document.title,
+        window.location.pathname
+      );
       return;
     }
   }, [user, isLoading, isProfileComplete, location.search, location.state, navigate]);
@@ -311,6 +323,12 @@ const Schedule = () => {
         'current_time': getCurrentTime(),
         'type': 'manual' // This would need to be dynamic based on address type
       });
+      
+      // Always go back to service selection from address selection
+      // This ensures proper navigation regardless of how user got to address selection
+      setCurrentStep(ScheduleStep.SERVICE_SELECTION);
+      window.scrollTo(0, 0);
+      return;
     }
     
     if (currentStep === ScheduleStep.ORDER_CONFIRMATION) {
