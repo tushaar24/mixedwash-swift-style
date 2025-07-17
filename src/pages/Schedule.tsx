@@ -130,98 +130,22 @@ const Schedule = () => {
             setOrderData(authOrderData);
           }
           
-          // Clear the entire history stack and create a clean navigation state
-          // This removes all auth-related pages from browser history
-          const cleanUrl = window.location.pathname;
-          window.history.replaceState(
-            { 
+          // Clear URL parameters to prevent re-processing
+          navigate(location.pathname, { 
+            state: { 
               step: ScheduleStep.ADDRESS_SELECTION,
               fromAuth: true,
-              orderData: dataToUse,
-              cleanHistory: true
-            },
-            document.title, 
-            cleanUrl
-          );
-          
-          // Push a service selection state so back button works correctly
-          window.history.pushState(
-            { 
-              step: ScheduleStep.SERVICE_SELECTION,
               orderData: dataToUse 
             },
-            'Service Selection',
-            cleanUrl
-          );
-          
-          // Then navigate to address selection
-          window.history.pushState(
-            { 
-              step: ScheduleStep.ADDRESS_SELECTION,
-              orderData: dataToUse 
-            },
-            'Address Selection',
-            cleanUrl
-          );
+            replace: true 
+          });
           
           setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
         }
-      }
-      return;
-    }
-    
-    // Handle return from auth with state (for email/password flows)
-    if (returnState?.fromAuth && returnState?.orderData && user && !isLoading) {
-      console.log("Returning from auth via state");
-      setOrderData(returnState.orderData);
-      if (!isProfileComplete) {
-        navigate("/profile", { 
-          state: { 
-            returnTo: "/schedule",
-            returnStep: ScheduleStep.ADDRESS_SELECTION,
-            orderData: returnState.orderData
-          },
-          replace: true
-        });
       } else {
-        console.log("Moving directly to address selection after auth");
-        
-        // Clear the entire history stack and create a clean navigation state
-        const cleanUrl = window.location.pathname;
-        window.history.replaceState(
-          { 
-            step: ScheduleStep.ADDRESS_SELECTION,
-            fromAuth: true,
-            orderData: returnState.orderData,
-            cleanHistory: true
-          },
-          document.title, 
-          cleanUrl
-        );
-        
-        // Push a service selection state so back button works correctly
-        window.history.pushState(
-          { 
-            step: ScheduleStep.SERVICE_SELECTION,
-            orderData: returnState.orderData 
-          },
-          'Service Selection',
-          cleanUrl
-        );
-        
-        // Then navigate to address selection
-        window.history.pushState(
-          { 
-            step: ScheduleStep.ADDRESS_SELECTION,
-            orderData: returnState.orderData 
-          },
-          'Address Selection',
-          cleanUrl
-        );
-        
-        setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
+        // No order data, clear URL parameters and start fresh
+        navigate(location.pathname, { replace: true });
       }
-      return;
     }
     
     // Handle return from profile completion
