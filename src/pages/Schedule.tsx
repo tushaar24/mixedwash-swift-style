@@ -90,7 +90,7 @@ const Schedule = () => {
     phone: profile?.mobile_number
   } : undefined;
 
-  // Handle return from auth - this should handle direct navigation to address selection
+  // Handle return from auth and profile completion
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const fromAuth = urlParams.get('fromAuth');
@@ -130,17 +130,27 @@ const Schedule = () => {
             setOrderData(authOrderData);
           }
           
-          // Clear URL parameters to prevent re-processing
-          navigate(location.pathname, { 
-            state: { 
-              step: ScheduleStep.ADDRESS_SELECTION,
-              fromAuth: true,
-              orderData: dataToUse 
-            },
-            replace: true 
-          });
+          // Clear URL parameters and setup proper navigation history
+          navigate(location.pathname, { replace: true });
           
-          setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
+          // Setup navigation history for proper back button behavior
+          setTimeout(() => {
+            // Push service selection to history first
+            window.history.pushState(
+              { step: ScheduleStep.SERVICE_SELECTION, orderData: dataToUse },
+              'Service Selection',
+              '/schedule'
+            );
+            
+            // Then push address selection
+            window.history.pushState(
+              { step: ScheduleStep.ADDRESS_SELECTION, orderData: dataToUse },
+              'Address Selection', 
+              '/schedule'
+            );
+            
+            setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
+          }, 0);
         }
       } else {
         // No order data, clear URL parameters and start fresh
@@ -153,76 +163,56 @@ const Schedule = () => {
       console.log("Returning from profile completion");
       setOrderData(returnState.orderData);
       
-      // Clean history and set up proper navigation
-      const cleanUrl = window.location.pathname;
-      window.history.replaceState(
-        { 
-          step: returnState.returnStep,
-          fromProfile: true,
-          orderData: returnState.orderData,
-          cleanHistory: true
-        },
-        document.title, 
-        cleanUrl
-      );
+      // Clear the return state and setup proper navigation history
+      navigate(location.pathname, { replace: true });
       
-      // Push a service selection state so back button works correctly
-      window.history.pushState(
-        { 
-          step: ScheduleStep.SERVICE_SELECTION,
-          orderData: returnState.orderData 
-        },
-        'Service Selection',
-        cleanUrl
-      );
-      
-      // Then navigate to the target step
-      if (returnState.returnStep === ScheduleStep.ADDRESS_SELECTION) {
+      setTimeout(() => {
+        // Push service selection to history first
         window.history.pushState(
-          { 
-            step: ScheduleStep.ADDRESS_SELECTION,
-            orderData: returnState.orderData 
-          },
-          'Address Selection',
-          cleanUrl
+          { step: ScheduleStep.SERVICE_SELECTION, orderData: returnState.orderData },
+          'Service Selection',
+          '/schedule'
         );
-      }
+        
+        // Then push the target step (usually address selection)
+        if (returnState.returnStep === ScheduleStep.ADDRESS_SELECTION) {
+          window.history.pushState(
+            { step: ScheduleStep.ADDRESS_SELECTION, orderData: returnState.orderData },
+            'Address Selection',
+            '/schedule'
+          );
+        }
+        
+        setCurrentStep(returnState.returnStep);
+      }, 0);
       
-      setCurrentStep(returnState.returnStep);
       return;
     }
   }, [user, isLoading, isProfileComplete, location.search, location.state, navigate]);
 
-  // Handle browser back button
+  // Handle browser back button with proper history management
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      // Only handle back button for schedule steps, not auth redirects
-      if (window.location.pathname === '/schedule') {
-        event.preventDefault();
-        
-        // Handle back navigation based on current step
-        if (currentStep === ScheduleStep.ADDRESS_SELECTION) {
-          console.log("Browser back button: going from address to service selection");
-          setCurrentStep(ScheduleStep.SERVICE_SELECTION);
+      if (window.location.pathname === '/schedule' && event.state) {
+        // Get the step from the popped state
+        const targetStep = event.state.step;
+        if (typeof targetStep === 'number' && targetStep >= 0 && targetStep <= 3) {
+          console.log(`Browser back button: navigating to step ${targetStep}`);
+          setCurrentStep(targetStep);
+          
+          // Restore order data if available in the state
+          if (event.state.orderData) {
+            setOrderData(event.state.orderData);
+          }
+          
           window.scrollTo(0, 0);
-        } else if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
-          console.log("Browser back button: going from time slot to address selection");
-          setCurrentStep(ScheduleStep.ADDRESS_SELECTION);
-          window.scrollTo(0, 0);
-        } else if (currentStep === ScheduleStep.ORDER_CONFIRMATION) {
-          console.log("Browser back button: going from confirmation to time slot");
-          setCurrentStep(ScheduleStep.TIME_SLOT_SELECTION);
-          window.scrollTo(0, 0);
-        } else {
-          // If on service selection, let normal navigation happen (go to home)
-          window.history.back();
         }
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [currentStep]);
+  }, []);
 
   // Track step views only on actual step transitions
   useEffect(() => {
@@ -349,8 +339,31 @@ const Schedule = () => {
       // (This should already be handled by TimeSlotSelection component)
     }
     
-    setCurrentStep((prev) => prev + 1);
+    const nextStep = currentStep + 1;
+    
+    // Push new state to history for proper back button behavior
+    window.history.pushState(
+      { 
+        step: nextStep, 
+        orderData: orderData 
+      },
+      getStepTitle(nextStep),
+      '/schedule'
+    );
+    
+    setCurrentStep(nextStep);
     window.scrollTo(0, 0);
+  };
+
+  // Helper function to get step titles
+  const getStepTitle = (step: number) => {
+    switch (step) {
+      case ScheduleStep.SERVICE_SELECTION: return 'Service Selection';
+      case ScheduleStep.ADDRESS_SELECTION: return 'Address Selection';
+      case ScheduleStep.TIME_SLOT_SELECTION: return 'Time Slot Selection';
+      case ScheduleStep.ORDER_CONFIRMATION: return 'Order Confirmation';
+      default: return 'Schedule';
+    }
   };
 
   // Handle previous step transitions
@@ -365,12 +378,6 @@ const Schedule = () => {
         'current_time': getCurrentTime(),
         'type': 'manual' // This would need to be dynamic based on address type
       });
-      
-      // Always go back to service selection from address selection
-      // This ensures proper navigation regardless of how user got to address selection
-      setCurrentStep(ScheduleStep.SERVICE_SELECTION);
-      window.scrollTo(0, 0);
-      return;
     }
     
     if (currentStep === ScheduleStep.ORDER_CONFIRMATION) {
@@ -385,8 +392,8 @@ const Schedule = () => {
       });
     }
     
-    setCurrentStep((prev) => prev - 1);
-    window.scrollTo(0, 0);
+    // Use browser's back functionality to maintain proper history
+    window.history.back();
   };
 
   // Update order data
@@ -394,9 +401,35 @@ const Schedule = () => {
     setOrderData((prev) => {
       const updated = { ...prev, ...data };
       console.log("Updated order data:", updated);
+      
+      // Update current history state with new order data
+      window.history.replaceState(
+        { 
+          step: currentStep, 
+          orderData: updated 
+        },
+        getStepTitle(currentStep),
+        '/schedule'
+      );
+      
       return updated;
     });
   };
+  
+  // Initialize history state when component mounts or step changes
+  useEffect(() => {
+    // Only set initial history state if we don't have one
+    if (!window.history.state || window.history.state.step !== currentStep) {
+      window.history.replaceState(
+        { 
+          step: currentStep, 
+          orderData: orderData 
+        },
+        getStepTitle(currentStep),
+        '/schedule'
+      );
+    }
+  }, [currentStep, orderData]);
 
   // Show loading only when we need authentication for address selection and beyond
   if (isLoading && currentStep > ScheduleStep.SERVICE_SELECTION && user) {
