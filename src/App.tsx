@@ -9,6 +9,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { PageTracker } from "./components/PageTracker";
 import { initCleverTap } from "./utils/clevertap";
+import { initPerformanceTracking } from "./utils/performance";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -25,6 +26,7 @@ const queryClient = new QueryClient();
 function App() {
   useEffect(() => {
     initCleverTap();
+    initPerformanceTracking();
   }, []);
 
   return (
