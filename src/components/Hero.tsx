@@ -76,7 +76,7 @@ export const Hero = () => {
           className="w-full h-full object-cover object-right"
           loading="eager"
           decoding="sync"
-          fetchPriority="high"
+          {...({ fetchpriority: "high" } as any)}
           width="1600"
           height="900"
           style={{ aspectRatio: '16/9' }}
