@@ -114,9 +114,11 @@ const Index = () => {
   console.log("Index rendering main content");
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" style={{ border: "2px solid red" }}>
+      <div style={{ backgroundColor: "yellow", padding: "10px" }}>DEBUG: Index wrapper</div>
       <Navbar />
-      <main>
+      <main style={{ backgroundColor: "lightblue", minHeight: "200px" }}>
+        <div style={{ backgroundColor: "pink", padding: "10px" }}>DEBUG: Main content</div>
         <Hero />
         <Suspense fallback={<LoadingSection />}>
           <ProfessionalLaundryService />
