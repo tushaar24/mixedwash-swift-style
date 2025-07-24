@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Info, Truck } from "lucide-react";
 import { ServiceWeightEstimateDialog } from "@/components/ServiceWeightEstimateDialog";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useDiscountEligibility } from "@/hooks/useDiscountEligibility";
 
 interface PricingSectionProps {
@@ -18,13 +18,23 @@ interface PricingSectionProps {
 
 export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEstimate }: PricingSectionProps) => {
   const [activeTab, setActiveTab] = useState("men");
-  const { isEligibleForDiscount, loading } = useDiscountEligibility();
   const [showServiceChargeAlert, setShowServiceChargeAlert] = useState(true);
+  
+  // Load discount eligibility asynchronously to prevent blocking
+  const { isEligibleForDiscount, loading } = useDiscountEligibility();
 
   // Early return if service data is not available
   if (!service || !service.prices) {
     return <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">Loading pricing information...</div>;
   }
+
+  // Memoize price calculations to prevent recalculation
+  const memoizedPrices = useMemo(() => {
+    return service.prices.map((price: any) => ({
+      ...price,
+      displayPrice: isEligibleForDiscount ? price.oldPrice : price.amount
+    }));
+  }, [service.prices, isEligibleForDiscount]);
   
   return (
     <div className="max-w-5xl mx-auto px-4 mt-6 sm:mt-8">
@@ -99,7 +109,7 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
             </Tabs>
           </Card>
         ) : (
-          service.prices.map((price: any, index: number) => (
+          memoizedPrices.map((price: any, index: number) => (
             <Card key={index} className="border shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -117,12 +127,11 @@ export const PricingSection = ({ service, serviceId, onSchedulePickup, onGetEsti
                       </div>
                     )}
                   </div>
-                  <div className="sm:text-right">
-                    <div className="font-semibold text-xl sm:text-2xl text-gray-800">
-                      {/* Show old price for old customers, new price for new customers */}
-                      {isEligibleForDiscount ? price.oldPrice : price.amount}
-                    </div>
-                  </div>
+                   <div className="sm:text-right">
+                     <div className="font-semibold text-xl sm:text-2xl text-gray-800">
+                       {price.displayPrice}
+                     </div>
+                   </div>
                 </div>
               </CardContent>
             </Card>
