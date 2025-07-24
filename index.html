@@ -61,7 +61,7 @@
     <style>
       /* Critical CSS for hero section and initial page load */
       *, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: #e5e7eb; }
-      body { margin: 0; padding: 0; background-color: #ffffff; color: #111827; font-family: ui-sans-serif, system-ui, sans-serif; }
+      body { margin: 0; padding: 0; background-color: #ffffff; color: #111827; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
       .relative { position: relative; }
       .hidden { display: none; }
       .flex { display: flex; }
@@ -96,10 +96,11 @@
       }
     </style>
     
-    <!-- Font Optimization -->
+    <!-- Font Optimization - Non-blocking -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
     
     <!-- Critical Resource Preloads -->
     <link rel="preload" as="image" href="/src/assets/hero-desktop-1600.webp" imagesrcset="/src/assets/hero-mobile-640.webp 640w, /src/assets/hero-tablet-1024.webp 1024w, /src/assets/hero-desktop-1600.webp 1600w" imagesizes="(max-width: 768px) 100vw, (max-width: 1200px) 1024px, 1600px" fetchpriority="high">
@@ -179,6 +180,7 @@
     </script>
     
     <!-- Load CSS asynchronously to prevent render blocking -->
+    <link rel="preload" as="style" href="/src/index.css" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="/src/index.css"></noscript>
     
     <!-- Lovable Script Tag - deferred -->
