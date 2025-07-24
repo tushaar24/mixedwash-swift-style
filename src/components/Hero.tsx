@@ -103,7 +103,9 @@ export const Hero = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 md:pt-0 md:pb-0 flex items-center md:min-h-[600px]">
         <div className="max-w-2xl">
           <h1 className="hero-title pt-0 md:pt-32 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
-            Professional Express Laundry Services Tailored to Your Schedule
+            <span className="block mb-2">Laundry and</span>
+            <span className="block mb-2">Dry Cleaning</span>
+            <span className="text-3xl md:text-4xl lg:text-5xl text-gray-600">with Next Day Delivery</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-lg mt-6">
             Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
