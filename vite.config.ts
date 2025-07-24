@@ -18,18 +18,8 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       treeshake: true,
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'router': ['react-router-dom'],
-          'ui': ['@radix-ui/react-accordion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          'supabase': ['@supabase/supabase-js'],
-          'query': ['@tanstack/react-query'],
-          'icons': ['lucide-react'],
-        },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[name]-[hash][extname]`;
-          const info = assetInfo.name.split('.');
-          const ext = info[info.length - 1];
           if (/\.(woff|woff2|eot|ttf|otf)$/.test(assetInfo.name)) {
             return `assets/fonts/[name]-[hash][extname]`;
           }
