@@ -6,7 +6,6 @@ import { Hero } from "@/components/Hero";
 import { useAuth } from "@/context/AuthContext";
 import { useSEO } from "@/hooks/useSEO";
 import { seoPages } from "@/utils/seo";
-import LazyLoadOnScroll from "@/components/LazyLoadOnScroll";
 
 // Lazy load below-fold components
 const ProfessionalLaundryService = lazy(() => import("@/components/ProfessionalLaundryService").then(m => ({ default: m.ProfessionalLaundryService })));
@@ -21,9 +20,6 @@ const FloatingActionButton = lazy(() => import("@/components/FloatingActionButto
 const LoadingSection = () => <div className="min-h-[400px] bg-gray-50 animate-pulse flex items-center justify-center">
   <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
 </div>;
-
-const SectionPlaceholder = () => <div className="min-h-[400px]" />;
-
 
 const Index = () => {
   const { user, profile, isLoading, isProfileComplete } = useAuth();
@@ -44,42 +40,28 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
-        <LazyLoadOnScroll placeholder={<SectionPlaceholder />}>
-          <Suspense fallback={<LoadingSection />}>
-            <ProfessionalLaundryService />
-          </Suspense>
-        </LazyLoadOnScroll>
-        <LazyLoadOnScroll placeholder={<SectionPlaceholder />}>
-          <Suspense fallback={<LoadingSection />}>
-            <WhyChooseUs />
-          </Suspense>
-        </LazyLoadOnScroll>
-        <LazyLoadOnScroll placeholder={<SectionPlaceholder />}>
-          <Suspense fallback={<LoadingSection />}>
-            <Services />
-          </Suspense>
-        </LazyLoadOnScroll>
-        <LazyLoadOnScroll placeholder={<SectionPlaceholder />}>
-          <Suspense fallback={<LoadingSection />}>
-            <HowItWorks />
-          </Suspense>
-        </LazyLoadOnScroll>
-        <LazyLoadOnScroll placeholder={<SectionPlaceholder />}>
-          <Suspense fallback={<LoadingSection />}>
-            <FAQ />
-          </Suspense>
-        </LazyLoadOnScroll>
-        <LazyLoadOnScroll placeholder={<SectionPlaceholder />}>
-          <Suspense fallback={<LoadingSection />}>
-            <CallToAction />
-          </Suspense>
-        </LazyLoadOnScroll>
-      </main>
-      <LazyLoadOnScroll placeholder={<div className="h-32" />}>
-        <Suspense fallback={<div className="h-32 bg-gray-100 animate-pulse" />}>
-          <Footer />
+        <Suspense fallback={<LoadingSection />}>
+          <ProfessionalLaundryService />
         </Suspense>
-      </LazyLoadOnScroll>
+        <Suspense fallback={<LoadingSection />}>
+          <WhyChooseUs />
+        </Suspense>
+        <Suspense fallback={<LoadingSection />}>
+          <Services />
+        </Suspense>
+        <Suspense fallback={<LoadingSection />}>
+          <HowItWorks />
+        </Suspense>
+        <Suspense fallback={<LoadingSection />}>
+          <FAQ />
+        </Suspense>
+        <Suspense fallback={<LoadingSection />}>
+          <CallToAction />
+        </Suspense>
+      </main>
+      <Suspense fallback={<div className="h-32 bg-gray-100 animate-pulse" />}>
+        <Footer />
+      </Suspense>
       <Suspense fallback={null}>
         <FloatingActionButton />
       </Suspense>
