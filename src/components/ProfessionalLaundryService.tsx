@@ -71,11 +71,11 @@ export const ProfessionalLaundryService = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-12 md:mb-16 lg:mb-20">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 md:mb-4 lg:mb-6">
+          <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 md:mb-4 lg:mb-6">
             <span className="text-gray-900 block leading-tight mb-2 md:mb-3">
               Professional Express Laundry Services
             </span>
-            <span className="text-gray-500 block text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium leading-tight">
+            <span className="text-gray-500 block text-base sm:text-lg md:text-2xl lg:text-3xl font-medium leading-tight">
               Tailored to Your Schedule
             </span>
           </h1>
