@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
 
-export const FAQ = () => {
+const FAQ = () => {
   const { user, profile } = useAuth();
   const sectionRef = useRef<HTMLElement>(null);
   const hasTrackedScrollRef = useRef(false);
@@ -110,3 +110,5 @@ export const FAQ = () => {
     </section>
   );
 };
+
+export default FAQ;

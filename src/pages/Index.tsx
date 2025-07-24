@@ -12,7 +12,7 @@ const ProfessionalLaundryService = lazy(() => import("@/components/ProfessionalL
 const WhyChooseUs = lazy(() => import("@/components/WhyChooseUs").then(m => ({ default: m.WhyChooseUs })));
 const Services = lazy(() => import("@/components/Services").then(m => ({ default: m.Services })));
 const HowItWorks = lazy(() => import("@/components/HowItWorks").then(m => ({ default: m.HowItWorks })));
-const FAQ = lazy(() => import("@/components/FAQ").then(m => ({ default: m.FAQ })));
+const FAQ = lazy(() => import("@/components/FAQ"));
 const CallToAction = lazy(() => import("@/components/CallToAction").then(m => ({ default: m.CallToAction })));
 const Footer = lazy(() => import("@/components/Footer").then(m => ({ default: m.Footer })));
 const FloatingActionButton = lazy(() => import("@/components/FloatingActionButton").then(m => ({ default: m.FloatingActionButton })));
