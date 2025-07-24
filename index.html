@@ -8,28 +8,19 @@
       // Analytics initialization with idle-until-urgent strategy
       window.analyticsQueue = [];
       
-      // GTM lazy loader - only load when user interacts or after delay
+      // GTM lazy loader - only load when user interacts
       function initGTM() {
         if (window.gtmLoaded) return;
         window.gtmLoaded = true;
         
-        // Initialize dataLayer first
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        window.gtag = gtag;
-        gtag('js', new Date());
-        gtag('config', 'GTM-TMLNCBRB', {
-          send_page_view: false // We'll handle page views manually for better control
-        });
-        
-        // Load GTM script
-        const script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://www.googletagmanager.com/gtm.js?id=GTM-TMLNCBRB';
-        document.head.appendChild(script);
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-TMLNCBRB');
       }
       
-      // CleverTap lazy loader - only load when user interacts or after delay
+      // CleverTap lazy loader - only load when user interacts
       function initCleverTap() {
         if (window.ctLoaded) return;
         window.ctLoaded = true;
@@ -46,36 +37,24 @@
         document.head.appendChild(wzrk);
       }
       
-      // Load analytics on first meaningful user interaction
+      // Load analytics on first user interaction or after 3 seconds
       function loadAnalytics() {
         if (window.analyticsInitialized) return;
         window.analyticsInitialized = true;
         
-        // Use requestIdleCallback for better performance
-        if ('requestIdleCallback' in window) {
-          requestIdleCallback(() => {
-            initGTM();
-            initCleverTap();
-          }, { timeout: 4000 });
-        } else {
-          setTimeout(() => {
-            initGTM();
-            initCleverTap();
-          }, 100);
-        }
+        requestIdleCallback(() => {
+          initGTM();
+          initCleverTap();
+        }, { timeout: 3000 });
       }
       
-      // Trigger on meaningful user interactions only
-      ['click', 'scroll', 'keydown', 'touchstart'].forEach(event => {
-        document.addEventListener(event, loadAnalytics, { 
-          once: true, 
-          passive: true,
-          capture: true 
-        });
+      // Trigger on user interaction
+      ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
+        document.addEventListener(event, loadAnalytics, { once: true, passive: true });
       });
       
-      // Fallback after 4 seconds for bounce detection
-      setTimeout(loadAnalytics, 4000);
+      // Fallback after 3 seconds
+      setTimeout(loadAnalytics, 3000);
     </script>
     
     <!-- SEO Meta Tags -->

@@ -6,17 +6,7 @@ const lazyTrackEvent = async (eventName: string, eventData?: Record<string, any>
     const { trackEvent } = await import('./clevertap');
     return trackEvent(eventName, eventData, userInfo);
   } catch (error) {
-    console.error('Failed to load CleverTap analytics:', error);
-  }
-};
-
-// Dynamically import GTM functions only when needed
-const lazyGTMEvent = async (eventName: string, eventData?: Record<string, any>) => {
-  try {
-    const { trackGTMEvent } = await import('./gtm');
-    return trackGTMEvent(eventName, eventData);
-  } catch (error) {
-    console.error('Failed to load GTM analytics:', error);
+    console.error('Failed to load analytics:', error);
   }
 };
 
@@ -52,18 +42,7 @@ export const analytics = {
   track: lazyTrackEvent,
   page: lazyTrackPageView,
   order: lazyTrackOrder,
-  service: lazyTrackService,
-  gtm: {
-    event: lazyGTMEvent,
-    pageView: async (pagePath: string, pageTitle?: string) => {
-      try {
-        const { trackGTMPageView } = await import('./gtm');
-        return trackGTMPageView(pagePath, pageTitle);
-      } catch (error) {
-        console.error('Failed to load GTM analytics:', error);
-      }
-    }
-  }
+  service: lazyTrackService
 };
 
 // Re-export for backward compatibility
@@ -71,4 +50,3 @@ export const trackEvent = lazyTrackEvent;
 export const trackPageView = lazyTrackPageView;
 export const trackOrderPlaced = lazyTrackOrder;
 export const trackServiceScheduled = lazyTrackService;
-export const trackGTMEvent = lazyGTMEvent;
