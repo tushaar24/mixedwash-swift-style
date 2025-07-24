@@ -281,9 +281,20 @@
     }
     </script>
     
-    <!-- DEFERRED MAIN CSS LOADING -->
-    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <!-- OPTIMIZED CSS LOADING - Non-blocking -->
+    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin>
     <noscript><link rel="stylesheet" href="/src/index.css"></noscript>
+    
+    <!-- Immediate CSS application -->
+    <script>
+      // Apply stylesheet immediately when preloaded
+      const cssLink = document.querySelector('link[rel="preload"][as="style"]');
+      if (cssLink) {
+        cssLink.addEventListener('load', () => {
+          cssLink.rel = 'stylesheet';
+        });
+      }
+    </script>
     
     <!-- Lovable Script Tag - deferred -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module" defer></script>
