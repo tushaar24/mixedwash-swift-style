@@ -14,14 +14,46 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2015',
-    cssCodeSplit: false, // Inline CSS to reduce requests
+    cssCodeSplit: true, // Enable CSS code splitting for better caching
     rollupOptions: {
-      treeshake: true,
+      treeshake: {
+        preset: 'recommended',
+        propertyReadSideEffects: false,
+        moduleSideEffects: false
+      },
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-accordion'],
-          utils: ['lucide-react', 'clsx', 'tailwind-merge']
+        manualChunks: (id) => {
+          // Core vendor libraries
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('lucide-react') || id.includes('clsx') || id.includes('tailwind-merge')) {
+              return 'vendor-utils';
+            }
+            if (id.includes('@supabase') || id.includes('@tanstack')) {
+              return 'vendor-data';
+            }
+            // Everything else in vendor
+            return 'vendor-misc';
+          }
+          
+          // Application chunks
+          if (id.includes('/pages/')) {
+            return 'pages';
+          }
+          if (id.includes('/components/ui/')) {
+            return 'ui-components';
+          }
+          if (id.includes('/components/')) {
+            return 'components';
+          }
+          if (id.includes('/hooks/')) {
+            return 'hooks';
+          }
         },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[name]-[hash][extname]`;
