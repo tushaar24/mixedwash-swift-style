@@ -3,7 +3,47 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Initialize analytics with idle-until-urgent pattern -->
+    <title>MixedWash - Laundry Made Fun, Fast & Friendly | Bangalore Laundry Service</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Font Optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+
+    <!-- Critical Resource Preloads -->
+    <link rel="preload" as="image" href="/src/assets/hero-desktop-1600.webp" fetchpriority="high">
+    <link rel="preload" as="style" href="/src/index.css">
+    <link rel="preload" as="script" href="/src/main.tsx">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="MixedWash - Professional laundry and dry cleaning service in Bangalore. Next-day delivery, doorstep pickup & delivery. Reliable, affordable, and eco-friendly laundry solutions." />
+    <meta name="keywords" content="laundry service bangalore, dry cleaning bangalore, doorstep laundry pickup, next day delivery laundry, professional laundry service, bangalore laundry, mixedwash" />
+    <meta name="author" content="MixedWash" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://mixedwash.in/" />
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="MixedWash - Laundry Made Fun, Fast & Friendly | Bangalore" />
+    <meta property="og:description" content="Professional laundry and dry cleaning service in Bangalore with next-day delivery. Free pickup & delivery at your doorstep. Book online now!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://mixedwash.in/" />
+    <meta property="og:image" content="https://mixedwash.in/og-image.jpg" />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:site_name" content="MixedWash" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MixedWash - Laundry Made Fun, Fast & Friendly" />
+    <meta name="twitter:description" content="Professional laundry service in Bangalore with next-day delivery. Free pickup & delivery at your doorstep." />
+    <meta name="twitter:image" content="https://mixedwash.in/og-image.jpg" />
+
+    <!-- Analytics initialization -->
     <script>
       // Analytics initialization with idle-until-urgent strategy
       window.analyticsQueue = [];
@@ -56,29 +96,6 @@
       // Fallback after 3 seconds
       setTimeout(loadAnalytics, 3000);
     </script>
-    
-    <!-- SEO Meta Tags -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MixedWash - Professional laundry and dry cleaning service in Bangalore. Next-day delivery, doorstep pickup & delivery. Reliable, affordable, and eco-friendly laundry solutions." />
-    <meta name="keywords" content="laundry service bangalore, dry cleaning bangalore, doorstep laundry pickup, next day delivery laundry, professional laundry service, bangalore laundry, mixedwash" />
-    <meta name="author" content="MixedWash" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://mixedwash.in/" />
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="MixedWash - Laundry Made Fun, Fast & Friendly | Bangalore" />
-    <meta property="og:description" content="Professional laundry and dry cleaning service in Bangalore with next-day delivery. Free pickup & delivery at your doorstep. Book online now!" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://mixedwash.in/" />
-    <meta property="og:image" content="https://mixedwash.in/og-image.jpg" />
-    <meta property="og:locale" content="en_IN" />
-    <meta property="og:site_name" content="MixedWash" />
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MixedWash - Laundry Made Fun, Fast & Friendly" />
-    <meta name="twitter:description" content="Professional laundry service in Bangalore with next-day delivery. Free pickup & delivery at your doorstep." />
-    <meta name="twitter:image" content="https://mixedwash.in/og-image.jpg" />
     
     <!-- INLINE CRITICAL CSS -->
     <style>
@@ -186,36 +203,6 @@
       .h-32 { height: 8rem; }
     </style>
     
-    <!-- Font Optimization - Non-blocking with size-adjust -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <style>
-      /* Fallback font with similar metrics to Inter */
-      @font-face {
-        font-family: 'Inter-fallback';
-        size-adjust: 107%;
-        src: local('BlinkMacSystemFont'), local('Segoe UI'), local('Roboto'), local('Arial');
-      }
-    </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
-    
-    <!-- Critical Resource Preloads -->
-    <link rel="preload" as="image" href="/src/assets/hero-desktop-1600.webp" imagesrcset="/src/assets/hero-mobile-640.webp 640w, /src/assets/hero-tablet-1024.webp 1024w, /src/assets/hero-desktop-1600.webp 1600w" imagesizes="(max-width: 768px) 100vw, (max-width: 1200px) 1024px, 1600px" fetchpriority="high">
-    <link rel="preload" as="style" href="/src/index.css">
-    <link rel="preload" as="script" href="/src/main.tsx">
-    <link rel="modulepreload" href="/src/App.tsx">
-    <link rel="modulepreload" href="/src/pages/Index.tsx">
-    <link rel="modulepreload" href="/src/components/Hero.tsx">
-    <link rel="modulepreload" href="/src/components/Navbar.tsx">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    
-    <!-- Page Title -->
-    <title>MixedWash - Laundry Made Fun, Fast & Friendly | Bangalore Laundry Service</title>
-    
     <!-- Structured Data for Local Business -->
     <script type="application/ld+json">
     {
@@ -280,31 +267,16 @@
       }
     }
     </script>
-    
-    <!-- OPTIMIZED CSS LOADING - Non-blocking -->
-    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin>
-    <noscript><link rel="stylesheet" href="/src/index.css"></noscript>
-    
-    <!-- Immediate CSS application -->
-    <script>
-      // Apply stylesheet immediately when preloaded
-      const cssLink = document.querySelector('link[rel="preload"][as="style"]');
-      if (cssLink) {
-        cssLink.addEventListener('load', () => {
-          cssLink.rel = 'stylesheet';
-        });
-      }
-    </script>
-    
+
     <!-- Lovable Script Tag - deferred -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module" defer></script>
   </head>
-  <body>
+  <body class="bg-white">
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TMLNCBRB"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx" defer></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
