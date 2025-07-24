@@ -12,15 +12,26 @@ export const useScrollTracking = (pageName: string) => {
   });
   const documentHeightRef = useRef<number>(0);
   const ticking = useRef(false);
+  const resizeObserver = useRef<ResizeObserver | null>(null);
+
+  const updateDocumentHeight = useCallback(() => {
+    // Use requestIdleCallback to avoid forced reflow during critical rendering
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        documentHeightRef.current = document.documentElement.scrollHeight - window.innerHeight;
+      });
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(() => {
+        documentHeightRef.current = document.documentElement.scrollHeight - window.innerHeight;
+      }, 0);
+    }
+  }, []);
 
   const handleScroll = useCallback(() => {
-    if (!ticking.current) {
+    if (!ticking.current && documentHeightRef.current > 0) {
       requestAnimationFrame(() => {
         const scrollTop = window.pageYOffset;
-        // Cache document height to avoid repeated DOM queries
-        if (documentHeightRef.current === 0) {
-          documentHeightRef.current = document.documentElement.scrollHeight - window.innerHeight;
-        }
         const scrollPercentage = (scrollTop / documentHeightRef.current) * 100;
 
         const userInfo = user ? {
@@ -60,9 +71,6 @@ export const useScrollTracking = (pageName: string) => {
   }, [pageName, user, profile]);
 
   useEffect(() => {
-    // Reset cached height on mount and recalculate if needed
-    documentHeightRef.current = 0;
-    
     // Reset tracking state for new page
     scrollTrackingRef.current = {
       hasTracked25: false,
@@ -71,7 +79,24 @@ export const useScrollTracking = (pageName: string) => {
       hasTracked100: false,
     };
 
+    // Initialize document height without forced reflow
+    updateDocumentHeight();
+
+    // Set up ResizeObserver to track height changes efficiently
+    if ('ResizeObserver' in window) {
+      resizeObserver.current = new ResizeObserver(() => {
+        updateDocumentHeight();
+      });
+      resizeObserver.current.observe(document.documentElement);
+    }
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (resizeObserver.current) {
+        resizeObserver.current.disconnect();
+      }
+    };
+  }, [handleScroll, updateDocumentHeight]);
 };
