@@ -5,6 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { useRef, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { LazyImage } from "@/components/LazyImage";
+import flexibleSchedulingImg from "@/assets/flexible-scheduling.jpg";
+import deliveryServiceImg from "@/assets/delivery-service.jpg";
+import realTimeUpdatesImg from "@/assets/real-time-updates.jpg";
+import premiumSupportImg from "@/assets/premium-support.jpg";
 
 export const ProfessionalLaundryService = () => {
   const navigate = useNavigate();
@@ -48,19 +52,19 @@ export const ProfessionalLaundryService = () => {
   const features = [{
     title: "Flexible Scheduling",
     description: "Select from our range of convenient time slots for pickup and delivery, perfectly aligned with your daily routine.",
-    image: "https://readdy.ai/api/search-image?query=modern%20digital%20calendar%20interface%20showing%20scheduling%20options%2C%20person%20using%20tablet%20to%20select%20laundry%20service%20time%20slots%2C%20clean%20minimal%20design%20with%20soft%20blue%20accents%2C%20professional%20workspace%20environment%2C%20natural%20lighting%2C%20high-end%20technology%20lifestyle%20photography&width=800&height=600&seq=1&orientation=landscape"
+    image: flexibleSchedulingImg
   }, {
     title: "24hr Delivery Service",
     description: "Affordable 24-Hour Laundry, Delivered Fast. We respect your time—enjoy reliable next-day delivery at unbeatable prices.",
-    image: "https://readdy.ai/api/search-image?query=professional%20Indian%20delivery%20driver%20in%20neat%20uniform%20delivering%20fresh%20laundry%20at%20modern%20apartment%2C%20traditional%20Indian%20features%2C%20well-groomed%20appearance%2C%20holding%20laundry%20bag%2C%20standing%20near%20delivery%20vehicle%2C%20modern%20urban%20Indian%20setting%2C%20soft%20morning%20light%2C%20professional%20service%20photography&width=800&height=600&seq=3&orientation=landscape"
+    image: deliveryServiceImg
   }, {
     title: "Real-Time Updates",
     description: "Stay informed with precise delivery tracking and instant notifications throughout the service process.",
-    image: "https://readdy.ai/api/search-image?query=modern%20minimalist%20map%20interface%20showing%20a%20clear%20delivery%20route%20marked%20with%20a%20bright%20blue%20line%2C%20prominent%20start%20point%20marked%20with%20green%20pin%20and%20destination%20with%20red%20pin%2C%20clean%20white%20map%20background%20with%20subtle%20street%20details%2C%20professional%20navigation%20screen%20design%2C%20high%20contrast%20route%20visualization%2C%20elegant%20mobile%20app%20interface&width=800&height=600&seq=3&orientation=landscape"
+    image: realTimeUpdatesImg
   }, {
     title: "Premium Support",
     description: "Access to dedicated customer service professionals ready to assist you at any time, ensuring a seamless experience.",
-    image: "https://readdy.ai/api/search-image?query=professional%20Indian%20customer%20service%20representative%20wearing%20traditional%20Indian%20attire%20with%20headset%20in%20modern%20office%20environment%2C%20helping%20customers%2C%20warm%20and%20friendly%20expression%2C%20clean%20corporate%20setting%20with%20Indian%20decor%20elements%2C%20soft%20ambient%20lighting%2C%20high-end%20photography&width=800&height=600&seq=4&orientation=landscape"
+    image: premiumSupportImg
   }];
   
   return <section ref={sectionRef} className="bg-white py-8 md:py-20">
