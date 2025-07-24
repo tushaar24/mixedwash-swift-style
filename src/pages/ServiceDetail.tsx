@@ -19,7 +19,27 @@ const ServiceDetail = () => {
   
   console.log('ServiceDetail component mounted with serviceSlug:', serviceSlug);
   
-  // Memoize SEO data to prevent recalculation
+  // Memoize user info to prevent recalculation - MUST be at top
+  const getUserInfo = useCallback(() => user ? {
+    user_id: user.id,
+    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
+    phone: profile?.mobile_number
+  } : undefined, [user, profile]);
+
+  // Memoize other services calculation - MUST be at top
+  const otherServices = useMemo(() => {
+    return Object.entries(servicesData)
+      .filter(([id]) => id !== serviceSlug)
+      .map(([id, serviceData]: [string, any]) => ({
+        id,
+        name: serviceData.name,
+        icon: serviceData.icon,
+        iconBg: serviceData.iconBg,
+        color: serviceData.color
+      }));
+  }, [serviceSlug]);
+
+  // Memoize SEO data to prevent recalculation - MUST be at top
   const seoData = useMemo(() => {
     if (!serviceSlug) {
       return {
@@ -49,13 +69,6 @@ const ServiceDetail = () => {
 
   // Apply SEO - this hook is called at the top level
   useSEO(seoData);
-  
-  // Memoize user info to prevent recalculation
-  const getUserInfo = useCallback(() => user ? {
-    user_id: user.id,
-    name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
-    phone: profile?.mobile_number
-  } : undefined, [user, profile]);
 
   const handleSchedulePickupClick = useCallback(async () => {
     // Navigate immediately for better UX
@@ -147,19 +160,6 @@ const ServiceDetail = () => {
   if (!service) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
-
-  // Memoize other services calculation to prevent recalculation
-  const otherServices = useMemo(() => {
-    return Object.entries(servicesData)
-      .filter(([id]) => id !== serviceSlug)
-      .map(([id, serviceData]: [string, any]) => ({
-        id,
-        name: serviceData.name,
-        icon: serviceData.icon,
-        iconBg: serviceData.iconBg,
-        color: serviceData.color
-      }));
-  }, [serviceSlug]);
 
   return (
     <div className="min-h-screen bg-white">
