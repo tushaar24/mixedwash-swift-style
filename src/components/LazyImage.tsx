@@ -7,8 +7,11 @@ interface LazyImageProps {
   placeholder?: string;
 }
 
+// In-memory cache for loaded images
+const imageCache = new Map<string, boolean>();
+
 export const LazyImage = ({ src, alt, className, placeholder }: LazyImageProps) => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(imageCache.has(src));
   const [isInView, setIsInView] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -39,7 +42,10 @@ export const LazyImage = ({ src, alt, className, placeholder }: LazyImageProps) 
           className={`w-full h-full object-cover transition-opacity duration-300 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
-          onLoad={() => setIsLoaded(true)}
+          onLoad={() => {
+            setIsLoaded(true);
+            imageCache.set(src, true);
+          }}
           loading="lazy"
           decoding="async"
         />
