@@ -36,10 +36,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
 
   const migrateTempCustomerData = async (userId: string, userPhone: string) => {
     try {
+      console.log("=== MIGRATION DEBUG ===");
+      console.log("Attempting to migrate temp customer data for:");
+      console.log("- userId:", userId);
+      console.log("- userPhone:", userPhone);
+      
       const { data, error } = await supabase.rpc('migrate_temp_customer_data', {
         user_phone: userPhone,
         authenticated_user_id: userId
@@ -49,6 +55,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         console.error("❌ Error migrating temp customer data:", error);
         return false;
       }
+      
+      console.log("✅ Migration result:", data);
+      console.log("Migration successful:", data === true ? "YES" : "NO");
+      console.log("=== END MIGRATION DEBUG ===");
       return data;
     } catch (error) {
       console.error("❌ Exception in migrateTempCustomerData:", error);
@@ -67,6 +77,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (error) {
         // If profile doesn't exist, create one
         if (error.code === 'PGRST116') {
+          console.log("Profile doesn't exist, creating new profile for user:", userId);
           const { data: newProfile, error: createError } = await supabase
             .from("profiles")
             .insert([{ id: userId }])
@@ -77,6 +88,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             console.error("Error creating profile:", createError);
             return null;
           }
+          
+          console.log("New profile created:", newProfile);
           return newProfile as Profile;
         }
         
@@ -98,25 +111,62 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const handleProfileAndMigration = async (userId: string) => {
+    console.log("=== PROFILE & MIGRATION CHECK ===");
+    console.log("Handling profile and migration for userId:", userId);
+    
     let profileData = await fetchProfile(userId);
+    console.log("📋 Profile data fetched:", {
+      hasProfile: !!profileData,
+      username: profileData?.username,
+      mobile_number: profileData?.mobile_number
+    });
+    
     const isComplete = checkProfileCompleteness(profileData);
+    console.log("✅ Profile completeness check:", {
+      isComplete,
+      hasUsername: !!(profileData?.username?.trim()),
+      hasMobileNumber: !!(profileData?.mobile_number?.trim())
+    });
     
     // Only attempt migration if profile is complete
     if (isComplete && profileData?.mobile_number) {
+      console.log("🔄 Profile is complete, attempting temp customer migration...");
+      console.log("📞 Using phone number for migration:", profileData.mobile_number);
+      
       const migrationSuccess = await migrateTempCustomerData(
         userId, 
         profileData.mobile_number
       );
       
       if (migrationSuccess) {
+        console.log("🎉 Temp customer data migrated successfully!");
         // Refresh profile after migration to get updated data
         profileData = await fetchProfile(userId);
+        console.log("📋 Profile after migration:", profileData);
+      } else {
+        console.log("ℹ️  No temp customer data found to migrate or migration failed");
       }
+    } else if (!isComplete) {
+      console.log("⚠️  Profile is incomplete, skipping migration check");
+      console.log("Missing:", {
+        username: !profileData?.username?.trim(),
+        mobile_number: !profileData?.mobile_number?.trim()
+      });
+    } else {
+      console.log("⚠️  No mobile number found, skipping migration");
     }
     
     setProfile(profileData);
-    // Re-check completeness after potential migration and update state
-    setIsProfileComplete(checkProfileCompleteness(profileData));
+    setIsProfileComplete(isComplete);
+    
+    // User is considered first-time if they don't have BOTH username AND mobile number
+    if (profileData && !isComplete) {
+      setIsFirstLogin(true);
+    } else {
+      setIsFirstLogin(false);
+    }
+    
+    console.log("=== END PROFILE & MIGRATION CHECK ===");
   };
 
   const refreshProfile = async () => {
@@ -126,9 +176,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    // onAuthStateChange handles all auth events including initial session
+    console.log("Setting up auth state listener...");
+    
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
+        console.log("Auth state changed:", event, newSession?.user?.id);
         setSession(newSession);
         setUser(newSession?.user ?? null);
         
@@ -141,22 +194,48 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             Name: userName
           });
           
-          await handleProfileAndMigration(newSession.user.id);
+          // Use setTimeout to avoid blocking the auth state change and ensure migration runs
+          setTimeout(async () => {
+            console.log("🚀 About to call handleProfileAndMigration for user:", newSession.user.id);
+            await handleProfileAndMigration(newSession.user.id);
+            setIsLoading(false);
+          }, 100); // Small delay to ensure everything is set up
         } else {
           // Clear profile when signed out
           setProfile(null);
+          setIsFirstLogin(false);
           setIsProfileComplete(false);
+          setIsLoading(false);
+          
+          // Track user logout
+          if (event === 'SIGNED_OUT') {
+            trackEvent('User Logged Out');
+          }
         }
-
-        // Track user logout event specifically
-        if (event === 'SIGNED_OUT') {
-          trackEvent('User Logged Out');
-        }
-
-        // We are no longer loading after the first auth event is handled
-        setIsLoading(false);
       }
     );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log("Got existing session:", session?.user?.id);
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Set user profile in CleverTap for existing session
+        const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
+        setUserProfile({
+          Identity: session.user.id,
+          Email: session.user.email,
+          Name: userName
+        });
+        
+        console.log("🚀 About to call handleProfileAndMigration for existing session user:", session.user.id);
+        await handleProfileAndMigration(session.user.id);
+      }
+      
+      setIsLoading(false);
+    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -166,7 +245,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     user,
     isLoading,
     profile,
-    isFirstLogin: !!user && !!profile && !isProfileComplete,
+    isFirstLogin,
     isProfileComplete,
     refreshProfile,
   };
