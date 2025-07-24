@@ -67,18 +67,23 @@ export const ProfessionalLaundryService = () => {
     image: premiumSupportImg
   }];
   
-  return <section ref={sectionRef} className="bg-white py-8 md:py-20">
+  return <section ref={sectionRef} className="bg-white py-12 md:py-20 lg:py-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <div className="text-center mb-16">
-         <h1 className="hero-title text-3xl md:text-5xl font-bold leading-snug md:leading-relaxed mb-4 md:mb-6 tracking-normal">
-  <span className="text-gray-900 block mb-1 md:mb-3">Professional Express Laundry Services</span>
-  <span className="text-gray-500 block text-base md:text-xl">Tailored to Your Schedule</span>
-</h1>
+        <div className="text-center mb-12 md:mb-16 lg:mb-20">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 md:mb-4 lg:mb-6">
+            <span className="text-gray-900 block leading-tight mb-2 md:mb-3">
+              Professional Express Laundry Services
+            </span>
+            <span className="text-gray-500 block text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium leading-tight">
+              Tailored to Your Schedule
+            </span>
+          </h1>
 
-
-          <div className="max-w-2xl mx-auto">
-            <p className="text-lg text-gray-600 leading-relaxed">Experience the convenience of our express premium laundry service, meticulously designed to accommodate your schedule. From flexible pickup times to precise delivery windows, we ensure your laundry needs are met with professional excellence.</p>
+          <div className="max-w-3xl mx-auto mt-6 md:mt-8 lg:mt-10">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed px-4 sm:px-0">
+              Experience the convenience of our express premium laundry service, meticulously designed to accommodate your schedule. From flexible pickup times to precise delivery windows, we ensure your laundry needs are met with professional excellence.
+            </p>
           </div>
         </div>
 
