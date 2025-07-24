@@ -107,12 +107,12 @@ export const Hero = () => {
             <span className="block mb-2">Dry Cleaning</span>
             <span className="text-3xl md:text-4xl lg:text-5xl text-gray-600">with Next Day Delivery</span>
           </h1>
-          <p className="hero-description">
+          <p className="text-xl text-gray-600 max-w-lg mt-6">
             Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
           </p>
-          <div className="hero-cta-container">
+          <div className="pt-8 pb-0 md:pb-32 flex flex-col space-y-4">
             <Button 
-              className="hero-button-primary" 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-4 text-lg h-auto group w-full sm:w-auto font-semibold" 
               onClick={handleScheduleClick}
             >
               Schedule Your Laundry Pickup
@@ -121,7 +121,7 @@ export const Hero = () => {
             
             <Button 
               variant="outline" 
-              className="hero-button-secondary" 
+              className="border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-gray-900 border-2 px-6 py-4 h-auto text-lg w-full sm:w-auto" 
               onClick={handleContactClick}
             >
               <MessageSquare className="mr-2 h-5 w-5" />
