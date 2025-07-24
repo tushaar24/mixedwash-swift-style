@@ -3,6 +3,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Performance optimizations for LCP */
+.hero-title {
+  contain: layout style paint;
+  font-display: swap;
+}
+
+/* Preload critical fonts */
+@font-face {
+  font-family: system-ui;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

@@ -3,56 +3,69 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { trackEvent } from "@/utils/clevertap";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useCallback } from "react";
 import heroDesktop from "@/assets/hero-desktop-1600.webp";
 import heroTablet from "@/assets/hero-tablet-1024.webp";
-import heroMobile from "@/assets/hero-mobile-640.webp";
 
 export const Hero = () => {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const { user, profile } = useAuth();
 
-  const getCurrentTime = () => {
-    const now = new Date();
-    return now.toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getUserInfo = () => user ? {
+  // Memoize heavy computations
+  const getUserInfo = useCallback(() => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
-  } : undefined;
+  } : undefined, [user, profile]);
 
-  const handleScheduleClick = () => {
-    const userInfo = getUserInfo();
-
-    // Track the CTA click event FIRST
-    trackEvent('schedule_cta_clicked', {
-      'customer name': userInfo?.name || 'Anonymous',
-      'customer id': userInfo?.user_id || 'Anonymous',
-      'current_time': getCurrentTime(),
-      'source': 'hero_section'
-    });
-
-    // Always navigate to schedule page for service selection first
+  const handleScheduleClick = useCallback(async () => {
+    // Navigate immediately for better UX
     navigate("/schedule", { state: { fromCTA: true } });
-  };
 
-  const handleContactClick = () => {
-    const userInfo = getUserInfo();
-    trackEvent('contact_us_cta_clicked', {
-      'customer name': userInfo?.name || 'Anonymous',
-      'customer id': userInfo?.user_id || 'Anonymous',
-      'current_time': getCurrentTime()
-    });
+    // Track asynchronously to avoid blocking
+    try {
+      const { trackEvent } = await import("@/utils/clevertap");
+      const userInfo = getUserInfo();
+      const currentTime = new Date().toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      trackEvent('schedule_cta_clicked', {
+        'customer name': userInfo?.name || 'Anonymous',
+        'customer id': userInfo?.user_id || 'Anonymous',
+        'current_time': currentTime,
+        'source': 'hero_section'
+      });
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
+    }
+  }, [navigate, getUserInfo]);
+
+  const handleContactClick = useCallback(async () => {
+    // Navigate immediately for better UX
     navigate("/contact");
-  };
+
+    // Track asynchronously to avoid blocking
+    try {
+      const { trackEvent } = await import("@/utils/clevertap");
+      const userInfo = getUserInfo();
+      const currentTime = new Date().toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      trackEvent('contact_us_cta_clicked', {
+        'customer name': userInfo?.name || 'Anonymous',
+        'customer id': userInfo?.user_id || 'Anonymous',
+        'current_time': currentTime
+      });
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
+    }
+  }, [navigate, getUserInfo]);
 
   return (
     <div className="relative overflow-hidden min-h-[500px] md:min-h-[600px]">
@@ -89,10 +102,8 @@ export const Hero = () => {
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 md:pt-0 md:pb-0 flex items-center md:min-h-[600px]">
         <div className="max-w-2xl">
-          <h1 className="pt-0 md:pt-32 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
-            <span className="block mb-2">Laundry and</span>
-            <span className="block mb-2">Dry Cleaning</span>
-            <span className="text-3xl md:text-4xl lg:text-5xl text-gray-600">with Next Day Delivery</span>
+          <h1 className="hero-title pt-0 md:pt-32 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
+            Professional Express Laundry Services Tailored to Your Schedule
           </h1>
           <p className="text-xl text-gray-600 max-w-lg mt-6">
             Laundry shouldn't slow you down. MixedWash delivers next-day laundry at no extra cost, always reliable, always easy.
