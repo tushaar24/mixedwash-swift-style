@@ -5,10 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { useRef, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { LazyImage } from "@/components/LazyImage";
-import flexibleSchedulingImg from "@/assets/flexible-scheduling.jpg";
-import deliveryServiceImg from "@/assets/delivery-service.jpg";
-import realTimeUpdatesImg from "@/assets/real-time-updates.jpg";
-import premiumSupportImg from "@/assets/premium-support.jpg";
+import flexibleSchedulingImg from "@/assets/flexible-scheduling.webp";
+import deliveryServiceImg from "@/assets/delivery-service.webp";
+import realTimeUpdatesImg from "@/assets/real-time-updates.webp";
+import premiumSupportImg from "@/assets/premium-support.webp";
 
 export const ProfessionalLaundryService = () => {
   const navigate = useNavigate();
