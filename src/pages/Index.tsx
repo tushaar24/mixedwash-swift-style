@@ -1,19 +1,23 @@
 
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
-import { ProfessionalLaundryService } from "@/components/ProfessionalLaundryService";
-import { WhyChooseUs } from "@/components/WhyChooseUs";
-import { Services } from "@/components/Services";
-import { HowItWorks } from "@/components/HowItWorks";
-import { FAQ } from "@/components/FAQ";
-import { CallToAction } from "@/components/CallToAction";
-import { Footer } from "@/components/Footer";
-import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { useAuth } from "@/context/AuthContext";
 import { useSEO } from "@/hooks/useSEO";
 import { seoPages } from "@/utils/seo";
+
+// Lazy load below-fold components
+const ProfessionalLaundryService = lazy(() => import("@/components/ProfessionalLaundryService").then(m => ({ default: m.ProfessionalLaundryService })));
+const WhyChooseUs = lazy(() => import("@/components/WhyChooseUs").then(m => ({ default: m.WhyChooseUs })));
+const Services = lazy(() => import("@/components/Services").then(m => ({ default: m.Services })));
+const HowItWorks = lazy(() => import("@/components/HowItWorks").then(m => ({ default: m.HowItWorks })));
+const FAQ = lazy(() => import("@/components/FAQ").then(m => ({ default: m.FAQ })));
+const CallToAction = lazy(() => import("@/components/CallToAction").then(m => ({ default: m.CallToAction })));
+const Footer = lazy(() => import("@/components/Footer").then(m => ({ default: m.Footer })));
+const FloatingActionButton = lazy(() => import("@/components/FloatingActionButton").then(m => ({ default: m.FloatingActionButton })));
+
+const LoadingSection = () => <div className="h-20 bg-gray-50 animate-pulse" />;
 
 const Index = () => {
   const { user, profile, isLoading, isProfileComplete } = useAuth();
@@ -34,15 +38,31 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
-        <ProfessionalLaundryService />
-        <WhyChooseUs />
-        <Services />
-        <HowItWorks />
-        <FAQ />
-        <CallToAction />
+        <Suspense fallback={<LoadingSection />}>
+          <ProfessionalLaundryService />
+        </Suspense>
+        <Suspense fallback={<LoadingSection />}>
+          <WhyChooseUs />
+        </Suspense>
+        <Suspense fallback={<LoadingSection />}>
+          <Services />
+        </Suspense>
+        <Suspense fallback={<LoadingSection />}>
+          <HowItWorks />
+        </Suspense>
+        <Suspense fallback={<LoadingSection />}>
+          <FAQ />
+        </Suspense>
+        <Suspense fallback={<LoadingSection />}>
+          <CallToAction />
+        </Suspense>
       </main>
-      <Footer />
-      <FloatingActionButton />
+      <Suspense fallback={<div className="h-32 bg-gray-100 animate-pulse" />}>
+        <Footer />
+      </Suspense>
+      <Suspense fallback={null}>
+        <FloatingActionButton />
+      </Suspense>
     </div>
   );
 };
