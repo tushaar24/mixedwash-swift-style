@@ -223,6 +223,212 @@
           font-size: 1.25rem;
         }
       }
+
+      .hero-description {
+        color: #6B7280; /* text-gray-600 */
+        font-size: 1.25rem; /* text-xl */
+        line-height: 1.75rem;
+        max-width: 32rem; /* max-w-lg */
+        margin-top: 1.5rem; /* mt-6 */
+      }
+
+      .hero-cta-container {
+        padding-top: 2rem; /* pt-8 */
+        padding-bottom: 0; /* pb-0 */
+        display: flex;
+        flex-direction: column;
+        row-gap: 1rem; /* space-y-4 */
+      }
+
+      .hero-button-primary {
+        background-color: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
+        padding: 1rem 1.5rem; /* px-6 py-4 */
+        font-size: 1.125rem; /* text-lg */
+        height: auto;
+        width: 100%;
+        font-weight: 600; /* font-semibold */
+      }
+      .hero-button-primary:hover {
+        background-color: hsl(var(--primary) / 0.9);
+      }
+
+      .hero-button-secondary {
+        border: 2px solid #E5E7EB; /* border-gray-200 */
+        background-color: white;
+        color: #111827; /* text-gray-900 */
+        padding: 1rem 1.5rem; /* px-6 py-4 */
+        font-size: 1.125rem; /* text-lg */
+        height: auto;
+        width: 100%;
+      }
+      .hero-button-secondary:hover {
+        background-color: #F9FAFB; /* hover:bg-gray-50 */
+        border-color: #D1D5DB; /* hover:border-gray-300 */
+      }
+
+      @media (min-width: 640px) { /* sm breakpoint */
+        .hero-button-primary, .hero-button-secondary {
+          width: auto;
+        }
+      }
+
+      @media (min-width: 768px) {
+        .hero-cta-container {
+          padding-bottom: 8rem; /* md:pb-32 */
+        }
+      }
+
+      /* ProfessionalLaundryService SECTION */
+      .laundry-section {
+        background-color: white;
+        padding-top: 3rem; /* py-12 */
+        padding-bottom: 3rem;
+      }
+      .laundry-section-container {
+        max-width: 72rem; /* max-w-6xl */
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 1rem; /* px-4 */
+        padding-right: 1rem;
+      }
+      .section-header {
+        text-align: center;
+        margin-bottom: 3rem; /* mb-12 */
+      }
+      .section-title {
+        font-size: 2.25rem; /* text-4xl */
+        line-height: 2.5rem;
+        font-weight: 600; /* font-semibold */
+        line-height: 1.2; /* leading-tight */
+        margin-bottom: 1.5rem; /* mb-6 */
+        letter-spacing: -0.025em; /* tracking-tight */
+      }
+      .section-description-container {
+        max-width: 48rem; /* max-w-3xl */
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 1.5rem; /* mt-6 */
+      }
+      .section-description {
+        font-size: 1rem; /* text-base */
+        color: #4B5563; /* text-gray-600 */
+        line-height: 1.625; /* leading-relaxed */
+        padding-left: 1rem; /* px-4 */
+        padding-right: 1rem;
+      }
+
+      .features-grid-container {
+        max-width: 64rem; /* max-w-5xl */
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 4rem; /* mb-16 */
+      }
+      .features-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem; /* gap-8 */
+      }
+      .feature-card {
+        background-color: white;
+        border-radius: 0.75rem; /* rounded-xl */
+        padding: 1.5rem; /* p-6 */
+        box-shadow: 0 2px 15px -3px rgba(0,0,0,0.07), 0 10px 20px -2px rgba(0,0,0,0.04);
+        transition: all 300ms;
+      }
+      .feature-card:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+      }
+      .feature-card-image-container {
+        width: 100%;
+        aspect-ratio: 4/3;
+        border-radius: 0.5rem; /* rounded-lg */
+        overflow: hidden;
+        margin-bottom: 1.5rem; /* mb-6 */
+        transform: scale(1);
+        transition: transform 500ms;
+      }
+      .feature-card:hover .feature-card-image-container {
+        transform: scale(1.02);
+      }
+      .feature-card-title {
+        font-size: 1.5rem; /* text-2xl */
+        font-weight: 600; /* font-semibold */
+        color: #111827; /* text-gray-900 */
+        margin-bottom: 1rem; /* mb-4 */
+      }
+      .feature-card-description {
+        color: #4B5563; /* text-gray-600 */
+        font-size: 1.125rem; /* text-lg */
+        line-height: 1.625; /* leading-relaxed */
+      }
+      .section-cta-container {
+        text-align: center;
+      }
+      .section-cta-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: #111827; /* bg-gray-900 */
+        color: white;
+        padding: 1rem 2rem; /* px-8 py-[16px] */
+        height: auto;
+        font-size: 1rem; /* text-base */
+        font-weight: 500; /* font-medium */
+        letter-spacing: 0.025em; /* tracking-wide */
+        transition: all 300ms;
+        margin-bottom: 2rem; /* mb-8 */
+      }
+      .section-cta-button:hover {
+        background-color: #1F2937; /* hover:bg-gray-800 */
+      }
+      .section-cta-button span + * {
+        transition: transform 300ms;
+      }
+      .section-cta-button:hover span + * {
+        transform: translateX(0.25rem);
+      }
+
+      @media (min-width: 768px) { /* md breakpoint */
+        .laundry-section {
+          padding-top: 5rem; /* md:py-20 */
+          padding-bottom: 5rem;
+        }
+        .section-header {
+          margin-bottom: 4rem; /* md:mb-16 */
+        }
+        .section-title {
+          font-size: 3rem; /* md:text-5xl */
+          line-height: 1;
+        }
+        .section-description-container {
+          margin-top: 2rem; /* md:mt-8 */
+        }
+        .section-description {
+          font-size: 1.25rem; /* md:text-xl */
+        }
+        .features-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 3rem; /* md:gap-12 */
+        }
+        .section-cta-button {
+          margin-bottom: 0; /* md:mb-0 */
+        }
+      }
+
+       @media (min-width: 1024px) { /* lg breakpoint */
+        .laundry-section {
+          padding-top: 6rem; /* lg:py-24 */
+          padding-bottom: 6rem;
+        }
+         .section-header {
+          margin-bottom: 5rem; /* lg:mb-20 */
+        }
+        .section-description-container {
+          margin-top: 2.5rem; /* lg:mt-10 */
+        }
+      }
+
     </style>
 
     <!-- Structured Data for Local Business -->

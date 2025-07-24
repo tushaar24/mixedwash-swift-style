@@ -67,28 +67,28 @@ export const ProfessionalLaundryService = () => {
     image: premiumSupportImg
   }];
   
-  return <section ref={sectionRef} className="bg-white py-12 md:py-20 lg:py-24">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  return <section ref={sectionRef} className="laundry-section">
+      <div className="laundry-section-container">
         {/* Header Section */}
-        <div className="text-center mb-12 md:mb-16 lg:mb-20">
-           <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 tracking-tight">
+        <div className="section-header">
+           <h1 className="section-title">
             <span className="text-gray-900">Professional Express Laundry Services</span><br />
             <span className="text-gray-500">Tailored to Your Schedule</span>
           </h1>
 
 
-          <div className="max-w-3xl mx-auto mt-6 md:mt-8 lg:mt-10">
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed px-4 sm:px-0">
+          <div className="section-description-container">
+            <p className="section-description">
               Experience the convenience of our express premium laundry service, meticulously designed to accommodate your schedule. From flexible pickup times to precise delivery windows, we ensure your laundry needs are met with professional excellence.
             </p>
           </div>
         </div>
 
         {/* Features Grid */}
-        <div className="max-w-5xl mx-auto mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-            {features.map((feature, index) => <div key={index} className="group bg-white rounded-xl p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300">
-                <div className="w-full aspect-[4/3] rounded-lg overflow-hidden mb-6 transform transition-transform duration-500 group-hover:scale-[1.02]">
+        <div className="features-grid-container">
+          <div className="features-grid">
+            {features.map((feature, index) => <div key={index} className="feature-card">
+                <div className="feature-card-image-container">
                   <LazyImage 
                     src={feature.image} 
                     alt={feature.title} 
@@ -96,10 +96,10 @@ export const ProfessionalLaundryService = () => {
                   />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+                  <h3 className="feature-card-title">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 text-lg leading-relaxed">
+                  <p className="feature-card-description">
                     {feature.description}
                   </p>
                 </div>
@@ -108,8 +108,8 @@ export const ProfessionalLaundryService = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="text-center">
-          <Button onClick={handleScheduleClick} className="inline-flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 h-auto text-base font-medium tracking-wide transition-all duration-300 group py-[16px] mb-8 md:mb-0">
+        <div className="section-cta-container">
+          <Button onClick={handleScheduleClick} className="section-cta-button">
             <span>Schedule Pickup Now</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
