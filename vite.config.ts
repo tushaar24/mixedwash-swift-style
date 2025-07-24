@@ -14,10 +14,15 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2015',
-    cssCodeSplit: true,
+    cssCodeSplit: false, // Inline CSS to reduce requests
     rollupOptions: {
       treeshake: true,
       output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-accordion'],
+          utils: ['lucide-react', 'clsx', 'tailwind-merge']
+        },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[name]-[hash][extname]`;
           if (/\.(woff|woff2|eot|ttf|otf)$/.test(assetInfo.name)) {
