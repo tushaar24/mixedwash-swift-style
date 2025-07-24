@@ -1,10 +1,13 @@
 
-import { Navbar } from "@/components/Navbar";
+import { lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSEO } from "@/hooks/useSEO";
 import { seoPages } from "@/utils/seo";
+
+// Lazy load navbar to reduce initial bundle size
+const Navbar = lazy(() => import("@/components/Navbar").then(module => ({ default: module.Navbar })));
 
 const Contact = () => {
   const navigate = useNavigate();
@@ -18,7 +21,9 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Navbar />
+      <Suspense fallback={<div className="h-16 border-b border-gray-100" />}>
+        <Navbar />
+      </Suspense>
       <main className="flex-grow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center mb-12">
