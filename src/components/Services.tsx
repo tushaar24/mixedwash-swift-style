@@ -95,7 +95,7 @@ export const Services = () => {
   }, {
     title: "Dry Cleaning",
     description: "Delicate care, speedy turnaround.",
-    icon: <img src="/lovable-uploads/c458f6b0-88cf-4b84-8d9a-10526e393e2d.png" alt="Blazer" className="h-10 w-10" />,
+    icon: <img src="/lovable-uploads/c458f6b0-88cf-4b84-8d9a-10526e393e2d.png" alt="Blazer" className="h-10 w-10" loading="lazy" />,
     newPrice: "starts at ₹100",
     oldPrice: "starts at ₹100",
     discount: 0,

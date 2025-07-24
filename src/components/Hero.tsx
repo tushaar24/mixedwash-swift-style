@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { trackEvent } from "@/utils/clevertap";
 import { useIsMobile } from "@/hooks/use-mobile";
+import heroDesktop from "@/assets/hero-desktop-1600.webp";
+import heroTablet from "@/assets/hero-tablet-1024.webp";
+import heroMobile from "@/assets/hero-mobile-640.webp";
 
 export const Hero = () => {
   const navigate = useNavigate();
@@ -52,19 +55,36 @@ export const Hero = () => {
   };
 
   return (
-    <div 
-      className="relative md:bg-cover md:bg-no-repeat" 
-      style={!isMobile ? {
-        backgroundImage: `url('https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
-        backgroundPosition: 'right center',
-        backgroundSize: 'contain'
-      } : {}}
-    >
+    <div className="relative overflow-hidden">
+      {/* Responsive background image - only shown on desktop */}
+      <picture className="absolute inset-0 hidden md:block">
+        <source
+          media="(min-width: 1200px)"
+          srcSet={heroDesktop}
+          width="1600"
+          height="900"
+        />
+        <source
+          media="(min-width: 768px)"
+          srcSet={heroTablet}
+          width="1024"
+          height="768"
+        />
+        <img
+          src={heroDesktop}
+          alt="Professional laundry service"
+          className="w-full h-full object-cover object-right"
+          loading="eager"
+          decoding="sync"
+          fetchPriority="high"
+        />
+      </picture>
+      
       {/* Clean white gradient overlay - hidden on mobile */}
       <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-white via-white/95 to-transparent"></div>
       
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 md:pt-0 md:pb-0 flex items-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 md:pt-0 md:pb-0 flex items-center md:min-h-[600px]">
         <div className="max-w-2xl">
           <h1 className="pt-0 md:pt-32 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900">
             <span className="block mb-2">Laundry and</span>

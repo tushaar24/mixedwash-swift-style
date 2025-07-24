@@ -3,7 +3,7 @@ import { Check, Clock, Shield, Shirt } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
-import laundryBackground from "@/assets/laundry-background.jpg";
+import laundryBackground from "@/assets/laundry-background-optimized.webp";
 
 export const WhyChooseUs = () => {
   const { user, profile } = useAuth();
