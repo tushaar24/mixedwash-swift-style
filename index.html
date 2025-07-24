@@ -180,7 +180,17 @@
     </script>
     
     <!-- Load CSS asynchronously to prevent render blocking -->
-    <link rel="preload" as="style" href="/src/index.css" onload="this.onload=null;this.rel='stylesheet'">
+    <script>
+      // Inline script to load CSS asynchronously
+      (function() {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/src/index.css';
+        link.media = 'print';
+        link.onload = function() { this.media = 'all'; };
+        document.head.appendChild(link);
+      })();
+    </script>
     <noscript><link rel="stylesheet" href="/src/index.css"></noscript>
     
     <!-- Lovable Script Tag - deferred -->
