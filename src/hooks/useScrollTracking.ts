@@ -18,13 +18,18 @@ export const useScrollTracking = (pageName: string) => {
     // Use requestIdleCallback to avoid forced reflow during critical rendering
     if ('requestIdleCallback' in window) {
       requestIdleCallback(() => {
-        documentHeightRef.current = document.documentElement.scrollHeight - window.innerHeight;
-      });
+        // Cache these values to avoid repeated DOM queries
+        const scrollHeight = document.documentElement.scrollHeight;
+        const viewportHeight = window.innerHeight;
+        documentHeightRef.current = scrollHeight - viewportHeight;
+      }, { timeout: 2000 });
     } else {
       // Fallback for browsers without requestIdleCallback
       setTimeout(() => {
-        documentHeightRef.current = document.documentElement.scrollHeight - window.innerHeight;
-      }, 0);
+        const scrollHeight = document.documentElement.scrollHeight;
+        const viewportHeight = window.innerHeight;
+        documentHeightRef.current = scrollHeight - viewportHeight;
+      }, 16); // ~1 frame at 60fps
     }
   }, []);
 
