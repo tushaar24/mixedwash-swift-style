@@ -14,35 +14,10 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2015',
-    cssCodeSplit: false, // Keep critical CSS together
+    cssCodeSplit: true,
     rollupOptions: {
       treeshake: true,
       output: {
-        // Optimize chunking strategy
-        manualChunks: {
-          // Critical above-the-fold bundle
-          'critical': [
-            'react',
-            'react-dom',
-            './src/components/Navbar.tsx',
-            './src/components/Hero.tsx'
-          ],
-          // Vendor libraries
-          'vendor': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-select',
-            'lucide-react',
-            'react-router-dom'
-          ],
-          // Deferred components bundle
-          'deferred': [
-            './src/components/Services.tsx',
-            './src/components/WhyChooseUs.tsx',
-            './src/components/HowItWorks.tsx',
-            './src/components/FAQ.tsx',
-            './src/components/Footer.tsx'
-          ]
-        },
         assetFileNames: (assetInfo) => {
           if (!assetInfo.name) return `assets/[name]-[hash][extname]`;
           if (/\.(woff|woff2|eot|ttf|otf)$/.test(assetInfo.name)) {
@@ -54,7 +29,7 @@ export default defineConfig(({ mode }) => ({
           return `assets/[name]-[hash][extname]`;
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/main-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
       },
     },
     minify: 'terser',
