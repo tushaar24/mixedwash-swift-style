@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/Navbar";
@@ -10,7 +10,6 @@ import { OrderConfirmation } from "@/components/schedule/OrderConfirmation";
 import { toast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { addDays, startOfToday } from "date-fns";
-import { trackEvent } from "@/utils/clevertap";
 
 // Steps in the scheduling flow
 enum ScheduleStep {
@@ -75,20 +74,20 @@ const Schedule = () => {
     dryCleaningItems: [],
   });
 
-  const getCurrentTime = () => {
+  const getCurrentTime = useCallback(() => {
     const now = new Date();
     return now.toLocaleTimeString('en-US', { 
       hour12: false, 
       hour: '2-digit', 
       minute: '2-digit' 
     });
-  };
+  }, []);
 
-  const getUserInfo = () => user ? {
+  const getUserInfo = useCallback(() => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
-  } : undefined;
+  } : undefined, [user, profile]);
 
   // Handle return from auth and profile completion
   useEffect(() => {
@@ -244,40 +243,45 @@ const Schedule = () => {
     if (prevStepRef.current !== currentStep) {
       const userInfo = getUserInfo();
       
-      const trackStepView = () => {
-        switch (currentStep) {
-          case ScheduleStep.SERVICE_SELECTION:
-            trackEvent('select_service_screen_viewed', {
-              'customer name': userInfo?.name || 'Anonymous',
-              'customer id': userInfo?.user_id || 'Anonymous',
-              'current_time': getCurrentTime()
-            });
-            break;
-          case ScheduleStep.ADDRESS_SELECTION:
-            trackEvent('add_address_screen_viewed', {
-              'customer name': userInfo?.name || 'Anonymous',
-              'customer id': userInfo?.user_id || 'Anonymous',
-              'current_time': getCurrentTime()
-            });
-            break;
-          case ScheduleStep.TIME_SLOT_SELECTION:
-            trackEvent('slot_selection_viewed', {
-              'customer name': userInfo?.name || 'Anonymous',
-              'customer id': userInfo?.user_id || 'Anonymous',
-              'current_time': getCurrentTime()
-            });
-            break;
-          case ScheduleStep.ORDER_CONFIRMATION:
-            trackEvent('confirm_order_viewed', {
-              'customer name': userInfo?.name || 'Anonymous',
-              'customer id': userInfo?.user_id || 'Anonymous',
-              'current_time': getCurrentTime(),
-              'selected_services': orderData.services.map(s => s.name).join(', '),
-              'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
-              'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
-              'pickup and delivery address': orderData.addressId || 'Not selected'
-            });
-            break;
+      const trackStepView = async () => {
+        try {
+          const { trackEvent } = await import("@/utils/clevertap");
+          switch (currentStep) {
+            case ScheduleStep.SERVICE_SELECTION:
+              trackEvent('select_service_screen_viewed', {
+                'customer name': userInfo?.name || 'Anonymous',
+                'customer id': userInfo?.user_id || 'Anonymous',
+                'current_time': getCurrentTime()
+              });
+              break;
+            case ScheduleStep.ADDRESS_SELECTION:
+              trackEvent('add_address_screen_viewed', {
+                'customer name': userInfo?.name || 'Anonymous',
+                'customer id': userInfo?.user_id || 'Anonymous',
+                'current_time': getCurrentTime()
+              });
+              break;
+            case ScheduleStep.TIME_SLOT_SELECTION:
+              trackEvent('slot_selection_viewed', {
+                'customer name': userInfo?.name || 'Anonymous',
+                'customer id': userInfo?.user_id || 'Anonymous',
+                'current_time': getCurrentTime()
+              });
+              break;
+            case ScheduleStep.ORDER_CONFIRMATION:
+              trackEvent('confirm_order_viewed', {
+                'customer name': userInfo?.name || 'Anonymous',
+                'customer id': userInfo?.user_id || 'Anonymous',
+                'current_time': getCurrentTime(),
+                'selected_services': orderData.services.map(s => s.name).join(', '),
+                'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
+                'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
+                'pickup and delivery address': orderData.addressId || 'Not selected'
+              });
+              break;
+          }
+        } catch (error) {
+          console.warn('Analytics tracking failed:', error);
         }
       };
 
@@ -297,36 +301,39 @@ const Schedule = () => {
   }, [currentStep, user, profile, fromCTA, orderData.services, orderData.deliveryDate, orderData.pickupDate, orderData.deliverySlotLabel, orderData.pickupSlotLabel, orderData.addressId]);
 
   // Handle next step transitions
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
     // Log the current state before moving to the next step
     console.log("Current step:", currentStep);
     console.log("Order data before next step:", orderData);
     
     const userInfo = getUserInfo();
     
-    // Track step-specific events before validation
-    if (currentStep === ScheduleStep.SERVICE_SELECTION) {
-      trackEvent('select_service_screen_continue_to_address_clicked', {
-        'customer name': userInfo?.name || 'Anonymous',
-        'customer id': userInfo?.user_id || 'Anonymous',
-        'current_time': getCurrentTime(),
-        'services_selected': orderData.services.map(s => s.name).join(', ')
-      });
+    // Track step-specific events before validation (async)
+    try {
+      const { trackEvent } = await import("@/utils/clevertap");
       
-      // Auth check is now done in ServiceSelection component
-      // If we reach here, user is authenticated and profile is complete
-    }
-    
-    if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
-      trackEvent('slot_selection_continue_to_confirm_clicked', {
-        'customer name': userInfo?.name || 'Anonymous',
-        'customer id': userInfo?.user_id || 'Anonymous',
-        'current_time': getCurrentTime(),
-        'date': orderData.pickupDate?.toDateString() || '',
-        'time_slot': orderData.pickupSlotLabel || '',
-        'delivery_date': orderData.deliveryDate?.toDateString() || '',
-        'delivery_time_slot': orderData.deliverySlotLabel || ''
-      });
+      if (currentStep === ScheduleStep.SERVICE_SELECTION) {
+        trackEvent('select_service_screen_continue_to_address_clicked', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': getCurrentTime(),
+          'services_selected': orderData.services.map(s => s.name).join(', ')
+        });
+      }
+      
+      if (currentStep === ScheduleStep.TIME_SLOT_SELECTION) {
+        trackEvent('slot_selection_continue_to_confirm_clicked', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': getCurrentTime(),
+          'date': orderData.pickupDate?.toDateString() || '',
+          'time_slot': orderData.pickupSlotLabel || '',
+          'delivery_date': orderData.deliveryDate?.toDateString() || '',
+          'delivery_time_slot': orderData.deliverySlotLabel || ''
+        });
+      }
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
     }
     
     // Validate current step data before proceeding
@@ -390,29 +397,35 @@ const Schedule = () => {
   };
 
   // Handle previous step transitions
-  const handlePrevStep = () => {
+  const handlePrevStep = async () => {
     const userInfo = getUserInfo();
     
-    // Track back button events
-    if (currentStep === ScheduleStep.ADDRESS_SELECTION) {
-      trackEvent('add_address_screen_back_to_services_clicked', {
-        'customer name': userInfo?.name || 'Anonymous',
-        'customer id': userInfo?.user_id || 'Anonymous',
-        'current_time': getCurrentTime(),
-        'type': 'manual' // This would need to be dynamic based on address type
-      });
-    }
-    
-    if (currentStep === ScheduleStep.ORDER_CONFIRMATION) {
-      trackEvent('confirm_order_back_to_schedule_clicked', {
-        'customer name': userInfo?.name || 'Anonymous',
-        'customer id': userInfo?.user_id || 'Anonymous',
-        'current_time': getCurrentTime(),
-        'selected_services': orderData.services.map(s => s.name).join(', '),
-        'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
-        'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
-        'pickup and delivery address': orderData.addressId || 'Not selected'
-      });
+    // Track back button events (async)
+    try {
+      const { trackEvent } = await import("@/utils/clevertap");
+      
+      if (currentStep === ScheduleStep.ADDRESS_SELECTION) {
+        trackEvent('add_address_screen_back_to_services_clicked', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': getCurrentTime(),
+          'type': 'manual' // This would need to be dynamic based on address type
+        });
+      }
+      
+      if (currentStep === ScheduleStep.ORDER_CONFIRMATION) {
+        trackEvent('confirm_order_back_to_schedule_clicked', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': getCurrentTime(),
+          'selected_services': orderData.services.map(s => s.name).join(', '),
+          'delivery': orderData.deliveryDate?.toDateString() + ' ' + orderData.deliverySlotLabel,
+          'pickup': orderData.pickupDate?.toDateString() + ' ' + orderData.pickupSlotLabel,
+          'pickup and delivery address': orderData.addressId || 'Not selected'
+        });
+      }
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
     }
     
     // Use browser's back functionality to maintain proper history

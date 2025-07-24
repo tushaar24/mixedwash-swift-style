@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useServices } from "@/hooks/useServices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -126,13 +126,18 @@ export const ServiceSelection = ({
   // Use shared services hook to prevent duplicate requests
   const { services: fetchedServices, loading: servicesLoading, error: servicesError } = useServices();
   
+  // Memoize sorted services to prevent re-sorting on every render
+  const sortedServices = useMemo(() => {
+    return fetchedServices.length > 0 ? sortServices(fetchedServices) : [];
+  }, [fetchedServices]);
+
+  // Update services state only when sortedServices changes
   useEffect(() => {
-    if (fetchedServices.length > 0) {
-      const sortedServices = sortServices(fetchedServices);
+    if (sortedServices.length > 0) {
       setServices(sortedServices);
       setLoading(false);
     }
-  }, [fetchedServices]);
+  }, [sortedServices]);
 
   useEffect(() => {
     if (servicesError) {
@@ -147,32 +152,30 @@ export const ServiceSelection = ({
   }, [servicesError]);
 
   useEffect(() => {
-    if (servicesLoading) {
-      setLoading(true);
-    }
+    setLoading(servicesLoading);
   }, [servicesLoading]);
 
-  // Check if dry cleaning service is selected
-  const isDryCleaningSelected = () => {
+  // Memoize expensive calculations
+  const isDryCleaningSelected = useCallback(() => {
     return services.some(service => selectedServiceIds.has(service.id) && service.name.toLowerCase().includes('dry cleaning'));
-  };
+  }, [services, selectedServiceIds]);
 
-  // Handle dry cleaning items change
-  const handleDryCleaningItemsChange = (items: DryCleaningItem[]) => {
+  // Handle dry cleaning items change - memoized
+  const handleDryCleaningItemsChange = useCallback((items: DryCleaningItem[]) => {
     updateOrderData({
       dryCleaningItems: items
     });
-  };
+  }, [updateOrderData]);
 
-  // Handle view details click
-  const handleViewDetails = (service: Service, e: React.MouseEvent) => {
+  // Handle view details click - memoized
+  const handleViewDetails = useCallback((service: Service, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card selection
     const route = getServiceRoute(service.name);
     navigate(`/service/${route}`);
-  };
+  }, [navigate]);
 
-  // Toggle service selection
-  const toggleServiceSelection = (service: Service) => {
+  // Toggle service selection - memoized
+  const toggleServiceSelection = useCallback((service: Service) => {
     const newSelectedServiceIds = new Set(selectedServiceIds);
     if (newSelectedServiceIds.has(service.id)) {
       newSelectedServiceIds.delete(service.id);
@@ -199,7 +202,7 @@ export const ServiceSelection = ({
     updateOrderData({
       services: selectedServices
     });
-  };
+  }, [selectedServiceIds, services, user, isEligibleForDiscount, updateOrderData]);
 
   // Continue to next step with dry cleaning validation
   const handleContinue = () => {
