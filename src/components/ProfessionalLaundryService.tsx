@@ -71,10 +71,11 @@ export const ProfessionalLaundryService = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-16">
-          <h1 className="hero-title text-4xl md:text-5xl font-bold leading-relaxed mb-6 tracking-tight">
-            <span className="text-gray-900 block md:mb-3">Professional Express Laundry Services</span>
-            <span className="text-gray-500 block">Tailored to Your Schedule</span>
-          </h1>
+         <h1 className="hero-title text-3xl md:text-5xl font-bold leading-snug md:leading-relaxed mb-4 md:mb-6 tracking-normal">
+  <span className="text-gray-900 block mb-1 md:mb-3">Professional Express Laundry Services</span>
+  <span className="text-gray-500 block text-base md:text-xl">Tailored to Your Schedule</span>
+</h1>
+
 
           <div className="max-w-2xl mx-auto">
             <p className="text-lg text-gray-600 leading-relaxed">Experience the convenience of our express premium laundry service, meticulously designed to accommodate your schedule. From flexible pickup times to precise delivery windows, we ensure your laundry needs are met with professional excellence.</p>
