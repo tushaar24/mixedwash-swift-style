@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,24 +9,32 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { PageTracker } from "./components/PageTracker";
 import { initCleverTap } from "./utils/clevertap";
-import { initPerformanceTracking } from "./utils/performance";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import Profile from "./pages/Profile";
-import Schedule from "./pages/Schedule";
-import OrderSuccess from "./pages/OrderSuccess";
-import ServiceDetail from "./pages/ServiceDetail";
-import Contact from "./pages/Contact";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsConditions from "./pages/TermsConditions";
-import NotFound from "./pages/NotFound";
+import { Loader2 } from "lucide-react";
+
+// Lazy load non-critical pages to reduce bundle size
+const Auth = lazy(() => import("./pages/Auth"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Schedule = lazy(() => import("./pages/Schedule"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
+const ServiceDetail = lazy(() => import("./pages/ServiceDetail"));
+const Contact = lazy(() => import("./pages/Contact"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsConditions = lazy(() => import("./pages/TermsConditions"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Loading component for lazy routes
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
 function App() {
   useEffect(() => {
     initCleverTap();
-    initPerformanceTracking();
   }, []);
 
   return (
@@ -48,18 +56,22 @@ function App() {
               <Route 
                 path="/auth" 
                 element={
-                  <PageTracker pageName="Authentication">
-                    <Auth />
-                  </PageTracker>
+                  <Suspense fallback={<PageLoader />}>
+                    <PageTracker pageName="Authentication">
+                      <Auth />
+                    </PageTracker>
+                  </Suspense>
                 } 
               />
               <Route 
                 path="/profile" 
                 element={
                   <ProtectedRoute>
-                    <PageTracker pageName="Profile">
-                      <Profile />
-                    </PageTracker>
+                    <Suspense fallback={<PageLoader />}>
+                      <PageTracker pageName="Profile">
+                        <Profile />
+                      </PageTracker>
+                    </Suspense>
                   </ProtectedRoute>
                 } 
               />
@@ -67,55 +79,69 @@ function App() {
               <Route 
                 path="/schedule" 
                 element={
-                  <Schedule />
+                  <Suspense fallback={<PageLoader />}>
+                    <Schedule />
+                  </Suspense>
                 } 
               />
               <Route 
                 path="/order-success" 
                 element={
-                  <PageTracker pageName="Order Success">
-                    <OrderSuccess />
-                  </PageTracker>
+                  <Suspense fallback={<PageLoader />}>
+                    <PageTracker pageName="Order Success">
+                      <OrderSuccess />
+                    </PageTracker>
+                  </Suspense>
                 } 
               />
               <Route 
                 path="/service/:serviceSlug" 
                 element={
-                  <PageTracker pageName="Service Detail">
-                    <ServiceDetail />
-                  </PageTracker>
+                  <Suspense fallback={<PageLoader />}>
+                    <PageTracker pageName="Service Detail">
+                      <ServiceDetail />
+                    </PageTracker>
+                  </Suspense>
                 } 
               />
               <Route 
                 path="/contact" 
                 element={
-                  <PageTracker pageName="Contact">
-                    <Contact />
-                  </PageTracker>
+                  <Suspense fallback={<PageLoader />}>
+                    <PageTracker pageName="Contact">
+                      <Contact />
+                    </PageTracker>
+                  </Suspense>
                 } 
               />
               <Route 
                 path="/privacy" 
                 element={
-                  <PageTracker pageName="Privacy Policy">
-                    <PrivacyPolicy />
-                  </PageTracker>
+                  <Suspense fallback={<PageLoader />}>
+                    <PageTracker pageName="Privacy Policy">
+                      <PrivacyPolicy />
+                    </PageTracker>
+                  </Suspense>
                 } 
               />
               <Route 
                 path="/terms" 
                 element={
-                  <PageTracker pageName="Terms & Conditions">
-                    <TermsConditions />
-                  </PageTracker>
+                  <Suspense fallback={<PageLoader />}>
+                    <PageTracker pageName="Terms & Conditions">
+                      <TermsConditions />
+                    </PageTracker>
+                  </Suspense>
                 } 
               />
               <Route 
                 path="*" 
                 element={
-                  <PageTracker pageName="404 Not Found">
-                    <NotFound />
-                  </PageTracker>
+                  <Suspense fallback={<PageLoader />}>
+                    <PageTracker pageName="404 Not Found">
+                      <NotFound />
+                    </PageTracker>
+                  </Suspense>
                 } 
               />
             </Routes>

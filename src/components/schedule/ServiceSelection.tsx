@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServices } from "@/hooks/useServices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -123,32 +123,34 @@ export const ServiceSelection = ({
   } = useDiscountEligibility();
   const navigate = useNavigate();
 
-  // Fetch services from Supabase
+  // Use shared services hook to prevent duplicate requests
+  const { services: fetchedServices, loading: servicesLoading, error: servicesError } = useServices();
+  
   useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const {
-          data,
-          error
-        } = await supabase.from("services").select("*");
-        if (error) {
-          throw error;
-        }
+    if (fetchedServices.length > 0) {
+      const sortedServices = sortServices(fetchedServices);
+      setServices(sortedServices);
+      setLoading(false);
+    }
+  }, [fetchedServices]);
 
-        const sortedServices = sortServices(data || []);
-        setServices(sortedServices);
-      } catch (error: any) {
-        toast({
-          title: "Error fetching services",
-          description: error.message,
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchServices();
-  }, []);
+  useEffect(() => {
+    if (servicesError) {
+      console.error("Error fetching services:", servicesError);
+      toast({
+        title: "Error",
+        description: "Failed to load services. Please try again.",
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+  }, [servicesError]);
+
+  useEffect(() => {
+    if (servicesLoading) {
+      setLoading(true);
+    }
+  }, [servicesLoading]);
 
   // Check if dry cleaning service is selected
   const isDryCleaningSelected = () => {
