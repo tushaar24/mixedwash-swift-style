@@ -1,7 +1,8 @@
 {
+  "version": 2,
   "headers": [
     {
-      "source": "/assets/(.*)",
+      "source": "/:path*\\.(js|mjs|css|json|xml|wasm)$",
       "headers": [
         {
           "key": "Cache-Control",
@@ -10,38 +11,36 @@
       ]
     },
     {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "header",
-          "key": "accept",
-          "value": "(.*)"
-        }
-      ],
+      "source": "/:path*\\.(png|jpe?g|webp|avif|svg|ico)$",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/:path*\\.(woff2?|ttf|eot|otf)$",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/:path*\\.(html)$",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, max-age=0, must-revalidate"
         }
       ]
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*\\.(png|jpg|jpeg|webp|svg|ico|woff|woff2|ttf|eot|css|js))",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      }
-    },
-    {
-      "src": "/(.*\\.html)",
-      "headers": {
-        "Cache-Control": "public, max-age=3600"
-      }
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+
+  // If you're building a SPA and need fallback to index.html:
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
