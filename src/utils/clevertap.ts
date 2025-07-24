@@ -3,45 +3,29 @@
 declare global {
   interface Window {
     clevertap: any;
-    ctLoaded?: boolean;
   }
 }
 
-// Lazy initialization function - only loads when needed
-const lazyInitCleverTap = (() => {
-  let initPromise: Promise<boolean> | null = null;
-  
-  return () => {
-    if (initPromise) return initPromise;
+// Initialize CleverTap - now that it's loaded via script tag
+export const initCleverTap = () => {
+  try {
+    // Simplified initialization - only check once
+    if (typeof window !== 'undefined' && window.clevertap) {
+      console.log('CleverTap initialized');
+      return true;
+    }
     
-    initPromise = new Promise((resolve) => {
-      // Check if already loaded
-      if (typeof window !== 'undefined' && window.clevertap && window.ctLoaded) {
-        resolve(true);
-        return;
+    // Single retry after 2 seconds
+    setTimeout(() => {
+      if (typeof window !== 'undefined' && window.clevertap) {
+        console.log('CleverTap initialized (delayed)');
       }
-      
-      // Wait for the script tag initialization
-      const checkInterval = setInterval(() => {
-        if (typeof window !== 'undefined' && window.clevertap && window.ctLoaded) {
-          clearInterval(checkInterval);
-          resolve(true);
-        }
-      }, 100);
-      
-      // Timeout after 5 seconds
-      setTimeout(() => {
-        clearInterval(checkInterval);
-        resolve(false);
-      }, 5000);
-    });
+    }, 2000);
     
-    return initPromise;
-  };
-})();
-
-// Initialize CleverTap - simplified version
-export const initCleverTap = () => lazyInitCleverTap();
+  } catch (error) {
+    console.error('CleverTap initialization failed:', error);
+  }
+};
 
 // User profile methods
 export const setUserProfile = (profileData: {
@@ -70,12 +54,10 @@ export const setUserProfile = (profileData: {
   }
 };
 
-// Event tracking methods with user info - lazy loaded
-export const trackEvent = async (eventName: string, eventData?: Record<string, any>, userInfo?: { user_id?: string; name?: string }) => {
+// Event tracking methods with user info
+export const trackEvent = (eventName: string, eventData?: Record<string, any>, userInfo?: { user_id?: string; name?: string }) => {
   try {
-    // Lazy initialize CleverTap first
-    const isInitialized = await lazyInitCleverTap();
-    if (!isInitialized || typeof window === 'undefined' || !window.clevertap) {
+    if (typeof window === 'undefined' || !window.clevertap) {
       return;
     }
 
@@ -93,11 +75,11 @@ export const trackEvent = async (eventName: string, eventData?: Record<string, a
   }
 };
 
-// Page view tracking with user info - lazy loaded
-export const trackPageView = async (pageName: string, pageData?: Record<string, any>, userInfo?: { user_id?: string; name?: string }) => {
+// Page view tracking with user info
+export const trackPageView = (pageName: string, pageData?: Record<string, any>, userInfo?: { user_id?: string; name?: string }) => {
   try {
-    const isInitialized = await lazyInitCleverTap();
-    if (!isInitialized || typeof window === 'undefined' || !window.clevertap) {
+    if (typeof window === 'undefined' || !window.clevertap) {
+      console.warn('CleverTap not available for page view tracking');
       return;
     }
 
@@ -108,23 +90,30 @@ export const trackPageView = async (pageName: string, pageData?: Record<string, 
       ...(userInfo?.name && { customer_name: userInfo.name })
     };
     
+    console.log('=== CLEVERTAP PAGE VIEW ===');
+    console.log('Page name:', pageName);
+    console.log('Page data:', pageData);
+    console.log('Event payload:', eventPayload);
+    console.log('User info:', userInfo);
+    
     window.clevertap.event.push('Page Viewed', eventPayload);
     
+    console.log('CleverTap page view event sent successfully');
   } catch (error) {
     console.error('Error tracking CleverTap page view:', error);
   }
 };
 
-// E-commerce events with user info - lazy loaded
-export const trackOrderPlaced = async (orderData: {
+// E-commerce events with user info
+export const trackOrderPlaced = (orderData: {
   orderId: string;
   amount: number;
   currency?: string;
   items?: any[];
 }, userInfo?: { user_id?: string; name?: string }) => {
   try {
-    const isInitialized = await lazyInitCleverTap();
-    if (!isInitialized || typeof window === 'undefined' || !window.clevertap) {
+    if (typeof window === 'undefined' || !window.clevertap) {
+      console.warn('CleverTap not available for order tracking');
       return;
     }
 
@@ -137,14 +126,20 @@ export const trackOrderPlaced = async (orderData: {
       ...(userInfo?.name && { customer_name: userInfo.name })
     };
     
+    console.log('=== CLEVERTAP ORDER PLACED ===');
+    console.log('Order data:', orderData);
+    console.log('Event payload:', eventPayload);
+    console.log('User info:', userInfo);
+    
     window.clevertap.event.push('Order Placed', eventPayload);
     
+    console.log('CleverTap order placed event sent successfully');
   } catch (error) {
     console.error('Error tracking CleverTap order:', error);
   }
 };
 
-export const trackServiceScheduled = async (serviceData: {
+export const trackServiceScheduled = (serviceData: {
   serviceName: string;
   serviceId: string;
   pickupDate: string;
@@ -152,8 +147,8 @@ export const trackServiceScheduled = async (serviceData: {
   amount?: number;
 }, userInfo?: { user_id?: string; name?: string }) => {
   try {
-    const isInitialized = await lazyInitCleverTap();
-    if (!isInitialized || typeof window === 'undefined' || !window.clevertap) {
+    if (typeof window === 'undefined' || !window.clevertap) {
+      console.warn('CleverTap not available for service tracking');
       return;
     }
 
@@ -167,8 +162,14 @@ export const trackServiceScheduled = async (serviceData: {
       ...(userInfo?.name && { customer_name: userInfo.name })
     };
     
+    console.log('=== CLEVERTAP SERVICE SCHEDULED ===');
+    console.log('Service data:', serviceData);
+    console.log('Event payload:', eventPayload);
+    console.log('User info:', userInfo);
+    
     window.clevertap.event.push('Service Scheduled', eventPayload);
     
+    console.log('CleverTap service scheduled event sent successfully');
   } catch (error) {
     console.error('Error tracking CleverTap service:', error);
   }
