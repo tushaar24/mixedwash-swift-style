@@ -2,9 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { trackEvent } from "@/utils/clevertap";
+import { LazyImage } from "@/components/LazyImage";
 
 export const ProfessionalLaundryService = () => {
   const navigate = useNavigate();
@@ -14,35 +14,36 @@ export const ProfessionalLaundryService = () => {
     profile
   } = useAuth();
   
-  const getCurrentTime = () => {
-    const now = new Date();
-    return now.toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-  
-  const getUserInfo = () => user ? {
+  const getUserInfo = useCallback(() => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
-  } : undefined;
+  } : undefined, [user, profile]);
   
-  const handleScheduleClick = () => {
-    const userInfo = getUserInfo();
-
-    // Track the CTA click event
-    trackEvent('schedule_cta_clicked', {
-      'customer name': userInfo?.name || 'Anonymous',
-      'customer id': userInfo?.user_id || 'Anonymous',
-      'current_time': getCurrentTime(),
-      'source': 'professional_service_section'
-    });
-
-    // Always navigate to schedule page for service selection first
+  const handleScheduleClick = useCallback(async () => {
+    // Navigate immediately for better UX
     navigate("/schedule", { state: { fromCTA: true } });
-  };
+
+    // Track asynchronously to avoid blocking
+    try {
+      const { trackEvent } = await import("@/utils/clevertap");
+      const userInfo = getUserInfo();
+      const currentTime = new Date().toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      trackEvent('schedule_cta_clicked', {
+        'customer name': userInfo?.name || 'Anonymous',
+        'customer id': userInfo?.user_id || 'Anonymous',
+        'current_time': currentTime,
+        'source': 'professional_service_section'
+      });
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
+    }
+  }, [navigate, getUserInfo]);
   
   const features = [{
     title: "Flexible Scheduling",
@@ -81,7 +82,11 @@ export const ProfessionalLaundryService = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
             {features.map((feature, index) => <div key={index} className="group bg-white rounded-xl p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300">
                 <div className="w-full aspect-[4/3] rounded-lg overflow-hidden mb-6 transform transition-transform duration-500 group-hover:scale-[1.02]">
-                  <img src={feature.image} alt={feature.title} className="w-full h-full object-cover" />
+                  <LazyImage 
+                    src={feature.image} 
+                    alt={feature.title} 
+                    className="w-full h-full object-cover" 
+                  />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-2xl font-semibold text-gray-900 mb-4">
