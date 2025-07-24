@@ -17,7 +17,9 @@ const CallToAction = lazy(() => import("@/components/CallToAction").then(m => ({
 const Footer = lazy(() => import("@/components/Footer").then(m => ({ default: m.Footer })));
 const FloatingActionButton = lazy(() => import("@/components/FloatingActionButton").then(m => ({ default: m.FloatingActionButton })));
 
-const LoadingSection = () => <div className="h-20 bg-gray-50 animate-pulse" />;
+const LoadingSection = () => <div className="min-h-[400px] bg-gray-50 animate-pulse flex items-center justify-center">
+  <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+</div>;
 
 const Index = () => {
   const { user, profile, isLoading, isProfileComplete } = useAuth();

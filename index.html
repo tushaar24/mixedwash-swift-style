@@ -86,7 +86,7 @@
         padding: 0; 
         background-color: hsl(var(--background)); 
         color: hsl(var(--foreground)); 
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-family: 'Inter-fallback', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         line-height: 1.5;
         -webkit-text-size-adjust: 100%;
       }
@@ -153,18 +153,27 @@
         .md\\:text-5xl { font-size: 3rem; line-height: 1; }
       }
       
-      /* Loading animation for lazy components */
-      .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+      /* Loading sections with proper dimensions */
+      .min-h-\\[400px\\] { min-height: 400px; }
+      .min-h-\\[500px\\] { min-height: 500px; }
+      .min-h-\\[600px\\] { min-height: 600px; }
       .bg-gray-50 { background-color: rgb(249 250 251); }
       .bg-gray-100 { background-color: rgb(243 244 246); }
       .h-20 { height: 5rem; }
       .h-32 { height: 8rem; }
     </style>
     
-    <!-- Font Optimization - Non-blocking -->
+    <!-- Font Optimization - Non-blocking with size-adjust -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <style>
+      /* Fallback font with similar metrics to Inter */
+      @font-face {
+        font-family: 'Inter-fallback';
+        size-adjust: 107%;
+        src: local('BlinkMacSystemFont'), local('Segoe UI'), local('Roboto'), local('Arial');
+      }
+    </style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
     

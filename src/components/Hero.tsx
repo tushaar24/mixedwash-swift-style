@@ -55,7 +55,7 @@ export const Hero = () => {
   };
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden min-h-[500px] md:min-h-[600px]">
       {/* Responsive background image - only shown on desktop */}
       <picture className="absolute inset-0 hidden md:block">
         <source
@@ -77,6 +77,9 @@ export const Hero = () => {
           loading="eager"
           decoding="sync"
           fetchPriority="high"
+          width="1600"
+          height="900"
+          style={{ aspectRatio: '16/9' }}
         />
       </picture>
       
