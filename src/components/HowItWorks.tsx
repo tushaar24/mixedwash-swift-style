@@ -79,7 +79,7 @@ export const HowItWorks = () => {
     number: "1",
     label: "FLEXIBLE",
     title: "Schedule your collection",
-    description: "Plan your day with ease. Choose a collection and delivery time at your convenience.",
+    description: "Plan your day with ease. Choose a collection and delivery time at your convenience. No need to search laundry near me every weekend anymore.",
     features: [{
       icon: <Computer className="h-5 w-5 text-blue-600" />,
       text: "Book easily through our website"
