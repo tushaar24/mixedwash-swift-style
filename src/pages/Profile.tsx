@@ -1266,9 +1266,8 @@ const Profile = () => {
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
                         <CalendarComponent
-                          mode="single"
-                          selected={reschedulePickupDate}
-                          onSelect={setReschedulePickupDate}
+                          selectedDate={reschedulePickupDate}
+                          onSelectDate={setReschedulePickupDate}
                           disabled={(date) => date < new Date()}
                           initialFocus
                         />
@@ -1311,9 +1310,8 @@ const Profile = () => {
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
                         <CalendarComponent
-                          mode="single"
-                          selected={rescheduleDeliveryDate}
-                          onSelect={setRescheduleDeliveryDate}
+                          selectedDate={rescheduleDeliveryDate}
+                          onSelectDate={setRescheduleDeliveryDate}
                           disabled={(date) => 
                             !reschedulePickupDate || date <= reschedulePickupDate
                           }

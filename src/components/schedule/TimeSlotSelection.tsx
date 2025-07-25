@@ -381,11 +381,9 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
             <h3 className="font-medium">Select Pickup Date</h3>
             <div className="border rounded-lg p-3 bg-white">
               <Calendar
-                mode="single"
-                selected={pickupDate || undefined}
-                onSelect={handlePickupDateSelect}
+                selectedDate={pickupDate || undefined}
+                onSelectDate={handlePickupDateSelect}
                 disabled={(date) => isBefore(date, today)}
-                className="p-3 pointer-events-auto"
               />
             </div>
             {pickupDate && isSameDay(pickupDate, today) && (
@@ -498,11 +496,9 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
               <h3 className="font-medium">Select Delivery Date</h3>
               <div className="border rounded-lg p-3 bg-white">
                 <Calendar
-                  mode="single"
-                  selected={deliveryDate || undefined}
-                  onSelect={handleDeliveryDateSelect}
+                  selectedDate={deliveryDate || undefined}
+                  onSelectDate={handleDeliveryDateSelect}
                   disabled={(date) => !pickupDate || isBefore(date, addDays(pickupDate, 1))}
-                  className="p-3 pointer-events-auto"
                 />
               </div>
               {deliveryDate && pickupDate && isSameDay(deliveryDate, addDays(pickupDate, 1)) && selectedPickupSlotId && (
