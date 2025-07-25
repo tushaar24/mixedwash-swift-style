@@ -68,7 +68,7 @@ export const FAQ = () => {
   const faqs = [
     {
       question: "Is next-day delivery really guaranteed?",
-      answer: "Absolutely! Every order is delivered next day without extra charges. That's our standard service level. No need to find laundry near me every weekend"
+      answer: "Absolutely! Every order is delivered next day without extra charges. That's our standard service level. No need to search laundry near me every weekend"
     },
     {
       question: "What if I'm not satisfied with the service?",
