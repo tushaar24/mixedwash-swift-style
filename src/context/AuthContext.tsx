@@ -194,12 +194,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             Name: userName
           });
           
-          // Use setTimeout to avoid blocking the auth state change and ensure migration runs
-          setTimeout(async () => {
-            console.log("🚀 About to call handleProfileAndMigration for user:", newSession.user.id);
-            await handleProfileAndMigration(newSession.user.id);
-            setIsLoading(false);
-          }, 100); // Small delay to ensure everything is set up
+          // Defer heavy operations to not block UI
+          setTimeout(() => {
+            handleProfileAndMigration(newSession.user.id).finally(() => {
+              setIsLoading(false);
+            });
+          }, 0);
         } else {
           // Clear profile when signed out
           setProfile(null);
@@ -215,8 +215,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // THEN check for existing session - optimize initial load
+    supabase.auth.getSession().then(({ data: { session } }) => {
       console.log("Got existing session:", session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
@@ -230,11 +230,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           Name: userName
         });
         
-        console.log("🚀 About to call handleProfileAndMigration for existing session user:", session.user.id);
-        await handleProfileAndMigration(session.user.id);
+        // Defer heavy operations to not block initial render
+        setTimeout(() => {
+          handleProfileAndMigration(session.user.id).finally(() => {
+            setIsLoading(false);
+          });
+        }, 0);
+      } else {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();

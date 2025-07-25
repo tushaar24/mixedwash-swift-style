@@ -38,46 +38,52 @@ const Auth = () => {
     
     // Check if user is already logged in
     if (user) {
-      // Check for stored order data from Google OAuth
-      const storedOrderData = sessionStorage.getItem('pendingOrderData');
-      const storedFromSchedule = sessionStorage.getItem('fromSchedule');
-      
-      let finalOrderData = orderData;
-      let finalFromSchedule = fromSchedule;
-      
-      if (storedOrderData && storedFromSchedule) {
-        finalOrderData = JSON.parse(storedOrderData);
-        finalFromSchedule = true;
-        // Clear from session storage
-        sessionStorage.removeItem('pendingOrderData');
-        sessionStorage.removeItem('fromSchedule');
-        console.log('Retrieved order data from sessionStorage after Google auth');
-      }
-      
-      // Priority 1: Check profile completion first
-      if (!isProfileComplete) {
-        // Profile incomplete - go to profile page with order data preserved
-        navigate("/profile", { 
-          state: finalFromSchedule && finalOrderData ? { 
-            fromSchedule: true, 
-            orderData: finalOrderData 
-          } : undefined,
-          replace: true 
-        });
-      } else if (finalFromSchedule && finalOrderData) {
-        // Profile complete and coming from schedule - go to address selection
-        navigate("/schedule", { 
-          state: { 
-            fromAuth: true,
-            orderData: finalOrderData,
-            currentStep: 1 // ADDRESS_SELECTION = 1
-          },
-          replace: true // Replace auth page in history
-        });
-      } else {
-        // Profile complete but not from schedule - redirect to home
-        navigate("/", { replace: true });
-      }
+      // Use setTimeout to prevent blocking the render
+      setTimeout(() => {
+        // Check for stored order data from Google OAuth
+        const storedOrderData = sessionStorage.getItem('pendingOrderData');
+        const storedFromSchedule = sessionStorage.getItem('fromSchedule');
+        
+        let finalOrderData = orderData;
+        let finalFromSchedule = fromSchedule;
+        
+        if (storedOrderData && storedFromSchedule) {
+          try {
+            finalOrderData = JSON.parse(storedOrderData);
+            finalFromSchedule = true;
+            // Clear from session storage
+            sessionStorage.removeItem('pendingOrderData');
+            sessionStorage.removeItem('fromSchedule');
+          } catch (e) {
+            console.error('Error parsing stored order data:', e);
+          }
+        }
+        
+        // Priority 1: Check profile completion first
+        if (!isProfileComplete) {
+          // Profile incomplete - go to profile page with order data preserved
+          navigate("/profile", { 
+            state: finalFromSchedule && finalOrderData ? { 
+              fromSchedule: true, 
+              orderData: finalOrderData 
+            } : undefined,
+            replace: true 
+          });
+        } else if (finalFromSchedule && finalOrderData) {
+          // Profile complete and coming from schedule - go to address selection
+          navigate("/schedule", { 
+            state: { 
+              fromAuth: true,
+              orderData: finalOrderData,
+              currentStep: 1 // ADDRESS_SELECTION = 1
+            },
+            replace: true // Replace auth page in history
+          });
+        } else {
+          // Profile complete but not from schedule - redirect to home
+          navigate("/", { replace: true });
+        }
+      }, 0);
     }
   }, [user, isProfileComplete, isLoading, navigate, fromSchedule, orderData]);
 
@@ -192,10 +198,10 @@ const Auth = () => {
   // Show loading while auth context is loading
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+      <div className="min-h-screen bg-background flex flex-col justify-center items-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -207,24 +213,24 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+        <h2 className="mt-6 text-center text-3xl font-bold text-foreground">
           MixedWash
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-muted-foreground">
           {fromSchedule ? "Sign in to continue with your order" : "Sign in to schedule your laundry pickup"}
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-card py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {/* Google Sign In Button */}
           <div className="mb-6">
             <Button
               onClick={handleGoogleSignIn}
               disabled={googleLoading}
-              className="w-full flex items-center justify-center space-x-2 bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"
+              className="w-full flex items-center justify-center space-x-2"
               variant="outline"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -239,7 +245,7 @@ const Auth = () => {
             {/* Progress bar for Google auth */}
             {googleLoading && (
               <div className="mt-4">
-                <div className="text-center text-sm text-gray-600 mb-2">
+                <div className="text-center text-sm text-muted-foreground mb-2">
                   Redirecting to Google...
                 </div>
                 <Progress value={100} className="w-full h-2" />
@@ -250,10 +256,10 @@ const Auth = () => {
           {/* Divider */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+              <span className="px-2 bg-card text-muted-foreground">Or continue with email</span>
             </div>
           </div>
           
@@ -266,7 +272,7 @@ const Auth = () => {
             <TabsContent value="login">
               <form className="space-y-6" onSubmit={handleEmailSignIn}>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="email" className="block text-sm font-medium text-foreground">
                     Email address
                   </label>
                   <div className="mt-1">
@@ -283,7 +289,7 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="password" className="block text-sm font-medium text-foreground">
                     Password
                   </label>
                   <div className="mt-1">
@@ -314,7 +320,7 @@ const Auth = () => {
             <TabsContent value="register">
               <form className="space-y-6" onSubmit={handleEmailSignUp}>
                 <div>
-                  <label htmlFor="register-email" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="register-email" className="block text-sm font-medium text-foreground">
                     Email address
                   </label>
                   <div className="mt-1">
@@ -331,7 +337,7 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="register-password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="register-password" className="block text-sm font-medium text-foreground">
                     Password
                   </label>
                   <div className="mt-1">
