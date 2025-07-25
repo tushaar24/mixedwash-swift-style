@@ -107,7 +107,7 @@ export const WhyChooseUs = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Why Choose MixedWash</h2>
           <p className="text-lg text-slate-200 max-w-2xl mx-auto">
-            We're not just another laundry service. Here's what makes us different.
+            We're not just another laundry near you. Here's what makes us different.
           </p>
         </div>
         
