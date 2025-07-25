@@ -126,6 +126,9 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
   // Select pickup date and auto-set delivery
   function handlePickupDateSelect(date: Date | null) {
+    // Prevent unselecting the date - only allow valid date selection
+    if (!date) return;
+    
     const userInfo = getUserInfo();
     
     // Track pickup date selection
@@ -133,7 +136,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
       'current_time': getCurrentTime(),
-      'selected_date': date?.toDateString() || '',
+      'selected_date': date.toDateString(),
       'previous_date': pickupDate?.toDateString() || ''
     });
 
@@ -143,7 +146,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     setSelectedPickupSlotId(null);
     
     // Auto-set delivery date to next day (24-hour delivery)
-    const newDeliveryDate = date ? addDays(date, 1) : null;
+    const newDeliveryDate = addDays(date, 1);
     setDeliveryDate(newDeliveryDate);
     
     // Reset delivery slot selection
@@ -204,6 +207,9 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
 
   // Select delivery date (only when customizing)
   function handleDeliveryDateSelect(date: Date | null) {
+    // Prevent unselecting the date - only allow valid date selection
+    if (!date) return;
+    
     const userInfo = getUserInfo();
     
     // Track delivery date selection
@@ -211,7 +217,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
       'current_time': getCurrentTime(),
-      'selected_delivery_date': date?.toDateString() || '',
+      'selected_delivery_date': date.toDateString(),
       'previous_delivery_date': deliveryDate?.toDateString() || '',
       'pickup_date': pickupDate?.toDateString() || ''
     });
