@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'es2015',
-    cssCodeSplit: true, // Enable CSS code splitting for better loading
+    cssCodeSplit: false, // Disable CSS code splitting to inline CSS
     cssMinify: true,
     rollupOptions: {
       treeshake: true,
