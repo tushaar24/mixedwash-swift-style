@@ -2,6 +2,32 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+     <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TMLNCBRB');</script>
+    <!-- End Google Tag Manager -->
+
+     <!-- CleverTap SDK -->
+    <script type="text/javascript">
+      var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
+      // replace with the CLEVERTAP_ACCOUNT_ID with the actual ACCOUNT ID value from your Dashboard -> Settings page
+      clevertap.account.push({"id": "589-KZZ-947Z"});
+      clevertap.region = 'eu1';
+      (function () {
+        var wzrk = document.createElement('script');
+        wzrk.type = 'text/javascript';
+        wzrk.async = true;
+        wzrk.src = ('https:' == document.location.protocol ? 'https://d2r1yp2w7bby2u.cloudfront.net' : 'http://static.clevertap.com') + '/js/clevertap.min.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wzrk, s);
+      })();
+    </script>
+    <!-- End CleverTap SDK -->
+
+    
     <meta charset="UTF-8" />
     <title>MixedWash - Laundry Made Fun, Fast & Friendly | Bangalore Laundry Service</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -43,64 +69,12 @@
     <meta name="twitter:description" content="Professional laundry service in Bangalore with next-day delivery. Free pickup & delivery at your doorstep." />
     <meta name="twitter:image" content="https://mixedwash.in/og-image.jpg" />
 
-    <!-- Analytics initialization -->
-    <script>
-      // Analytics initialization with idle-until-urgent strategy
-      window.analyticsQueue = [];
-      
-      // GTM lazy loader - only load when user interacts
-      function initGTM() {
-        if (window.gtmLoaded) return;
-        window.gtmLoaded = true;
-        
-        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-TMLNCBRB');
-      }
-      
-      // CleverTap lazy loader - only load when user interacts
-      function initCleverTap() {
-        if (window.ctLoaded) return;
-        window.ctLoaded = true;
-        
-        var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
-        clevertap.account.push({"id": "589-KZZ-947Z"});
-        clevertap.region = 'eu1';
-        window.clevertap = clevertap;
-        
-        var wzrk = document.createElement('script');
-        wzrk.type = 'text/javascript';
-        wzrk.async = true;
-        wzrk.src = 'https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js';
-        document.head.appendChild(wzrk);
-      }
-      
-      // Load analytics on first user interaction or after 3 seconds
-      function loadAnalytics() {
-        if (window.analyticsInitialized) return;
-        window.analyticsInitialized = true;
-        
-        requestIdleCallback(() => {
-          initGTM();
-          initCleverTap();
-        }, { timeout: 3000 });
-      }
-      
-      // Trigger on user interaction
-      ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
-        document.addEventListener(event, loadAnalytics, { once: true, passive: true });
-      });
-      
-      // Fallback after 3 seconds
-      setTimeout(loadAnalytics, 3000);
-    </script>
     
     <!-- INLINE CRITICAL CSS -->
     <style>
       /* Critical CSS Variables */
       :root {
+
         --background: 0 0% 100%;
         --foreground: 222.2 84% 4.9%;
         --primary: 222.2 47.4% 11.2%;
@@ -111,6 +85,34 @@
         --muted-foreground: 215.4 16.3% 46.9%;
         --border: 214.3 31.8% 91.4%;
         --radius: 0.5rem;
+
+
+        --hero-min-height-mobile: 500px;
+        --hero-min-height-desktop: 600px;
+        --hero-max-width: 80rem;
+        --hero-padding-x: 1rem;
+        --hero-padding-y-mobile: 2rem;
+        --hero-padding-y-desktop: 0;
+
+        /* Typography Scale */
+        --hero-title-size-mobile: clamp(2rem, 5vw, 2.25rem);
+        --hero-title-size-desktop: clamp(2.5rem, 4vw, 3rem);
+        --hero-subtitle-size: clamp(1.5rem, 3vw, 1.875rem);
+        --hero-description-size: clamp(1.125rem, 2.5vw, 1.25rem);
+
+        /* Colors */
+        --hero-text-primary: #111827;
+        --hero-text-secondary: #4b5563;
+        --hero-bg-white: #ffffff;
+        --hero-border-light: #e5e7eb;
+        --hero-border-hover: #d1d5db;
+        --hero-bg-hover: #f9fafb;
+
+        /* Spacing */
+        --hero-gap-small: 0.5rem;
+        --hero-gap-medium: 1rem;
+        --hero-gap-large: 1.5rem;
+        --hero-gap-xl: 2rem;
       }
       
       /* Critical base styles */
@@ -157,7 +159,431 @@
       .pt-8 { padding-top: 2rem; }
       .pb-12 { padding-bottom: 3rem; }
       .space-x-4 > :not([hidden]) ~ :not([hidden]) { margin-left: 1rem; }
-      
+
+      /* Hero Section */
+
+      .hero-container {
+        position: relative;
+        overflow: hidden;
+        min-height: 500px;
+      }
+
+      .schedule-btn{
+        padding-top: 30px;
+        padding-bottom: 30px;
+
+      }
+
+
+      @media (min-width: 768px) {
+        .hero-container {
+          min-height: 600px;
+        }
+
+      }
+
+      .hero-bg-picture {
+        position: absolute;
+        inset: 0;
+        display: none;
+      }
+
+      @media (min-width: 768px) {
+        .hero-bg-picture {
+          display: block;
+        }
+      }
+
+      .hero-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: right;
+        aspect-ratio: 16 / 9;
+      }
+
+      .hero-gradient {
+        position: absolute;
+        inset: 0;
+        display: none;
+        background-image: linear-gradient(to right, #ffffff, rgba(255, 255, 255, 0.95), transparent);
+      }
+
+      .hero-content {
+        position: relative;
+        z-index: 10;
+        max-width: 80rem;
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 2rem;
+        padding-right: 1rem;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        display: flex;
+        align-items: center;
+      }
+
+      @media (min-width: 768px) {
+        .hero-gradient {
+          display: block;
+        }
+      }
+
+      @media (min-width: 1272px) {
+        .hero-content {
+          position: relative;
+          z-index: 10;
+          max-width: 80rem;
+          margin-left: auto;
+          margin-right: auto;
+          padding-left: 6rem;
+          padding-right: 1rem;
+          padding-top: 2rem;
+          padding-bottom: 3rem;
+          display: flex;
+          align-items: center;
+        }
+
+        .items-center{
+        }
+
+      }
+
+      @media (min-width: 768px) {
+        .hero-content {
+          padding-top: 0;
+          padding-bottom: 0;
+          min-height: 600px;
+        }
+      }
+      @media (max-width: 768px) {
+        .hero-title{
+
+        }
+
+        .hero-description {
+          font-size: 1.20rem;
+          line-height: 1.75rem;
+          color: #4B5563;
+          max-width: 30rem;
+          margin-top: 1.5rem;
+        }
+
+
+        .hero-content {
+          padding-top: 2rem;
+          padding-left: 1rem;
+        }
+
+        .items-center{
+          padding-left: 0;
+        }
+      }
+      .hero-textbox {
+        max-width: 28.5rem;
+      }
+
+
+      .md\:flex {
+        display: flex;
+        font-size: 14.5px;
+      }
+      .hero-title {
+        font-size: 2.25rem;
+        line-height: 2.5rem;
+        font-weight: 700;
+        color: #111827; /* Tailwind gray-900 */
+        margin-top: 0;
+        padding-top: 0;
+        letter-spacing: -0.025em;
+      }
+
+
+      @media (min-width: 1024px) {
+        .hero-title {
+          font-size: 3.50rem;
+          line-height: 1;
+          padding-top: 8rem;
+        }
+        h1.hero-title{
+          font-size: 3.50rem;
+          line-height: 1;
+        }
+
+        span.hero-subtitle {
+          font-size: 2.75rem;
+          line-height: 2.2rem;
+          color: #4B5563;
+          margin-top: 19px;
+        }
+
+
+      }
+
+      @media (min-width: 768px) {
+        .hero-title {
+          font-size: 3rem;
+          line-height: 1;
+          padding-top: 8rem;
+        }
+      }
+
+      .hero-title span {
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.875rem;
+        line-height: 2.25rem;
+        color: #4B5563; /* Tailwind gray-600 */
+      }
+
+      .hero-description {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+        color: #4B5563;
+        max-width: 32rem;
+        margin-top: 1.5rem;
+      }
+
+      .hero-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding-top: 2rem;
+      }
+
+      /* schedule and contact button */
+      button.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.rounded-md.text-sm.font-medium.ring-offset-background.transition-colors.focus-visible\:outline-none.focus-visible\:ring-2.focus-visible\:ring-ring.focus-visible\:ring-offset-2.disabled\:pointer-events-none.disabled\:opacity-50.\[\&_svg\]\:pointer-events-none.\[\&_svg\]\:size-4.\[\&_svg\]\:shrink-0.bg-primary.text-primary-foreground.hover\:bg-primary\/90.h-10.px-4.py-4.schedule-btn {
+        padding-top: 30px;
+        padding-bottom: 30px;
+      }
+
+      button.inline-flex.items-center.justify-center.gap-2.whitespace-nowrap.rounded-md.text-sm.font-medium.ring-offset-background.transition-colors.focus-visible\:outline-none.focus-visible\:ring-2.focus-visible\:ring-ring.focus-visible\:ring-offset-2.disabled\:pointer-events-none.disabled\:opacity-50.\[\&_svg\]\:pointer-events-none.\[\&_svg\]\:size-4.\[\&_svg\]\:shrink-0.border.border-input.bg-background.hover\:bg-accent.hover\:text-accent-foreground.h-10.px-4.py-4.contact-btn{
+        padding-bottom: 30px;
+        padding-top: 30px;
+      }
+
+      @media (min-width: 768px) {
+        .hero-buttons {
+          padding-bottom: 8rem;
+        }
+      }
+
+      .schedule-btn {
+        background-color: hsl(var(--primary));
+        color: hsl(var(--primary-foreground));
+        padding: 2rem 2.5rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        width: 100%;
+        padding-top: 30px;
+        padding-bottom: 30px;
+        transition: background-color 0.15s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+      }
+
+      .schedule-btn:hover {
+        background-color: hsl(var(--primary) / 0.9);
+      }
+
+      .contact-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+
+        /* Text & Typography */
+        white-space: nowrap;
+        font-weight: 500;
+        font-size: 1.125rem;
+        line-height: 1.75rem;
+        color: #111827;
+
+        /* Border & Background */
+        border: 2px solid #e5e7eb;
+        border-radius: 0.375rem;
+        background-color: #ffffff;
+
+        /* Spacing */
+        padding: 1rem 1.5rem;
+        height: auto;
+
+        /* Width - Full on mobile, auto on desktop */
+        width: 100%;
+
+        /* Transitions */
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+
+        /* Focus Ring Setup */
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+
+        /* Cursor */
+        cursor: pointer;
+      }
+
+      .contact-btn:hover {
+        background-color: #f9fafb;
+        border-color: #d1d5db;
+      }
+
+      .cta-icon {
+        margin-left: 0.5rem;
+        height: 1.25rem;
+        width: 1.25rem;
+        transition: transform 0.15s ease-in-out;
+      }
+
+      .schedule-btn:hover .cta-icon {
+        transform: translateX(0.25rem);
+      }
+
+      .contact-icon {
+        margin-right: 0.5rem;
+        height: 1.25rem;
+        width: 1.25rem;
+      }
+
+
+      @media (min-width: 640px) {
+        .contact-btn {
+          width: auto;
+        }
+      }
+
+      /* Hover State */
+      .contact-btn:hover {
+        color: hsl(var(--accent-foreground, #374151));
+        border-color: #d1d5db;
+        background-color: #f9fafb;
+      }
+
+      /* Focus Visible State */
+      .contact-btn:focus-visible {
+        outline: 2px solid hsl(var(--ring, #3b82f6));
+        outline-offset: 2px;
+      }
+
+      /* Disabled State */
+      .contact-btn:disabled {
+        pointer-events: none;
+        opacity: 0.5;
+      }
+
+      /* Icon Styling */
+      .contact-btn svg {
+        pointer-events: none;
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+        margin-right: 0.5rem;
+      }
+
+      /* Alternative: If you want to use a more specific icon class */
+      .contact-btn .contact-icon {
+        pointer-events: none;
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+        margin-right: 0.5rem;
+      }
+
+      /*Professional Laundry*/
+      .laundry-hero-section {
+        text-align: center;
+        margin-bottom: 3rem; /* 48px */
+      }
+
+      @media (min-width: 768px) {
+        .laundry-hero-section {
+          margin-bottom: 4rem; /* 64px */
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .laundry-hero-section {
+          margin-bottom: 5rem; /* 80px */
+        }
+      }
+
+      .professional-title {
+        font-size: 2.25rem; /* 36px */
+        line-height: 2.5rem; /* 40px */
+        font-weight: 600;
+        line-height: 1.25;
+        margin-bottom: 1.5rem; /* 24px */
+        letter-spacing: -0.025em;
+      }
+
+      @media (min-width: 768px) {
+        .professional-title {
+          font-size: 3rem; /* 48px */
+          line-height: 1;
+        }
+      }
+
+      .title-primary {
+        color: #111827; /* gray-900 */
+      }
+
+      .title-secondary {
+        color: #6b7280; /* gray-500 */
+      }
+
+      .professional-content {
+        max-width: 48rem; /* 768px */
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 1.5rem; /* 24px */
+      }
+
+      @media (min-width: 768px) {
+        .professional-content {
+          margin-top: 2rem; /* 32px */
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .professional-content {
+          margin-top: 2.5rem; /* 40px */
+        }
+      }
+
+      .professional-description {
+        font-size: 1rem; /* 16px */
+        line-height: 1.5rem; /* 24px */
+        color: #4b5563; /* gray-600 */
+        line-height: 1.625;
+        padding-left: 1rem; /* 16px */
+        padding-right: 1rem; /* 16px */
+      }
+
+      @media (min-width: 640px) {
+        .professional-description {
+          font-size: 1.125rem; /* 18px */
+          line-height: 1.75rem; /* 28px */
+          padding-left: 0;
+          padding-right: 0;
+        }
+      }
+
+      @media (min-width: 768px) {
+        .professional-description {
+          font-size: 1.25rem; /* 20px */
+          line-height: 1.75rem; /* 28px */
+        }
+      }
+
+
+
       /* Critical typography */
       .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
       .text-2xl { font-size: 1.5rem; line-height: 2rem; }
@@ -192,7 +618,9 @@
         .md\\:pb-0 { padding-bottom: 0px; }
         .md\\:text-5xl { font-size: 3rem; line-height: 1; }
       }
-      
+
+
+
       /* Loading sections with proper dimensions */
       .min-h-\\[400px\\] { min-height: 400px; }
       .min-h-\\[500px\\] { min-height: 500px; }
@@ -276,6 +704,8 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TMLNCBRB"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
+
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
