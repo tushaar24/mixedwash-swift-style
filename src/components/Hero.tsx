@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCallback } from "react";
 import heroDesktop from "@/assets/hero-desktop-1600.webp";
 import heroTablet from "@/assets/hero-tablet-1024.webp";
+import heroMobile from "@/assets/laundry-background-optimized.webp";
 
 export const Hero = () => {
   const navigate = useNavigate();
@@ -69,8 +70,8 @@ export const Hero = () => {
 
   return (
     <div className="relative overflow-hidden min-h-[500px] md:min-h-[600px]">
-      {/* Responsive background image - only shown on desktop */}
-      <picture className="absolute inset-0 hidden md:block">
+      {/* Responsive background image */}
+      <picture className="absolute inset-0">
         <source
           media="(min-width: 1200px)"
           srcSet={heroDesktop}
@@ -82,6 +83,12 @@ export const Hero = () => {
           srcSet={heroTablet}
           width="1024"
           height="768"
+        />
+        <source
+          media="(max-width: 767px)"
+          srcSet={heroMobile}
+          width="640"
+          height="960"
         />
         <img
           src={heroDesktop}
@@ -96,8 +103,8 @@ export const Hero = () => {
         />
       </picture>
       
-      {/* Clean white gradient overlay - hidden on mobile */}
-      <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-white via-white/95 to-transparent"></div>
+      {/* Clean white gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-white via-white/95 to-transparent"></div>
       
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 md:pt-0 md:pb-0 flex items-center md:min-h-[600px]">
