@@ -43,10 +43,11 @@
     <meta name="twitter:description" content="Professional laundry service in Bangalore with next-day delivery. Free pickup & delivery at your doorstep." />
     <meta name="twitter:image" content="https://mixedwash.in/og-image.jpg" />
 
-    <!-- Analytics initialization -->
+    <!-- Analytics initialization v2.0 -->
     <script>
-      // Analytics initialization with idle-until-urgent strategy
+      // Analytics initialization - immediate loading
       window.analyticsQueue = [];
+      window.dataLayer = window.dataLayer || [];
       
       // GTM - load immediately
       (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -55,19 +56,24 @@
       'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
       })(window,document,'script','dataLayer','GTM-TMLNCBRB');
       
-      // CleverTap - load immediately
-      var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
-      clevertap.account.push({"id": "589-KZZ-947Z"});
-      clevertap.region = 'eu1';
-      window.clevertap = clevertap;
-      
-      var wzrk = document.createElement('script');
-      wzrk.type = 'text/javascript';
-      wzrk.async = true;
-      wzrk.src = 'https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js';
-      document.head.appendChild(wzrk);
-      
-      // Note: Analytics are now loaded immediately above, no need for interaction-based loading
+      // CleverTap - load immediately with error handling
+      try {
+        var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
+        clevertap.account.push({"id": "589-KZZ-947Z"});
+        clevertap.region = 'eu1';
+        window.clevertap = clevertap;
+        
+        var wzrk = document.createElement('script');
+        wzrk.type = 'text/javascript';
+        wzrk.async = true;
+        wzrk.src = 'https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js';
+        wzrk.onerror = function() {
+          console.warn('CleverTap blocked by ad blocker - using GTM fallback');
+        };
+        document.head.appendChild(wzrk);
+      } catch(e) {
+        console.warn('CleverTap initialization failed:', e);
+      }
     </script>
     
     <!-- INLINE CRITICAL CSS -->
