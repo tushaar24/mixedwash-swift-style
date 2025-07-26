@@ -181,38 +181,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
-        console.log('🔐 Auth state changed:', event, newSession?.user?.id);
+        console.log("Auth state changed:", event, newSession?.user?.id);
         setSession(newSession);
         setUser(newSession?.user ?? null);
         
         if (newSession?.user) {
           // Set user profile in CleverTap for any session (login or restoration)
           const userName = newSession.user.user_metadata?.full_name || newSession.user.user_metadata?.name;
-          console.log('👤 Setting user profile for tracking:', {
-            id: newSession.user.id,
-            email: newSession.user.email,
-            name: userName
-          });
-          
           setUserProfile({
             Identity: newSession.user.id,
             Email: newSession.user.email,
             Name: userName
           });
-          
-          // Track successful login event
-          if (event === 'SIGNED_IN') {
-            console.log('✅ Tracking login event');
-            trackEvent('User Logged In', {
-              login_method: 'google',
-              user_email: newSession.user.email,
-              user_name: userName,
-              timestamp: new Date().toISOString()
-            }, {
-              user_id: newSession.user.id,
-              name: userName
-            });
-          }
           
           // Defer heavy operations to not block UI
           setTimeout(() => {
@@ -229,7 +209,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // Track user logout
           if (event === 'SIGNED_OUT') {
-            console.log('👋 Tracking logout event');
             trackEvent('User Logged Out');
           }
         }
