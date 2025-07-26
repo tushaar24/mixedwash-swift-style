@@ -50,6 +50,7 @@ export const FloatingActionButton = () => {
         onClick={handleWhatsApp}
         className="h-14 w-14 rounded-full bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl transition-all duration-300 py-4"
         size="icon"
+        aria-label="Contact us on WhatsApp"
       >
         <svg 
           className="h-6 w-6 text-white" 
@@ -65,6 +66,7 @@ export const FloatingActionButton = () => {
         onClick={handleCall}
         className="h-14 w-14 rounded-full bg-black hover:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 py-4"
         size="icon"
+        aria-label="Call us now"
       >
         <Phone className="h-6 w-6 text-white" />
       </Button>
