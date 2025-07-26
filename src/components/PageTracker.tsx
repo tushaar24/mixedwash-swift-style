@@ -27,26 +27,41 @@ export const PageTracker = ({ children, pageName }: PageTrackerProps) => {
     // Skip if already tracked for this location
     if (hasTrackedRef.current) return;
     
+    console.log('=== PAGE TRACKER ===');
+    console.log('Page name:', pageName);
+    console.log('Location:', location.pathname);
+    console.log('User exists:', !!user);
+    console.log('Profile exists:', !!profile);
+    
     const userInfo = user ? {
       user_id: user.id,
       name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username
     } : undefined;
     
-    // Special handling for Homepage
-    if (pageName === 'Homepage') {
-      trackEvent('home_page_viewed', {
-        'URL': location.pathname,
-        'Search': location.search,
-        ...(userInfo?.user_id && { user_id: userInfo.user_id }),
-        'customer_name': userInfo?.name || 'anonymous user'
-      });
-    } else {
-      // Use regular page view tracking for other pages
-      trackPageView(pageName, {
-        'URL': location.pathname,
-        'Search': location.search
-      }, userInfo);
-    }
+    console.log('User info for tracking:', userInfo);
+    
+    // Add small delay to ensure CleverTap is fully loaded
+    setTimeout(() => {
+      // Special handling for Homepage
+      if (pageName === 'Homepage') {
+        console.log('🏠 Tracking homepage view');
+        trackEvent('home_page_viewed', {
+          'URL': location.pathname,
+          'Search': location.search,
+          'timestamp': new Date().toISOString(),
+          ...(userInfo?.user_id && { user_id: userInfo.user_id }),
+          'customer_name': userInfo?.name || 'anonymous user'
+        });
+      } else {
+        console.log('📄 Tracking page view:', pageName);
+        // Use regular page view tracking for other pages
+        trackPageView(pageName, {
+          'URL': location.pathname,
+          'Search': location.search,
+          'timestamp': new Date().toISOString()
+        }, userInfo);
+      }
+    }, 100);
     
     hasTrackedRef.current = true;
   }, [user, profile, pageName, location]);
