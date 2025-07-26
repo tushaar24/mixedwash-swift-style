@@ -34,15 +34,7 @@ const queryClient = new QueryClient();
 
 function App() {
   useEffect(() => {
-    console.log('=== APP INITIALIZATION ===');
-    const ctInitResult = initCleverTap();
-    console.log('CleverTap init result:', ctInitResult);
-    
-    // Also initialize GTM dataLayer if not already present
-    if (typeof window !== 'undefined' && !window.dataLayer) {
-      window.dataLayer = [];
-      console.log('✅ GTM dataLayer initialized');
-    }
+    initCleverTap();
   }, []);
 
   return (
