@@ -70,15 +70,15 @@ export const ProfessionalLaundryService = () => {
   return <section ref={sectionRef} className="bg-white py-12 md:py-20 lg:py-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <div className="laundry-hero-section">
-           <h1 className="professional-title">
-            <span className="title-primary">Professional Express Laundry Near You</span><br />
-            <span className="title-secondary">Tailored to Your Schedule</span>
+        <div className="text-center mb-12 md:mb-16 lg:mb-20">
+           <h1 className="text-4xl md:text-5xl font-semibold leading-tight mb-6 tracking-tight">
+            <span className="text-gray-900">Professional Express Laundry Near You</span><br />
+            <span className="text-gray-500">Tailored to Your Schedule</span>
           </h1>
 
 
-          <div className="professional-content">
-            <p className="professional-description">
+          <div className="max-w-3xl mx-auto mt-6 md:mt-8 lg:mt-10">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed px-4 sm:px-0">
               Experience the convenience of our express premium laundry service near you, meticulously designed to accommodate your schedule. From flexible pickup times to precise delivery windows, we ensure your laundry needs are met with professional excellence.
             </p>
           </div>
