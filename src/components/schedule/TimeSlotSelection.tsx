@@ -630,6 +630,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
             onClick={onBack}
             variant="outline"
             className="px-6 py-2 h-auto text-base group"
+            aria-label="Go back to address selection"
           >
             <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
             Back
@@ -639,6 +640,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
             onClick={handleContinue}
             className="bg-black hover:bg-gray-800 text-white px-6 py-2 h-auto text-base group"
             disabled={!orderData.pickupDate || !orderData.pickupSlotId || !orderData.deliveryDate || !orderData.deliverySlotId}
+            aria-label="Continue to order confirmation"
           >
             Continue to Confirm
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />

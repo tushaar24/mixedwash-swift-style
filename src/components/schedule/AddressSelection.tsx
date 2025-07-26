@@ -492,7 +492,7 @@ export const AddressSelection = ({
       
       {/* Back button */}
       <div className="pt-8">
-        <Button onClick={onBack} variant="outline" className="px-6 py-6 h-auto text-base group">
+        <Button onClick={onBack} variant="outline" className="px-6 py-6 h-auto text-base group" aria-label="Go back to services">
           <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
           Back to Services
         </Button>
@@ -500,7 +500,7 @@ export const AddressSelection = ({
       
       {/* Sticky Continue button */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-center z-10">
-        <Button onClick={handleContinue} disabled={!selectedAddressId} className="bg-black hover:bg-gray-800 text-white h-auto text-base group min-w-48 px-[48px] py-[12px]">
+        <Button onClick={handleContinue} disabled={!selectedAddressId} className="bg-black hover:bg-gray-800 text-white h-auto text-base group min-w-48 px-[48px] py-[12px]" aria-label="Continue to schedule pickup">
           Continue to Schedule
           <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
         </Button>

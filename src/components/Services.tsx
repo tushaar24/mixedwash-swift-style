@@ -156,6 +156,7 @@ export const Services = () => {
                   size="icon" 
                   variant="outline" 
                   className="h-8 w-8 rounded-full bg-white border-gray-300 hover:bg-gray-50 shadow-sm"
+                  aria-label={`Learn more about ${service.title}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleServiceClick(service.route, service.title);

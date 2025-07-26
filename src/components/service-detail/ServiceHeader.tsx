@@ -18,6 +18,7 @@ export const ServiceHeader = ({ service, serviceColor }: ServiceHeaderProps) => 
           variant="ghost" 
           className="mb-4 sm:mb-6 hover:bg-white/20"
           onClick={() => navigate("/")}
+          aria-label="Go back to home page"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           <span className="text-sm">Back to Home</span>

@@ -464,6 +464,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
           onClick={onBack}
           variant="outline"
           className="px-6 py-6 h-auto text-base group"
+          aria-label="Go back to time slot selection"
         >
           <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-transform" />
           Back to Schedule

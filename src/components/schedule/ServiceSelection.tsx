@@ -357,6 +357,7 @@ export const ServiceSelection = ({
           onClick={handleContinue} 
           disabled={selectedServiceIds.size === 0} 
           className="bg-black hover:bg-gray-800 text-white h-auto text-base group min-w-48 py-[12px] px-[48px]"
+          aria-label="Continue to address selection"
         >
           Continue to Address
           <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
