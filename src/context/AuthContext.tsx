@@ -11,6 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
   profile: Profile | null;
   isFirstLogin: boolean;
+  isProfileChecked: boolean;
   isProfileComplete: boolean;
   refreshProfile: () => Promise<void>;
 }
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   profile: null,
   isFirstLogin: false,
+  isProfileChecked: false,
   isProfileComplete: false,
   refreshProfile: async () => {},
 });
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
+  const [isProfileChecked, setIsProfileChecked] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
 
   const migrateTempCustomerData = async (userId: string, userPhone: string) => {
@@ -166,6 +169,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsFirstLogin(false);
     }
     
+    setIsProfileChecked(true);
     console.log("=== END PROFILE & MIGRATION CHECK ===");
   };
 
@@ -184,8 +188,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         console.log("Auth state changed:", event, newSession?.user?.id);
         setSession(newSession);
         setUser(newSession?.user ?? null);
+        setIsLoading(false); // Stop loading as soon as we know auth state
         
         if (newSession?.user) {
+          setIsProfileChecked(false);
           // Set user profile in CleverTap for any session (login or restoration)
           const userName = newSession.user.user_metadata?.full_name || newSession.user.user_metadata?.name;
           setUserProfile({
@@ -196,16 +202,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // Defer heavy operations to not block UI
           setTimeout(() => {
-            handleProfileAndMigration(newSession.user.id).finally(() => {
-              setIsLoading(false);
-            });
+            handleProfileAndMigration(newSession.user.id);
           }, 0);
         } else {
           // Clear profile when signed out
           setProfile(null);
           setIsFirstLogin(false);
           setIsProfileComplete(false);
-          setIsLoading(false);
+          setIsProfileChecked(true); // Profile state is known (empty)
           
           // Track user logout
           if (event === 'SIGNED_OUT') {
@@ -220,8 +224,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.log("Got existing session:", session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
+      setIsLoading(false); // Stop loading, we have auth state
       
       if (session?.user) {
+        setIsProfileChecked(false);
         // Set user profile in CleverTap for existing session
         const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
         setUserProfile({
@@ -232,12 +238,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Defer heavy operations to not block initial render
         setTimeout(() => {
-          handleProfileAndMigration(session.user.id).finally(() => {
-            setIsLoading(false);
-          });
+          handleProfileAndMigration(session.user.id);
         }, 0);
       } else {
-        setIsLoading(false);
+        setIsProfileChecked(true); // Profile state is known (empty)
       }
     });
 
@@ -250,6 +254,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isLoading,
     profile,
     isFirstLogin,
+    isProfileChecked,
     isProfileComplete,
     refreshProfile,
   };

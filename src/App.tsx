@@ -66,7 +66,7 @@ function App() {
               <Route 
                 path="/profile" 
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requireCompleteProfile={false}>
                     <Suspense fallback={<PageLoader />}>
                       <PageTracker pageName="Profile">
                         <Profile />
@@ -87,11 +87,13 @@ function App() {
               <Route 
                 path="/order-success" 
                 element={
-                  <Suspense fallback={<PageLoader />}>
-                    <PageTracker pageName="Order Success">
-                      <OrderSuccess />
-                    </PageTracker>
-                  </Suspense>
+                  <ProtectedRoute>
+                    <Suspense fallback={<PageLoader />}>
+                      <PageTracker pageName="Order Success">
+                        <OrderSuccess />
+                      </PageTracker>
+                    </Suspense>
+                  </ProtectedRoute>
                 } 
               />
               <Route 

@@ -22,7 +22,7 @@ const LoadingSection = () => <div className="min-h-[400px] bg-gray-50 animate-pu
 </div>;
 
 const Index = () => {
-  const { user, profile, isLoading, isProfileComplete } = useAuth();
+  const { user, isProfileChecked, isProfileComplete } = useAuth();
   const navigate = useNavigate();
 
   // SEO optimization for homepage
@@ -30,10 +30,10 @@ const Index = () => {
 
   // Redirect to profile page if user is logged in but profile is incomplete
   useEffect(() => {
-    if (!isLoading && user && !isProfileComplete) {
+    if (isProfileChecked && user && !isProfileComplete) {
       navigate("/profile");
     }
-  }, [user, isProfileComplete, isLoading, navigate]);
+  }, [user, isProfileComplete, isProfileChecked, navigate]);
 
   return (
     <div className="min-h-screen bg-white">
