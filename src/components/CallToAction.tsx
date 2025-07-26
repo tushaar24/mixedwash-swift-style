@@ -50,6 +50,7 @@ export const CallToAction = () => {
           <Button 
             className="bg-white text-black hover:bg-gray-100 hover:text-black px-8 py-6 text-lg group"
             onClick={handleScheduleClick}
+            aria-label="Schedule your first laundry pickup"
           >
             Schedule Your First Pickup
             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />

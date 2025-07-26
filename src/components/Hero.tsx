@@ -114,6 +114,7 @@ export const Hero = () => {
             <Button 
               className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-4 text-lg h-auto group w-full sm:w-auto font-semibold" 
               onClick={handleScheduleClick}
+              aria-label="Schedule your laundry pickup"
             >
               Schedule Your Laundry Pickup
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
