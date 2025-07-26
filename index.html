@@ -67,13 +67,7 @@
       wzrk.src = 'https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js';
       document.head.appendChild(wzrk);
       
-      // Trigger on user interaction
-      ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
-        document.addEventListener(event, loadAnalytics, { once: true, passive: true });
-      });
-      
-      // Fallback after 3 seconds
-      setTimeout(loadAnalytics, 3000);
+      // Note: Analytics are now loaded immediately above, no need for interaction-based loading
     </script>
     
     <!-- INLINE CRITICAL CSS -->
