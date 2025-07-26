@@ -15,12 +15,10 @@ export const initCleverTap = () => {
       return true;
     }
     
-    // Single retry after 2 seconds
-    setTimeout(() => {
-      if (typeof window !== 'undefined' && window.clevertap) {
-        console.log('CleverTap initialized (delayed)');
-      }
-    }, 2000);
+    // CleverTap should be available immediately
+    if (typeof window !== 'undefined' && window.clevertap) {
+      console.log('CleverTap initialized');
+    }
     
   } catch (error) {
     console.error('CleverTap initialization failed:', error);

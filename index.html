@@ -48,45 +48,24 @@
       // Analytics initialization with idle-until-urgent strategy
       window.analyticsQueue = [];
       
-      // GTM lazy loader - only load when user interacts
-      function initGTM() {
-        if (window.gtmLoaded) return;
-        window.gtmLoaded = true;
-        
-        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-TMLNCBRB');
-      }
+      // GTM - load immediately
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-TMLNCBRB');
       
-      // CleverTap lazy loader - only load when user interacts
-      function initCleverTap() {
-        if (window.ctLoaded) return;
-        window.ctLoaded = true;
-        
-        var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
-        clevertap.account.push({"id": "589-KZZ-947Z"});
-        clevertap.region = 'eu1';
-        window.clevertap = clevertap;
-        
-        var wzrk = document.createElement('script');
-        wzrk.type = 'text/javascript';
-        wzrk.async = true;
-        wzrk.src = 'https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js';
-        document.head.appendChild(wzrk);
-      }
+      // CleverTap - load immediately
+      var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
+      clevertap.account.push({"id": "589-KZZ-947Z"});
+      clevertap.region = 'eu1';
+      window.clevertap = clevertap;
       
-      // Load analytics on first user interaction or after 3 seconds
-      function loadAnalytics() {
-        if (window.analyticsInitialized) return;
-        window.analyticsInitialized = true;
-        
-        requestIdleCallback(() => {
-          initGTM();
-          initCleverTap();
-        }, { timeout: 3000 });
-      }
+      var wzrk = document.createElement('script');
+      wzrk.type = 'text/javascript';
+      wzrk.async = true;
+      wzrk.src = 'https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js';
+      document.head.appendChild(wzrk);
       
       // Trigger on user interaction
       ['mousedown', 'touchstart', 'keydown', 'scroll'].forEach(event => {
