@@ -140,7 +140,7 @@ export const Navbar = () => {
               <>
                 <a 
                   href="#services" 
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" 
+                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   Services
@@ -177,6 +177,7 @@ export const Navbar = () => {
                       className="w-full bg-black text-white hover:bg-gray-800"
                       onClick={handleScheduleClick}
                     >
+
                       Schedule Pickup
                     </Button>
                   </div>
