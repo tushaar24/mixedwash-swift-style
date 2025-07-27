@@ -139,7 +139,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'MixedWash Orders <onboarding@resend.dev>',
+        from: 'MixedWash Orders <orders@mixedwash.com>',
         to: [ADMIN_EMAIL],
         subject: `🆕 New Order: ${orderDetails.services.map(s => s.name).join(', ')} - Customer Order`,
         html: emailHtml,
