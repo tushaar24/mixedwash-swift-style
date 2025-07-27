@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Calendar, Clock, Home, Truck, ShoppingBag, ArrowRight, Loader2, Package } from "lucide-react";
 import { format } from "date-fns";
 import { useSEO } from "@/hooks/useSEO";
+import { supabase } from "@/integrations/supabase/client";
 
 interface OrderDetails {
   services: Array<{
@@ -83,6 +84,30 @@ const OrderSuccess = () => {
 
     loadOrderDetails();
   }, [location.state, navigate]);
+
+  // Send order email when order details are loaded
+  useEffect(() => {
+    const sendOrderEmail = async () => {
+      if (!orderDetails) return;
+
+      try {
+        console.log('Sending order email notification...');
+        const { data, error } = await supabase.functions.invoke('send-order-email', {
+          body: { orderDetails }
+        });
+
+        if (error) {
+          console.error('Error sending order email:', error);
+        } else {
+          console.log('Order email sent successfully:', data);
+        }
+      } catch (error) {
+        console.error('Failed to send order email:', error);
+      }
+    };
+
+    sendOrderEmail();
+  }, [orderDetails]);
 
   const handleTrackOrder = () => {
     // Clear history stack and navigate to profile
