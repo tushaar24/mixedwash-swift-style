@@ -10,6 +10,7 @@ import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 
 interface OrderDetails {
+  order_id: string;
   user: {
     name: string;
     phone: string;
@@ -96,7 +97,7 @@ const OrderSuccess = () => {
       if (!orderDetails) return;
 
       // Create a unique identifier for this order to prevent duplicate emails
-      const orderIdentifier = `${orderDetails.user.email}_${orderDetails.pickupDate}_${orderDetails.services.map(s => s.id).join('_')}`;
+      const orderIdentifier = orderDetails.order_id;
       const emailSentKey = `email_sent_${orderIdentifier}`;
       
       // Check if email was already sent for this order
