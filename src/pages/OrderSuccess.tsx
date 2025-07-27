@@ -90,10 +90,21 @@ const OrderSuccess = () => {
     loadOrderDetails();
   }, [location.state, navigate]);
 
-  // Send order email when order details are loaded
+  // Send order email when order details are loaded (only once per order)
   useEffect(() => {
     const sendOrderEmail = async () => {
       if (!orderDetails) return;
+
+      // Create a unique identifier for this order to prevent duplicate emails
+      const orderIdentifier = `${orderDetails.user.email}_${orderDetails.pickupDate}_${orderDetails.services.map(s => s.id).join('_')}`;
+      const emailSentKey = `email_sent_${orderIdentifier}`;
+      
+      // Check if email was already sent for this order
+      const emailAlreadySent = localStorage.getItem(emailSentKey);
+      if (emailAlreadySent) {
+        console.log('Email already sent for this order, skipping...');
+        return;
+      }
 
       try {
         console.log('Sending order email notification...');
@@ -105,6 +116,8 @@ const OrderSuccess = () => {
           console.error('Error sending order email:', error);
         } else {
           console.log('Order email sent successfully:', data);
+          // Mark email as sent for this order
+          localStorage.setItem(emailSentKey, 'true');
         }
       } catch (error) {
         console.error('Failed to send order email:', error);
