@@ -307,6 +307,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
           'Your selected address';
         
         const orderDetails = {
+          order_id: results[0]?.data?.[0]?.id || 'unknown',
           user: userInfo,
           services: orderData.services,
           pickupDate: orderData.pickupDate!.toISOString(),
