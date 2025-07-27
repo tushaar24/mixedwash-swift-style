@@ -22,49 +22,53 @@ export const Hero = () => {
     // Navigate immediately for better UX
     navigate("/schedule", { state: { fromCTA: true } });
 
-    // Track asynchronously to avoid blocking
-    try {
-      const { trackEvent } = await import("@/utils/clevertap");
-      const userInfo = getUserInfo();
-      const currentTime = new Date().toLocaleTimeString('en-US', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      
-      trackEvent('schedule_cta_clicked', {
-        'customer name': userInfo?.name || 'Anonymous',
-        'customer id': userInfo?.user_id || 'Anonymous',
-        'current_time': currentTime,
-        'source': 'hero_section'
-      });
-    } catch (error) {
-      console.warn('Analytics tracking failed:', error);
-    }
+    // Track asynchronously with requestIdleCallback to avoid blocking
+    requestIdleCallback(async () => {
+      try {
+        const { trackEvent } = await import("@/utils/clevertap");
+        const userInfo = getUserInfo();
+        const currentTime = new Date().toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        trackEvent('schedule_cta_clicked', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': currentTime,
+          'source': 'hero_section'
+        });
+      } catch (error) {
+        console.warn('Analytics tracking failed:', error);
+      }
+    }, { timeout: 5000 });
   }, [navigate, getUserInfo]);
 
   const handleContactClick = useCallback(async () => {
     // Navigate immediately for better UX
     navigate("/contact");
 
-    // Track asynchronously to avoid blocking
-    try {
-      const { trackEvent } = await import("@/utils/clevertap");
-      const userInfo = getUserInfo();
-      const currentTime = new Date().toLocaleTimeString('en-US', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      
-      trackEvent('contact_us_cta_clicked', {
-        'customer name': userInfo?.name || 'Anonymous',
-        'customer id': userInfo?.user_id || 'Anonymous',
-        'current_time': currentTime
-      });
-    } catch (error) {
-      console.warn('Analytics tracking failed:', error);
-    }
+    // Track asynchronously with requestIdleCallback to avoid blocking
+    requestIdleCallback(async () => {
+      try {
+        const { trackEvent } = await import("@/utils/clevertap");
+        const userInfo = getUserInfo();
+        const currentTime = new Date().toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        trackEvent('contact_us_cta_clicked', {
+          'customer name': userInfo?.name || 'Anonymous',
+          'customer id': userInfo?.user_id || 'Anonymous',
+          'current_time': currentTime
+        });
+      } catch (error) {
+        console.warn('Analytics tracking failed:', error);
+      }
+    }, { timeout: 5000 });
   }, [navigate, getUserInfo]);
 
   return (

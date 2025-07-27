@@ -21,8 +21,17 @@ export default defineConfig(({ mode }) => ({
       treeshake: true,
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
+          // Core vendor chunk - keep minimal for initial load
+          vendor: ['react', 'react-dom'],
+          // Router and navigation - separate chunk
+          router: ['react-router-dom'],
+          // Supabase and auth - separate chunk since heavy
+          supabase: ['@supabase/supabase-js'],
+          // TanStack Query - separate chunk
+          query: ['@tanstack/react-query'],
+          // UI components - separate chunk
           ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-accordion'],
+          // Icons and utilities
           utils: ['lucide-react', 'clsx', 'tailwind-merge']
         },
         assetFileNames: (assetInfo) => {
