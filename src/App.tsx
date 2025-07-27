@@ -34,10 +34,16 @@ const queryClient = new QueryClient();
 
 function App() {
   useEffect(() => {
-    // Defer CleverTap initialization to not block initial render
-    requestIdleCallback(() => {
-      initCleverTap();
-    }, { timeout: 3000 });
+    // Defer CleverTap initialization with mobile compatibility fallback
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(() => {
+        initCleverTap();
+      }, { timeout: 2000 });
+    } else {
+      setTimeout(() => {
+        initCleverTap();
+      }, 1000);
+    }
   }, []);
 
   return (

@@ -193,8 +193,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (newSession?.user) {
           setIsProfileChecked(false);
           
-          // Defer ALL heavy operations to avoid blocking render
-          requestIdleCallback(() => {
+          // Use setTimeout fallback for better mobile compatibility
+          const scheduleHeavyOps = () => {
             // Set user profile in CleverTap for any session (login or restoration)
             const userName = newSession.user.user_metadata?.full_name || newSession.user.user_metadata?.name;
             setUserProfile({
@@ -204,7 +204,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             });
             
             handleProfileAndMigration(newSession.user.id);
-          }, { timeout: 5000 });
+          };
+
+          // Use requestIdleCallback with setTimeout fallback for mobile compatibility
+          if (typeof requestIdleCallback === 'function') {
+            requestIdleCallback(scheduleHeavyOps, { timeout: 2000 });
+          } else {
+            setTimeout(scheduleHeavyOps, 100);
+          }
         } else {
           // Clear profile when signed out
           setProfile(null);
@@ -214,9 +221,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // Track user logout - defer this too
           if (event === 'SIGNED_OUT') {
-            requestIdleCallback(() => {
-              trackEvent('User Logged Out');
-            });
+            if (typeof requestIdleCallback === 'function') {
+              requestIdleCallback(() => {
+                trackEvent('User Logged Out');
+              });
+            } else {
+              setTimeout(() => {
+                trackEvent('User Logged Out');
+              }, 50);
+            }
           }
         }
       }
@@ -232,8 +245,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (session?.user) {
         setIsProfileChecked(false);
         
-        // Defer heavy operations until browser is idle
-        requestIdleCallback(() => {
+        // Use setTimeout fallback for better mobile compatibility
+        const scheduleExistingSessionOps = () => {
           // Set user profile in CleverTap for existing session
           const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
           setUserProfile({
@@ -243,7 +256,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           });
           
           handleProfileAndMigration(session.user.id);
-        }, { timeout: 5000 });
+        };
+
+        // Use requestIdleCallback with setTimeout fallback for mobile compatibility
+        if (typeof requestIdleCallback === 'function') {
+          requestIdleCallback(scheduleExistingSessionOps, { timeout: 2000 });
+        } else {
+          setTimeout(scheduleExistingSessionOps, 100);
+        }
       } else {
         setIsProfileChecked(true); // Profile state is known (empty)
       }
