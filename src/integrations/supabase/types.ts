@@ -397,6 +397,41 @@ export type Database = {
         }
         Relationships: []
       }
+      order_email_queue: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          order_id: string | null
+          processed_at: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          order_id?: string | null
+          processed_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          order_id?: string | null
+          processed_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_email_queue_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           address_id: string
