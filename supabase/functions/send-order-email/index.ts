@@ -19,6 +19,11 @@ interface OrderData {
 }
 
 interface FrontendOrderDetails {
+  user: {
+    name: string;
+    phone: string;
+    email: string;
+  };
   services: Array<{
     id: string;
     name: string;
@@ -75,6 +80,13 @@ serve(async (req) => {
         <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
           🆕 New Order Received
         </h2>
+        
+        <div style="background-color: #e8f4fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #007bff; margin-top: 0;">Customer Details</h3>
+          <p><strong>Name:</strong> ${orderDetails.user.name}</p>
+          <p><strong>Phone:</strong> ${orderDetails.user.phone}</p>
+          <p><strong>Email:</strong> ${orderDetails.user.email}</p>
+        </div>
         
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="color: #007bff; margin-top: 0;">Services Ordered</h3>

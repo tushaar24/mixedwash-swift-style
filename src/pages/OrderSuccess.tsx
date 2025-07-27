@@ -10,6 +10,11 @@ import { useSEO } from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 
 interface OrderDetails {
+  user: {
+    name: string;
+    phone: string;
+    email: string;
+  };
   services: Array<{
     id: string;
     name: string;
