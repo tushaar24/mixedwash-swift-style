@@ -46,23 +46,14 @@ serve(async (req) => {
     const requestData = await req.json()
     console.log('Received request data:', requestData)
 
-    // Handle both database trigger format and frontend format
-    let orderDetails: FrontendOrderDetails
-    let isFromDatabase = false
-
-    if (requestData.record) {
-      // This is from database trigger - convert to frontend format
-      isFromDatabase = true
-      console.log('Processing database record:', requestData.record)
-      // We'll handle this case later if needed
-      throw new Error('Database trigger format not yet implemented')
-    } else if (requestData.orderDetails) {
-      // This is from frontend
-      orderDetails = requestData.orderDetails
-      console.log('Processing frontend order details:', orderDetails)
-    } else {
-      throw new Error('Invalid request format - missing record or orderDetails')
+    // Extract orderDetails from the request
+    const orderDetails: FrontendOrderDetails = requestData.orderDetails
+    
+    if (!orderDetails) {
+      throw new Error('Invalid request format - missing orderDetails')
     }
+    
+    console.log('Processing frontend order details:', orderDetails)
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
     const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'admin@mixedwash.com'
