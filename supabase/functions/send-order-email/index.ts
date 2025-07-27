@@ -18,15 +18,51 @@ interface OrderData {
   created_at: string
 }
 
+interface FrontendOrderDetails {
+  services: Array<{
+    id: string;
+    name: string;
+    price: number;
+  }>;
+  pickupDate: string;
+  pickupSlot: string;
+  deliveryDate: string;
+  deliverySlot: string;
+  address: string;
+  dryCleaningItems: Array<{
+    name: string;
+    price: number;
+    quantity: number;
+  }>;
+  specialInstructions?: string;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { record }: { record: OrderData } = await req.json()
-    
-    console.log('Received order data:', record)
+    const requestData = await req.json()
+    console.log('Received request data:', requestData)
+
+    // Handle both database trigger format and frontend format
+    let orderDetails: FrontendOrderDetails
+    let isFromDatabase = false
+
+    if (requestData.record) {
+      // This is from database trigger - convert to frontend format
+      isFromDatabase = true
+      console.log('Processing database record:', requestData.record)
+      // We'll handle this case later if needed
+      throw new Error('Database trigger format not yet implemented')
+    } else if (requestData.orderDetails) {
+      // This is from frontend
+      orderDetails = requestData.orderDetails
+      console.log('Processing frontend order details:', orderDetails)
+    } else {
+      throw new Error('Invalid request format - missing record or orderDetails')
+    }
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
     const ADMIN_EMAIL = Deno.env.get('ADMIN_EMAIL') || 'admin@mixedwash.com'
@@ -35,51 +71,14 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY environment variable is not set')
     }
 
-    // Fetch additional order details from database
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    
-    const supabaseHeaders = {
-      'Authorization': `Bearer ${supabaseKey}`,
-      'apikey': supabaseKey,
-      'Content-Type': 'application/json',
-    }
+    // For frontend format, we already have the display data
+    // Calculate total for dry cleaning items
+    const dryCleaningTotal = orderDetails.dryCleaningItems.reduce(
+      (sum, item) => sum + (item.price * item.quantity), 
+      0
+    );
 
-    // Get service details
-    const serviceResponse = await fetch(`${supabaseUrl}/rest/v1/services?id=eq.${record.service_id}&select=*`, {
-      headers: supabaseHeaders
-    })
-    const serviceData = await serviceResponse.json()
-    const service = serviceData[0]
-
-    // Get user profile
-    const profileResponse = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${record.user_id}&select=*`, {
-      headers: supabaseHeaders
-    })
-    const profileData = await profileResponse.json()
-    const profile = profileData[0]
-
-    // Get address details
-    const addressResponse = await fetch(`${supabaseUrl}/rest/v1/addresses?id=eq.${record.address_id}&select=*`, {
-      headers: supabaseHeaders
-    })
-    const addressData = await addressResponse.json()
-    const address = addressData[0]
-
-    // Get time slot details
-    const pickupSlotResponse = await fetch(`${supabaseUrl}/rest/v1/time_slots?id=eq.${record.pickup_slot_id}&select=*`, {
-      headers: supabaseHeaders
-    })
-    const pickupSlotData = await pickupSlotResponse.json()
-    const pickupSlot = pickupSlotData[0]
-
-    const deliverySlotResponse = await fetch(`${supabaseUrl}/rest/v1/time_slots?id=eq.${record.delivery_slot_id}&select=*`, {
-      headers: supabaseHeaders
-    })
-    const deliverySlotData = await deliverySlotResponse.json()
-    const deliverySlot = deliverySlotData[0]
-
-    // Create email content
+    // Create email content using frontend data
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">
@@ -87,39 +86,51 @@ serve(async (req) => {
         </h2>
         
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="color: #007bff; margin-top: 0;">Order Details</h3>
-          <p><strong>Order ID:</strong> ${record.id}</p>
-          <p><strong>Service:</strong> ${service?.name || 'Unknown Service'}</p>
-          <p><strong>Price:</strong> ₹${service?.price || 'N/A'}${service?.name?.toLowerCase().includes('dry cleaning') ? '' : '/kg'}</p>
-          <p><strong>Order Date:</strong> ${new Date(record.created_at).toLocaleString()}</p>
+          <h3 style="color: #007bff; margin-top: 0;">Services Ordered</h3>
+          ${orderDetails.services.map(service => `
+            <div style="margin-bottom: 10px; padding: 10px; border-left: 3px solid #007bff;">
+              <p><strong>Service:</strong> ${service.name}</p>
+              <p><strong>Price:</strong> ₹${service.price}${service.name.toLowerCase().includes('dry cleaning') ? '' : '/kg'}</p>
+            </div>
+          `).join('')}
+          <p><strong>Order Date:</strong> ${new Date().toLocaleString()}</p>
         </div>
 
-        <div style="background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="color: #17a2b8; margin-top: 0;">Customer Information</h3>
-          <p><strong>Name:</strong> ${profile?.username || 'Not provided'}</p>
-          <p><strong>Email:</strong> ${profile?.email || 'Not provided'}</p>
-          <p><strong>Mobile:</strong> ${profile?.mobile_number || 'Not provided'}</p>
-        </div>
+        ${orderDetails.dryCleaningItems.length > 0 ? `
+          <div style="background-color: #e8f4f8; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #17a2b8; margin-top: 0;">Dry Cleaning Items</h3>
+            ${orderDetails.dryCleaningItems.map(item => `
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span>${item.name} × ${item.quantity}</span>
+                <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+              </div>
+            `).join('')}
+            <div style="border-top: 1px solid #ddd; padding-top: 10px; margin-top: 10px; font-weight: bold;">
+              <div style="display: flex; justify-content: space-between;">
+                <span>Items Total:</span>
+                <span>₹${dryCleaningTotal.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        ` : ''}
 
         <div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="color: #28a745; margin-top: 0;">Schedule</h3>
-          <p><strong>Pickup Date:</strong> ${new Date(record.pickup_date).toLocaleDateString()}</p>
-          <p><strong>Pickup Time:</strong> ${pickupSlot?.start_time || 'Unknown'} - ${pickupSlot?.end_time || 'Unknown'}</p>
-          <p><strong>Delivery Date:</strong> ${new Date(record.delivery_date).toLocaleDateString()}</p>
-          <p><strong>Delivery Time:</strong> ${deliverySlot?.start_time || 'Unknown'} - ${deliverySlot?.end_time || 'Unknown'}</p>
+          <p><strong>Pickup Date:</strong> ${new Date(orderDetails.pickupDate).toLocaleDateString()}</p>
+          <p><strong>Pickup Time:</strong> ${orderDetails.pickupSlot}</p>
+          <p><strong>Delivery Date:</strong> ${new Date(orderDetails.deliveryDate).toLocaleDateString()}</p>
+          <p><strong>Delivery Time:</strong> ${orderDetails.deliverySlot}</p>
         </div>
 
         <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="color: #856404; margin-top: 0;">Address</h3>
-          <p>${address?.house_building || ''} ${address?.address_line1 || ''}</p>
-          ${address?.address_line2 ? `<p>${address.address_line2}</p>` : ''}
-          <p>${address?.area || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.postal_code || ''}</p>
+          <p>${orderDetails.address}</p>
         </div>
 
-        ${record.special_instructions ? `
+        ${orderDetails.specialInstructions ? `
           <div style="background-color: #f8d7da; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #721c24; margin-top: 0;">Special Instructions</h3>
-            <p>${record.special_instructions}</p>
+            <p>${orderDetails.specialInstructions}</p>
           </div>
         ` : ''}
 
@@ -139,7 +150,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'MixedWash Orders <orders@mixedwash.com>',
         to: [ADMIN_EMAIL],
-        subject: `🆕 New Order: ${service?.name || 'Laundry Service'} - ${profile?.username || 'Customer'}`,
+        subject: `🆕 New Order: ${orderDetails.services.map(s => s.name).join(', ')} - Customer Order`,
         html: emailHtml,
       }),
     })
