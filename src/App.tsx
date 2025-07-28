@@ -9,6 +9,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { PageTracker } from "./components/PageTracker";
 import { initCleverTap } from "./utils/clevertap";
+import { initWebVitals } from "./utils/performance";
 import Index from "./pages/Index";
 import { Loader2 } from "lucide-react";
 
@@ -38,10 +39,12 @@ function App() {
     if (typeof requestIdleCallback === 'function') {
       requestIdleCallback(() => {
         initCleverTap();
+        initWebVitals();
       }, { timeout: 2000 });
     } else {
       setTimeout(() => {
         initCleverTap();
+        initWebVitals();
       }, 1000);
     }
   }, []);

@@ -20,6 +20,12 @@ interface Service {
   icon: string;
 }
 
+interface ServiceWithCalculations extends Service {
+  minimumKg: number | null;
+  deliveryTime: string;
+  displayPrice: number;
+}
+
 interface ServiceSelectionProps {
   orderData: ScheduleOrderData;
   updateOrderData: (data: Partial<ScheduleOrderData>) => void;
@@ -113,7 +119,7 @@ export const ServiceSelection = ({
   updateOrderData,
   onNext
 }: ServiceSelectionProps) => {
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<ServiceWithCalculations[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedServiceIds, setSelectedServiceIds] = useState<Set<string>>(new Set(orderData.services.map(service => service.id)));
   const { user } = useAuth();
@@ -131,13 +137,22 @@ export const ServiceSelection = ({
     return fetchedServices.length > 0 ? sortServices(fetchedServices) : [];
   }, [fetchedServices]);
 
-  // Update services state only when sortedServices changes
+  // Memoize expensive service calculations to prevent recalculation on every render
+  const serviceCalculations = useMemo(() => 
+    sortedServices.map(service => ({
+      ...service,
+      minimumKg: getMinimumKg(service.name),
+      deliveryTime: getDeliveryTime(service.name),
+      displayPrice: user ? getServicePricing(service, isEligibleForDiscount) : getServicePricing(service, false)
+    })), [sortedServices, user, isEligibleForDiscount]);
+
+  // Update services state only when serviceCalculations changes
   useEffect(() => {
-    if (sortedServices.length > 0) {
-      setServices(sortedServices);
+    if (serviceCalculations.length > 0) {
+      setServices(serviceCalculations);
       setLoading(false);
     }
-  }, [sortedServices]);
+  }, [serviceCalculations]);
 
   useEffect(() => {
     if (servicesError) {
@@ -255,13 +270,8 @@ export const ServiceSelection = ({
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {services.map(service => {
-          const minimumKg = getMinimumKg(service.name);
-          const deliveryTime = getDeliveryTime(service.name);
-          
-          // Get the correct display price based on customer eligibility
-          // For unauthenticated users, show new customer pricing
-          const displayPrice = user ? getServicePricing(service, isEligibleForDiscount) : getServicePricing(service, false);
+        {serviceCalculations.map(service => {
+          const { minimumKg, deliveryTime, displayPrice } = service;
           
           return (
             <Card 
