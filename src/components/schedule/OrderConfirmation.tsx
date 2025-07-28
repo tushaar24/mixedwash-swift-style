@@ -273,46 +273,26 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         
         console.log("=== ORDER PLACEMENT COMPLETE ===");
         
-        // Track conversion for Google Tag Manager
-        const totalValue = orderData.services.reduce((sum, service) => sum + service.price, 0);
-        const orderId = results[0]?.data?.[0]?.id || 'unknown';
-        
-        // Enhanced E-commerce tracking for all purchases
-        if (typeof window !== 'undefined' && window.dataLayer) {
-          window.dataLayer.push({
-            event: 'purchase',
-            ecommerce: {
-              transaction_id: orderId,
-              value: totalValue,
-              currency: 'INR',
-              items: orderData.services.map((service, index) => ({
-                item_id: service.id,
-                item_name: service.name,
-                category: 'Laundry Service',
-                quantity: 1,
-                price: service.price
-              }))
-            }
-          });
-          console.log("GTM purchase event pushed to dataLayer with enhanced e-commerce data");
-        }
-        
-        // Track first-time conversion separately for new customer identification
+        // Track conversion for Google Tag Manager (only first time)
         const hasConverted = localStorage.getItem('hasConverted');
         if (!hasConverted) {
-          console.log("=== TRACKING FIRST-TIME CUSTOMER ===");
+          console.log("=== TRACKING FIRST CONVERSION ===");
           
+          // Push event to dataLayer for GTM
           if (typeof window !== 'undefined' && window.dataLayer) {
             window.dataLayer.push({
-              event: 'first_time_customer',
-              customer_type: 'new',
-              order_value: totalValue
+              event: 'first_conversion',
+              order_count: orderData.services.length,
+              services: orderData.services.map(service => service.name)
             });
-            console.log("GTM first_time_customer event pushed to dataLayer");
+            console.log("GTM first_conversion event pushed to dataLayer");
           }
           
+          // Set flag in localStorage
           localStorage.setItem('hasConverted', 'true');
           console.log("hasConverted flag set in localStorage");
+        } else {
+          console.log("User has already converted before, skipping GTM tracking");
         }
         
         // Prepare order details for success page with user info and proper address
