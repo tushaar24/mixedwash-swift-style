@@ -145,11 +145,18 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         console.log("=== ALL ORDERS CREATED SUCCESSFULLY ===");
         console.log(`${results.length} orders created`);
         
-        // Get user profile to check phone number
+        // Get user profile to check phone number and get user details
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("mobile_number")
+          .select("mobile_number, username, email")
           .eq("id", authData.user.id)
+          .single();
+        
+        // Get address details for the order
+        const { data: addressData } = await supabase
+          .from("addresses")
+          .select("*")
+          .eq("id", orderData.addressId)
           .single();
         
         // Add phone number to phone_numbers table if user has a mobile number and order was successful
@@ -184,7 +191,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
         }
         
         // Prepare user info for tracking
-        const userInfo = {
+        const trackingUserInfo = {
           user_id: authData.user.id,
           name: authData.user.user_metadata?.full_name || authData.user.user_metadata?.name
         };
@@ -202,7 +209,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
               pickupDate: format(orderData.pickupDate!, 'yyyy-MM-dd'),
               deliveryDate: format(orderData.deliveryDate!, 'yyyy-MM-dd'),
               amount: service.price
-            }, userInfo);
+            }, trackingUserInfo);
           }
         });
         
@@ -213,7 +220,7 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
             amount: totalAmount,
             currency: 'INR',
             items: orderData.dryCleaningItems
-          }, userInfo);
+          }, trackingUserInfo);
         }
         
         // Save dry cleaning items if any
@@ -288,14 +295,26 @@ export const OrderConfirmation = ({ orderData, onBack, onComplete }: OrderConfir
           console.log("User has already converted before, skipping GTM tracking");
         }
         
-        // Prepare order details for success page
+        // Prepare order details for success page with user info and proper address
+        const userInfo = {
+          name: profileData?.username || authData.user.user_metadata?.full_name || authData.user.user_metadata?.name || 'Customer',
+          phone: profileData?.mobile_number || '',
+          email: profileData?.email || authData.user.email || ''
+        };
+        
+        const fullAddress = addressData ? 
+          `${addressData.house_building ? addressData.house_building + ', ' : ''}${addressData.address_line1}${addressData.address_line2 ? ', ' + addressData.address_line2 : ''}, ${addressData.area ? addressData.area + ', ' : ''}${addressData.city}, ${addressData.state} - ${addressData.postal_code}` :
+          'Your selected address';
+        
         const orderDetails = {
+          order_id: results[0]?.data?.[0]?.id || 'unknown',
+          user: userInfo,
           services: orderData.services,
           pickupDate: orderData.pickupDate!.toISOString(),
           pickupSlot: orderData.pickupSlotLabel || '',
           deliveryDate: orderData.deliveryDate!.toISOString(),
           deliverySlot: orderData.deliverySlotLabel || '',
-          address: 'Your selected address', // You might want to fetch actual address details
+          address: fullAddress,
           dryCleaningItems: orderData.dryCleaningItems,
           specialInstructions: orderData.specialInstructions
         };

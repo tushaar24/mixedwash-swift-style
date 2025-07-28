@@ -7,8 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Calendar, Clock, Home, Truck, ShoppingBag, ArrowRight, Loader2, Package } from "lucide-react";
 import { format } from "date-fns";
 import { useSEO } from "@/hooks/useSEO";
+import { supabase } from "@/integrations/supabase/client";
 
 interface OrderDetails {
+  order_id: string;
+  user: {
+    name: string;
+    phone: string;
+    email: string;
+  };
   services: Array<{
     id: string;
     name: string;
@@ -83,6 +90,43 @@ const OrderSuccess = () => {
 
     loadOrderDetails();
   }, [location.state, navigate]);
+
+  // Send order email when order details are loaded (only once per order)
+  useEffect(() => {
+    const sendOrderEmail = async () => {
+      if (!orderDetails) return;
+
+      // Create a unique identifier for this order to prevent duplicate emails
+      const orderIdentifier = orderDetails.order_id;
+      const emailSentKey = `email_sent_${orderIdentifier}`;
+      
+      // Check if email was already sent for this order
+      const emailAlreadySent = localStorage.getItem(emailSentKey);
+      if (emailAlreadySent) {
+        console.log('Email already sent for this order, skipping...');
+        return;
+      }
+
+      try {
+        console.log('Sending order email notification...');
+        const { data, error } = await supabase.functions.invoke('send-order-email', {
+          body: { orderDetails }
+        });
+
+        if (error) {
+          console.error('Error sending order email:', error);
+        } else {
+          console.log('Order email sent successfully:', data);
+          // Mark email as sent for this order
+          localStorage.setItem(emailSentKey, 'true');
+        }
+      } catch (error) {
+        console.error('Failed to send order email:', error);
+      }
+    };
+
+    sendOrderEmail();
+  }, [orderDetails]);
 
   const handleTrackOrder = () => {
     // Clear history stack and navigate to profile
