@@ -1,15 +1,23 @@
-import { useCallback } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, ArrowRight, Calendar as CalendarIcon, Clock, Loader2, Truck, Edit3 } from "lucide-react";
 import { ScheduleOrderData } from "@/pages/Schedule";
-import { format } from "date-fns";
+import { addDays, format, isBefore, startOfToday, isSameDay, isAfter } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/utils/clevertap";
 import { useAuth } from "@/context/AuthContext";
-import { useSlotSelection } from "@/hooks/useSlotSelection";
-import { getTodayDate, isDateSame, addDaysToDate, isValidFutureDate } from "@/utils/dateHelpers";
+
+interface TimeSlot {
+  id: string;
+  label: string;
+  start_time: string;
+  end_time: string;
+  enabled: boolean;
+}
 
 interface TimeSlotSelectionProps {
   orderData: ScheduleOrderData;
@@ -20,58 +28,142 @@ interface TimeSlotSelectionProps {
 
 export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }: TimeSlotSelectionProps) => {
   const { user, profile } = useAuth();
-  
-  // Use custom hook for slot selection logic
-  const {
-    timeSlots,
-    loadingSlots,
-    showDeliveryCustomization,
-    today,
-    handlePickupDateSelect,
-    handlePickupTimeSlotSelect,
-    handleDeliveryDateSelect,
-    handleDeliveryTimeSlotSelect,
-    setShowDeliveryCustomization,
-    getAvailableTimeSlots,
-    isValidForContinue,
-    getValidationErrors,
-  } = useSlotSelection({ orderData, updateOrderData });
+  const [loading, setLoading] = useState(false);
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(true);
+  const [pickupDate, setPickupDate] = useState<Date | null>(orderData.pickupDate || new Date());
+  const [deliveryDate, setDeliveryDate] = useState<Date | null>(orderData.deliveryDate || (orderData.pickupDate ? addDays(orderData.pickupDate, 1) : addDays(new Date(), 1)));
+  const [selectedPickupSlotId, setSelectedPickupSlotId] = useState<string | null>(orderData.pickupSlotId);
+  const [selectedDeliverySlotId, setSelectedDeliverySlotId] = useState<string | null>(orderData.deliverySlotId);
+  const [showDeliveryCustomization, setShowDeliveryCustomization] = useState(false);
 
-  const getCurrentTime = useCallback(() => {
+  // Today for date validation
+  const today = startOfToday();
+
+  const getCurrentTime = () => {
     const now = new Date();
     return now.toLocaleTimeString('en-US', { 
       hour12: false, 
       hour: '2-digit', 
       minute: '2-digit' 
     });
-  }, []);
+  };
 
-  const getUserInfo = useCallback(() => user ? {
+  const getUserInfo = () => user ? {
     user_id: user.id,
     name: user.user_metadata?.full_name || user.user_metadata?.name || profile?.username,
     phone: profile?.mobile_number
-  } : undefined, [user, profile]);
+  } : undefined;
 
-  // Enhanced pickup date selection with tracking
-  const handlePickupDateSelectWithTracking = useCallback(async (date: Date | null) => {
+  // Fetch all time slots from database (both enabled and disabled)
+  useEffect(() => {
+    const fetchTimeSlots = async () => {
+      try {
+        setLoadingSlots(true);
+        const { data, error } = await supabase
+          .from("time_slots")
+          .select("*")
+          .order("start_time");
+
+        if (error) {
+          console.error("Error fetching time slots:", error);
+          toast({
+            title: "Error loading time slots",
+            description: "Failed to load available time slots. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          console.log("Fetched all time slots:", data);
+          setTimeSlots(data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching time slots:", error);
+        toast({
+          title: "Error loading time slots",
+          description: "Failed to load available time slots. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+
+    fetchTimeSlots();
+  }, []);
+
+  // Filter time slots based on date and enabled status
+  const getAvailableTimeSlots = (selectedDate: Date | null, isPickup: boolean = true) => {
+    if (!selectedDate) return [];
+    
+    // For pickup slots
+    if (isPickup) {
+      // If selected date is today, only show enabled slots
+      if (isSameDay(selectedDate, today)) {
+        return timeSlots.filter(slot => slot.enabled);
+      }
+      // For future dates, show all slots
+      return timeSlots;
+    }
+    
+    // For delivery slots
+    if (!isPickup && pickupDate && selectedPickupSlotId) {
+      const pickupSlot = timeSlots.find(slot => slot.id === selectedPickupSlotId);
+      
+      // If delivery is next day after pickup, filter by pickup slot time or later
+      if (pickupSlot && isSameDay(selectedDate, addDays(pickupDate, 1))) {
+        return timeSlots.filter(slot => slot.start_time >= pickupSlot.start_time);
+      }
+      
+      // For delivery dates more than 1 day after pickup, show all slots
+      if (isAfter(selectedDate, addDays(pickupDate, 1))) {
+        return timeSlots;
+      }
+    }
+    
+    // Default: show all slots
+    return timeSlots;
+  };
+
+  // Select pickup date and auto-set delivery
+  function handlePickupDateSelect(date: Date | null) {
+    // Prevent unselecting the date - only allow valid date selection
+    if (!date) return;
+    
     const userInfo = getUserInfo();
     
     // Track pickup date selection
-    if (date) {
-      trackEvent('pickup_date_selected', {
-        'customer name': userInfo?.name || 'Anonymous',
-        'customer id': userInfo?.user_id || 'Anonymous',
-        'current_time': getCurrentTime(),
-        'selected_date': date.toDateString(),
-        'previous_date': orderData.pickupDate?.toDateString() || ''
-      });
-    }
+    trackEvent('pickup_date_selected', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'selected_date': date.toDateString(),
+      'previous_date': pickupDate?.toDateString() || ''
+    });
 
-    handlePickupDateSelect(date);
-  }, [handlePickupDateSelect, getUserInfo, getCurrentTime, orderData.pickupDate]);
+    setPickupDate(date);
+    
+    // Reset pickup time slot when changing date
+    setSelectedPickupSlotId(null);
+    
+    // Auto-set delivery date to next day (24-hour delivery)
+    const newDeliveryDate = addDays(date, 1);
+    setDeliveryDate(newDeliveryDate);
+    
+    // Reset delivery slot selection
+    setSelectedDeliverySlotId(null);
+    
+    updateOrderData({ 
+      pickupDate: date,
+      deliveryDate: newDeliveryDate,
+      pickupSlotId: null,
+      pickupSlotLabel: null,
+      deliverySlotId: null,
+      deliverySlotLabel: null,
+    });
+  }
 
-  // Enhanced pickup time slot selection with tracking
-  const handlePickupTimeSlotSelectWithTracking = useCallback(async (timeSlot: any) => {
+  // Select pickup time slot and auto-set same delivery slot
+  function handlePickupTimeSlotSelect(timeSlot: TimeSlot) {
     const userInfo = getUserInfo();
     
     // Track pickup time slot selection
@@ -81,34 +173,69 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       'current_time': getCurrentTime(),
       'selected_time_slot': timeSlot.label,
       'selected_time_slot_id': timeSlot.id,
-      'pickup_date': orderData.pickupDate?.toDateString() || '',
-      'previous_time_slot': timeSlots.find(slot => slot.id === orderData.pickupSlotId)?.label || ''
+      'pickup_date': pickupDate?.toDateString() || '',
+      'previous_time_slot': timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label || ''
     });
 
-    handlePickupTimeSlotSelect(timeSlot);
-  }, [handlePickupTimeSlotSelect, getUserInfo, getCurrentTime, orderData.pickupDate, orderData.pickupSlotId, timeSlots]);
+    console.log("Selecting pickup time slot:", timeSlot);
+    setSelectedPickupSlotId(timeSlot.id);
+    
+    // Auto-set delivery slot to the same slot if available, otherwise first available slot
+    const deliverySlots = getAvailableTimeSlots(deliveryDate, false);
+    let autoDeliverySlot = deliverySlots.find(slot => slot.id === timeSlot.id);
+    
+    // If same slot not available, pick the first available slot that's equal or later
+    if (!autoDeliverySlot) {
+      autoDeliverySlot = deliverySlots.find(slot => slot.start_time >= timeSlot.start_time) || deliverySlots[0];
+    }
+    
+    if (autoDeliverySlot) {
+      setSelectedDeliverySlotId(autoDeliverySlot.id);
+      updateOrderData({
+        pickupSlotId: timeSlot.id,
+        pickupSlotLabel: timeSlot.label,
+        deliverySlotId: autoDeliverySlot.id,
+        deliverySlotLabel: autoDeliverySlot.label,
+      });
+    } else {
+      updateOrderData({
+        pickupSlotId: timeSlot.id,
+        pickupSlotLabel: timeSlot.label,
+      });
+    }
+  }
 
-  // Enhanced delivery date selection with tracking
-  const handleDeliveryDateSelectWithTracking = useCallback(async (date: Date | null) => {
+  // Select delivery date (only when customizing)
+  function handleDeliveryDateSelect(date: Date | null) {
+    // Prevent unselecting the date - only allow valid date selection
+    if (!date) return;
+    
     const userInfo = getUserInfo();
     
     // Track delivery date selection
-    if (date) {
-      trackEvent('delivery_date_selected', {
-        'customer name': userInfo?.name || 'Anonymous',
-        'customer id': userInfo?.user_id || 'Anonymous',
-        'current_time': getCurrentTime(),
-        'selected_delivery_date': date.toDateString(),
-        'previous_delivery_date': orderData.deliveryDate?.toDateString() || '',
-        'pickup_date': orderData.pickupDate?.toDateString() || ''
-      });
-    }
+    trackEvent('delivery_date_selected', {
+      'customer name': userInfo?.name || 'Anonymous',
+      'customer id': userInfo?.user_id || 'Anonymous',
+      'current_time': getCurrentTime(),
+      'selected_delivery_date': date.toDateString(),
+      'previous_delivery_date': deliveryDate?.toDateString() || '',
+      'pickup_date': pickupDate?.toDateString() || ''
+    });
 
-    handleDeliveryDateSelect(date);
-  }, [handleDeliveryDateSelect, getUserInfo, getCurrentTime, orderData.deliveryDate, orderData.pickupDate]);
+    setDeliveryDate(date);
+    
+    // Reset delivery time slot when changing date
+    setSelectedDeliverySlotId(null);
+    
+    updateOrderData({ 
+      deliveryDate: date,
+      deliverySlotId: null,
+      deliverySlotLabel: null,
+    });
+  }
 
-  // Enhanced delivery time slot selection with tracking
-  const handleDeliveryTimeSlotSelectWithTracking = useCallback(async (timeSlot: any) => {
+  // Select delivery time slot (only when customizing)
+  function handleDeliveryTimeSlotSelect(timeSlot: TimeSlot) {
     const userInfo = getUserInfo();
     
     // Track delivery time slot selection
@@ -118,17 +245,23 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       'current_time': getCurrentTime(),
       'selected_delivery_time_slot': timeSlot.label,
       'selected_delivery_time_slot_id': timeSlot.id,
-      'delivery_date': orderData.deliveryDate?.toDateString() || '',
-      'pickup_date': orderData.pickupDate?.toDateString() || '',
-      'pickup_time_slot': timeSlots.find(slot => slot.id === orderData.pickupSlotId)?.label || '',
-      'previous_delivery_time_slot': timeSlots.find(slot => slot.id === orderData.deliverySlotId)?.label || ''
+      'delivery_date': deliveryDate?.toDateString() || '',
+      'pickup_date': pickupDate?.toDateString() || '',
+      'pickup_time_slot': timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label || '',
+      'previous_delivery_time_slot': timeSlots.find(slot => slot.id === selectedDeliverySlotId)?.label || ''
     });
 
-    handleDeliveryTimeSlotSelect(timeSlot);
-  }, [handleDeliveryTimeSlotSelect, getUserInfo, getCurrentTime, orderData, timeSlots]);
+    console.log("Selecting delivery time slot:", timeSlot);
+    setSelectedDeliverySlotId(timeSlot.id);
+    
+    updateOrderData({
+      deliverySlotId: timeSlot.id,
+      deliverySlotLabel: timeSlot.label,
+    });
+  }
 
   // Handle change delivery schedule CTA click
-  const handleChangeDeliveryClick = useCallback(async () => {
+  function handleChangeDeliveryClick() {
     const userInfo = getUserInfo();
     
     // Track change delivery schedule CTA click
@@ -136,31 +269,50 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       'customer name': userInfo?.name || 'Anonymous',
       'customer id': userInfo?.user_id || 'Anonymous',
       'current_time': getCurrentTime(),
-      'current_delivery_date': orderData.deliveryDate?.toDateString() || '',
-      'current_delivery_time_slot': timeSlots.find(slot => slot.id === orderData.deliverySlotId)?.label || '',
-      'pickup_date': orderData.pickupDate?.toDateString() || '',
-      'pickup_time_slot': timeSlots.find(slot => slot.id === orderData.pickupSlotId)?.label || ''
+      'current_delivery_date': deliveryDate?.toDateString() || '',
+      'current_delivery_time_slot': timeSlots.find(slot => slot.id === selectedDeliverySlotId)?.label || '',
+      'pickup_date': pickupDate?.toDateString() || '',
+      'pickup_time_slot': timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label || ''
     });
 
     setShowDeliveryCustomization(true);
-  }, [getUserInfo, getCurrentTime, orderData, timeSlots, setShowDeliveryCustomization]);
+  }
 
-  // Continue to next step with enhanced validation
-  const handleContinue = useCallback(async () => {
-    // Validate all required fields
-    if (!isValidForContinue()) {
-      const errors = getValidationErrors();
-      errors.forEach(error => {
-        toast({
-          title: "Missing Information",
-          description: error,
-          variant: "destructive",
-        });
+  // Continue to next step
+  function handleContinue() {
+    if (!orderData.pickupDate) {
+      toast({
+        title: "Please select a pickup date",
+        description: "You need to select a pickup date to continue",
       });
       return;
     }
     
-    // Get the selected time slots for final validation
+    if (!orderData.pickupSlotId) {
+      toast({
+        title: "Please select a pickup time slot",
+        description: "You need to select a pickup time slot to continue",
+      });
+      return;
+    }
+
+    if (!orderData.deliveryDate) {
+      toast({
+        title: "Please select a delivery date",
+        description: "You need to select a delivery date to continue",
+      });
+      return;
+    }
+    
+    if (!orderData.deliverySlotId) {
+      toast({
+        title: "Please select a delivery time slot",
+        description: "You need to select a delivery time slot to continue",
+      });
+      return;
+    }
+    
+    // Get the selected time slots
     const selectedPickupSlot = timeSlots.find(slot => slot.id === orderData.pickupSlotId);
     const selectedDeliverySlot = timeSlots.find(slot => slot.id === orderData.deliverySlotId);
     
@@ -173,47 +325,25 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       return;
     }
     
-    // Final validation of dates
-    if (!isValidFutureDate(orderData.pickupDate)) {
-      toast({
-        title: "Invalid pickup date",
-        description: "Pickup date cannot be in the past.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Make a final update to ensure all data is set correctly before continuing
+    const updatedOrderData = {
+      pickupDate: orderData.pickupDate,
+      deliveryDate: orderData.deliveryDate,
+      pickupSlotId: selectedPickupSlot.id,
+      pickupSlotLabel: selectedPickupSlot.label,
+      deliverySlotId: selectedDeliverySlot.id,
+      deliverySlotLabel: selectedDeliverySlot.label
+    };
+    
+    updateOrderData(updatedOrderData);
     
     // Log the final state for debugging
-    console.log("Final order data before continuing:", orderData);
+    console.log("Final order data before continuing:", updatedOrderData);
     
     // Continue to next step
     onNext();
-  }, [isValidForContinue, getValidationErrors, timeSlots, orderData, onNext]);
+  }
 
-  // Use 24-hour delivery button handler
-  const handleUse24HourDelivery = useCallback(() => {
-    setShowDeliveryCustomization(false);
-    
-    // Reset to 24-hour delivery
-    const newDeliveryDate = orderData.pickupDate ? addDaysToDate(orderData.pickupDate, 1) : null;
-    const pickupSlot = timeSlots.find(slot => slot.id === orderData.pickupSlotId);
-    
-    if (pickupSlot && newDeliveryDate) {
-      const deliverySlots = getAvailableTimeSlots(newDeliveryDate, false);
-      const autoDeliverySlot = deliverySlots.find(slot => slot.id === pickupSlot.id) || 
-                              deliverySlots.find(slot => slot.start_time >= pickupSlot.start_time) || 
-                              deliverySlots[0];
-      if (autoDeliverySlot) {
-        updateOrderData({
-          deliveryDate: newDeliveryDate,
-          deliverySlotId: autoDeliverySlot.id,
-          deliverySlotLabel: autoDeliverySlot.label,
-        });
-      }
-    }
-  }, [setShowDeliveryCustomization, orderData.pickupDate, orderData.pickupSlotId, timeSlots, getAvailableTimeSlots, updateOrderData]);
-
-  // Loading state
   if (loadingSlots) {
     return (
       <div className="space-y-6 pb-24">
@@ -228,8 +358,8 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
     );
   }
 
-  const availablePickupSlots = getAvailableTimeSlots(orderData.pickupDate, true);
-  const availableDeliverySlots = getAvailableTimeSlots(orderData.deliveryDate, false);
+  const availablePickupSlots = getAvailableTimeSlots(pickupDate, true);
+  const availableDeliverySlots = getAvailableTimeSlots(deliveryDate, false);
 
   return (
     <div className="space-y-6 pb-24">
@@ -251,12 +381,12 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
             <h3 className="font-medium">Select Pickup Date</h3>
             <div className="border rounded-lg p-3 bg-white">
               <Calendar
-                selectedDate={orderData.pickupDate || undefined}
-                onSelectDate={handlePickupDateSelectWithTracking}
-                disabled={(date) => !isValidFutureDate(date)}
+                selectedDate={pickupDate || undefined}
+                onSelectDate={handlePickupDateSelect}
+                disabled={(date) => isBefore(date, today)}
               />
             </div>
-            {orderData.pickupDate && isDateSame(orderData.pickupDate, today) && (
+            {pickupDate && isSameDay(pickupDate, today) && (
               <p className="text-xs text-blue-600">
                 Only available time slots are shown for today
               </p>
@@ -270,18 +400,18 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
               Select Pickup Time
             </h3>
             
-            {orderData.pickupDate ? (
+            {pickupDate ? (
               <div className="space-y-3">
                 {availablePickupSlots.length > 0 ? (
                   availablePickupSlots.map((slot) => (
                     <Card 
                       key={slot.id}
                       className={`transition-all cursor-pointer hover:shadow-md ${
-                        orderData.pickupSlotId === slot.id 
+                        selectedPickupSlotId === slot.id 
                           ? "ring-2 ring-black shadow-md" 
                           : "hover:scale-[1.01] border-gray-200"
                       }`}
-                      onClick={() => handlePickupTimeSlotSelectWithTracking(slot)}
+                      onClick={() => handlePickupTimeSlotSelect(slot)}
                     >
                       <CardContent className="p-3">
                         <div className="flex items-center justify-between">
@@ -289,7 +419,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
                             <p className="font-medium">{slot.label}</p>
                           </div>
                           
-                          {orderData.pickupSlotId === slot.id && (
+                          {selectedPickupSlotId === slot.id && (
                             <div className="h-6 w-6 bg-black rounded-full flex items-center justify-center">
                               <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -303,7 +433,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
                 ) : (
                   <div className="p-6 bg-white rounded-lg text-center border">
                     <p className="text-gray-600">
-                      {orderData.pickupDate && isDateSame(orderData.pickupDate, today) 
+                      {pickupDate && isSameDay(pickupDate, today) 
                         ? "No available time slots for today" 
                         : "No time slots are currently available"
                       }
@@ -328,7 +458,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
             Delivery Schedule
           </h2>
           
-          {orderData.pickupSlotId && !showDeliveryCustomization && (
+          {selectedPickupSlotId && !showDeliveryCustomization && (
             <Button 
               variant="outline" 
               size="sm"
@@ -342,7 +472,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
         </div>
 
         {/* Default 24-hour delivery display */}
-        {orderData.pickupSlotId && !showDeliveryCustomization && (
+        {selectedPickupSlotId && !showDeliveryCustomization && (
           <div className="bg-white rounded-lg p-4 border">
             <div className="flex items-center gap-3">
               <div className="bg-blue-100 p-2 rounded-lg">
@@ -351,7 +481,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
               <div>
                 <h3 className="font-medium">24-Hour Delivery</h3>
                 <p className="text-sm text-gray-600">
-                  {orderData.deliveryDate && format(orderData.deliveryDate, 'EEEE, MMMM d, yyyy')} • {timeSlots.find(slot => slot.id === orderData.deliverySlotId)?.label || timeSlots.find(slot => slot.id === orderData.pickupSlotId)?.label}
+                  {deliveryDate && format(deliveryDate, 'EEEE, MMMM d, yyyy')} • {timeSlots.find(slot => slot.id === selectedDeliverySlotId)?.label || timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label}
                 </p>
               </div>
             </div>
@@ -366,14 +496,14 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
               <h3 className="font-medium">Select Delivery Date</h3>
               <div className="border rounded-lg p-3 bg-white">
                 <Calendar
-                  selectedDate={orderData.deliveryDate || undefined}
-                  onSelectDate={handleDeliveryDateSelectWithTracking}
-                  disabled={(date) => !orderData.pickupDate || !isValidFutureDate(date) || (orderData.pickupDate && date <= orderData.pickupDate)}
+                  selectedDate={deliveryDate || undefined}
+                  onSelectDate={handleDeliveryDateSelect}
+                  disabled={(date) => !pickupDate || isBefore(date, addDays(pickupDate, 1))}
                 />
               </div>
-              {orderData.deliveryDate && orderData.pickupDate && isDateSame(orderData.deliveryDate, addDaysToDate(orderData.pickupDate, 1)) && orderData.pickupSlotId && (
+              {deliveryDate && pickupDate && isSameDay(deliveryDate, addDays(pickupDate, 1)) && selectedPickupSlotId && (
                 <p className="text-xs text-blue-600">
-                  Only slots equal or later than pickup time ({timeSlots.find(slot => slot.id === orderData.pickupSlotId)?.label}) are shown for next day delivery
+                  Only slots equal or later than pickup time ({timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label}) are shown for next day delivery
                 </p>
               )}
             </div>
@@ -385,18 +515,18 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
                 Select Delivery Time
               </h3>
               
-              {orderData.deliveryDate ? (
+              {deliveryDate ? (
                 <div className="space-y-3">
                   {availableDeliverySlots.length > 0 ? (
                     availableDeliverySlots.map((slot) => (
                       <Card 
                         key={slot.id}
                         className={`transition-all cursor-pointer hover:shadow-md ${
-                          orderData.deliverySlotId === slot.id 
+                          selectedDeliverySlotId === slot.id 
                             ? "ring-2 ring-blue-500 shadow-md" 
                             : "hover:scale-[1.01] border-gray-200"
                         }`}
-                        onClick={() => handleDeliveryTimeSlotSelectWithTracking(slot)}
+                        onClick={() => handleDeliveryTimeSlotSelect(slot)}
                       >
                         <CardContent className="p-3">
                           <div className="flex items-center justify-between">
@@ -404,7 +534,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
                               <p className="font-medium">{slot.label}</p>
                             </div>
                             
-                            {orderData.deliverySlotId === slot.id && (
+                            {selectedDeliverySlotId === slot.id && (
                               <div className="h-6 w-6 bg-blue-500 rounded-full flex items-center justify-center">
                                 <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -437,7 +567,27 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={handleUse24HourDelivery}
+              onClick={() => {
+                setShowDeliveryCustomization(false);
+                // Reset to 24-hour delivery
+                const newDeliveryDate = pickupDate ? addDays(pickupDate, 1) : null;
+                setDeliveryDate(newDeliveryDate);
+                const pickupSlot = timeSlots.find(slot => slot.id === selectedPickupSlotId);
+                if (pickupSlot) {
+                  const deliverySlots = getAvailableTimeSlots(newDeliveryDate, false);
+                  const autoDeliverySlot = deliverySlots.find(slot => slot.id === pickupSlot.id) || 
+                                          deliverySlots.find(slot => slot.start_time >= pickupSlot.start_time) || 
+                                          deliverySlots[0];
+                  if (autoDeliverySlot) {
+                    setSelectedDeliverySlotId(autoDeliverySlot.id);
+                    updateOrderData({
+                      deliveryDate: newDeliveryDate,
+                      deliverySlotId: autoDeliverySlot.id,
+                      deliverySlotLabel: autoDeliverySlot.label,
+                    });
+                  }
+                }
+              }}
             >
               Use 24-Hour Delivery
             </Button>
@@ -446,17 +596,17 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
       </div>
 
       {/* Summary */}
-      {orderData.pickupDate && orderData.pickupSlotId && orderData.deliveryDate && orderData.deliverySlotId && (
+      {pickupDate && selectedPickupSlotId && deliveryDate && selectedDeliverySlotId && (
         <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
           <h3 className="font-medium mb-2 text-green-800">Schedule Summary</h3>
           <div className="space-y-1 text-sm">
             <p>
               <span className="font-medium">Pickup: </span> 
-              {format(orderData.pickupDate, 'EEEE, d MMMM yyyy')} • {timeSlots.find(slot => slot.id === orderData.pickupSlotId)?.label}
+              {format(pickupDate, 'EEEE, d MMMM yyyy')} • {timeSlots.find(slot => slot.id === selectedPickupSlotId)?.label}
             </p>
             <p>
               <span className="font-medium">Delivery: </span> 
-              {format(orderData.deliveryDate, 'EEEE, d MMMM yyyy')} • {timeSlots.find(slot => slot.id === orderData.deliverySlotId)?.label}
+              {format(deliveryDate, 'EEEE, d MMMM yyyy')} • {timeSlots.find(slot => slot.id === selectedDeliverySlotId)?.label}
             </p>
           </div>
         </div>
@@ -489,7 +639,7 @@ export const TimeSlotSelection = ({ orderData, updateOrderData, onNext, onBack }
           <Button 
             onClick={handleContinue}
             className="bg-black hover:bg-gray-800 text-white px-6 py-2 h-auto text-base group"
-            disabled={!isValidForContinue()}
+            disabled={!orderData.pickupDate || !orderData.pickupSlotId || !orderData.deliveryDate || !orderData.deliverySlotId}
             aria-label="Continue to order confirmation"
           >
             Continue to Confirm
