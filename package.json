@@ -9,15 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "analyze": "npm run build && npx rollup-plugin-visualizer dist/stats.html --template treemap",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch",
-    "test:edge-cases": "vitest run --grep=\"edge.case|Edge Case\"",
-    "test:integration": "vitest run --grep=\"integration|Integration\"",
-    "test:critical": "vitest run --grep=\"critical|Critical\""
+    "analyze": "npm run build && npx rollup-plugin-visualizer dist/stats.html --template treemap"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -71,9 +63,6 @@
   "devDependencies": {
     "@eslint/js": "^9.9.0",
     "@tailwindcss/typography": "^0.5.15",
-    "@testing-library/jest-dom": "^6.6.4",
-    "@testing-library/react": "^14.3.1",
-    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
@@ -83,14 +72,12 @@
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
-    "jsdom": "^23.2.0",
     "lovable-tagger": "^1.1.8",
     "postcss": "^8.4.47",
     "rollup-plugin-visualizer": "^6.0.3",
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.1",
-    "vitest": "^1.6.1"
+    "vite": "^5.4.1"
   }
 }
