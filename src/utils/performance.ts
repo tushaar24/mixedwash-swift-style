@@ -1,4 +1,4 @@
-import { getCLS, getFID, getFCP, getLCP, getTTFB, type Metric } from 'web-vitals';
+import { onCLS, onFCP, onLCP, onTTFB, type Metric } from 'web-vitals';
 
 export const initWebVitals = () => {
   const handleMetric = (metric: Metric) => {
@@ -20,11 +20,10 @@ export const initWebVitals = () => {
   };
 
   // Measure Core Web Vitals
-  getCLS(handleMetric);
-  getFID(handleMetric);
-  getFCP(handleMetric);
-  getLCP(handleMetric);
-  getTTFB(handleMetric);
+  onCLS(handleMetric);
+  onFCP(handleMetric);
+  onLCP(handleMetric);
+  onTTFB(handleMetric);
 };
 
 // Utility to retrieve stored metrics for analysis
